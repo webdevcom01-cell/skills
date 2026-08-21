@@ -1,0 +1,71 @@
+{
+  "skill_name": "agent-scaffolder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Scaffolduje se novi agent po imenu 'Price Monitor'. U STEP 1b (AskUserQuestion), korisnik na pitanje Q3 ('Does {agent_name} need to search the web for live data?') bira odgovor 'No — works from KB memory and input payload only'. Prema tabeli za inferisanje temperature iz procesor prompta, koju temperaturu treba da dobije ovaj agent, i u koju kategoriju (Research / Classifier / Content / Middleware / General) spada?",
+      "expected_output": "Agent spada u kategoriju General sa temperaturom 0.6, NE Research sa 0.3. Red tabele 'intelligence / scout / research / monitor + Q3=Yes → Research → 0.3' je AND uslov sa dve nezavisne komponente: (a) šara u imenu ('monitor' se poklapa) I (b) Q3=Yes. Pošto je Q3=No, uslov nije zadovoljen iako se šara u imenu poklapa, pa agent pada u red 'anything else → General → 0.6'.",
+      "expectations": [
+        "Agent zaključuje da je konačna temperatura 0.6, ne 0.3",
+        "Agent eksplicitno objašnjava da red za Research zahteva I šaru u imenu I Q3=Yes zajedno, ne samo jedno od to dvoje",
+        "Agent NE bira Research/0.3 samo zato što 'monitor' postoji u imenu agenta",
+        "Agent imenuje krajnju kategoriju kao General (fallback red 'anything else')"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Tokom STEP 1b, korisnik na pitanje Q1 ('Pipeline Role') bira opciju 'Middle link — receives from one agent and triggers another'. Da li agent-scaffolder treba da izvrši STEP 1c (pitanje 'Which existing agent will {agent_name} trigger?' i poziv as_list_agents da se pronađe downstream agent), ili se taj korak preskače jer korisnik nije doslovno izabrao opciju 'Sends output'?",
+      "expected_output": "STEP 1c se MORA izvršiti. Pravilo glasi 'Only if Q1 = \"Sends output\" OR \"Middle link\"' — ovo je OR uslov sa dve nezavisne, ravnopravne grane, i 'Middle link' je eksplicitno jedna od njih, potpuno nezavisno od toga da li je izabrano 'Sends output'. Agent treba da pita koji postojeći agent će biti okinut i pozove as_list_agents da pronađe podudaranja, isto kao da je korisnik izabrao 'Sends output'.",
+      "expectations": [
+        "Agent zaključuje da se STEP 1c IZVRŠAVA za odgovor 'Middle link'",
+        "Agent eksplicitno navodi OR uslov sa obe grane (Sends output OR Middle link), ne samo jednu",
+        "Agent NE zaključuje da se korak preskače zato što odgovor nije doslovno 'Sends output'",
+        "Agent pominje as_list_agents kao korak za pronalaženje downstream_agent_id"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Prilikom građenja flow-a za agenta čiji je pipeline_role 'Sends output' (dakle ima call_agent node), predlaže se sledeća izmena: promeniti outputVariable ai_response extraktor node-a sa 'structured_output' u 'final_payload', ali OSTAVITI call_agent node-ov inputVariable nepromenjen kao 'structured_output', uz obrazloženje da je to 'samo preimenovanje jedne promenljive na jednom mestu'. Da li je ova izmena, kao predložena, u skladu sa pravilima agent-scaffolder skilla?",
+      "expected_output": "NE, izmena krši BINDING RULE koje eksplicitno kaže: 'call_agent.inputVariable MUST equal extractor.outputVariable. Both must be \"structured_output\". Never change one without changing the other.' Ako se ekstraktorov outputVariable promeni u 'final_payload' a call_agent.inputVariable ostane 'structured_output', handoff node više neće primati tačan podatak (A2A binding integritet je narušen; u finalnom izveštaju STEP 9 status VARIABLE BINDING više ne bi bio MATCH). Ili se menjaju OBA polja zajedno na istu novu vrednost, ili se ne menja nijedno.",
+      "expectations": [
+        "Agent zaključuje da izmena NIJE bezbedna kao predloženo",
+        "Agent eksplicitno citira BINDING RULE (inputVariable mora biti jednako outputVariable, nikad menjati jedno bez drugog)",
+        "Agent kaže da oba polja moraju biti sinhronizovano promenjena na istu vrednost, ili nijedno",
+        "Agent NE prihvata obrazloženje 'samo preimenovanje jedne promenljive' kao bezopasno"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Agent treba da doda samo JEDAN dodatni node (call_agent) na postojeći flow koji već ima 4 node-a i radi ispravno. Pošto je izmena mala, predlaže se da se as_update_flow pozove direktno sa dry_run:false (preskačući dry-run korak) da bi se uštedelo vreme. Da li agent-scaffolder dozvoljava ovakav preskok za 'male' izmene flow-a?",
+      "expected_output": "NE. Skill eksplicitno kaže: 'as_update_flow replaces the entire flow and has no undo. Never call it directly.' Propisan redosled je: (1) dry_run:true, (2) provera da li se broj node-ova i edge-ova iz dry-run rezultata poklapa sa onim šta je izgrađeno u 5a-5c — ako ne, STANI i ne primenjuj, (3) tek onda identičan poziv sa dry_run:false. Ovo pravilo nema izuzetak za veličinu izmene — as_update_flow ZAMENJUJE ceo flow (ne dodaje inkrementalno), pa i 'mali' poziv sa pogrešno sastavljenim node/edge nizom može obrisati postojeća 4 node-a bez mogućnosti povratka. Verzija 2.1 skilla (2026-07-29) je upravo dodala ovaj dry-run korak baš zbog toga.",
+      "expectations": [
+        "Agent zaključuje da se dry-run NE SME preskočiti, bez obzira na veličinu izmene",
+        "Agent objašnjava da as_update_flow zamenjuje ceo flow i nema undo",
+        "Agent opisuje ispravan redosled: dry_run:true → provera broja node/edge → tek onda dry_run:false",
+        "Agent eksplicitno kaže da 'mala izmena' nije validan izuzetak od ovog pravila"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Agent 'trend-scout' se scaffolduje sa Q3 (Web Search) = Yes i pipeline_role = 'Sends output'. Po standardnoj arhitekturi skilla, flow će sadržati node-ove: kb_search, web_search, ai_response processor, ai_response extractor i call_agent — ukupno 5 node-a povezanih u linearan lanac. Nakon upisa flow-a, STEP 5e zahteva verifikaciju broja edge-ova. Koliko edge-ova flow treba da ima da bi verifikacija prošla — i da li bi rezultat od 5 edge-ova (jednak broju node-ova) trebalo prihvatiti kao ispravan?",
+      "expected_output": "Flow treba da ima TAČNO 4 edge-a, ne 5. Pravilo iz STEP 5e glasi: 'Edge count = node count - 1 (linear chain)'. Sa 5 node-ova, ispravan broj edge-ova je 5-1=4 (kb_search→web_search, web_search→processor, processor→extractor, extractor→call_agent). Rezultat od 5 edge-ova bi bio neispravan i po pravilu STEP 5e agent mora STATI, prijaviti tačno koji node ili edge nedostaje/je višak, i NE preći na STEP 6 dok se ne ispravi.",
+      "expectations": [
+        "Agent tačno prebrojava 5 node-ova u opisanom scenariju",
+        "Agent zaključuje da je ispravan broj edge-ova 4 (node count - 1), ne 5",
+        "Agent NE prihvata 5 edge-ova (broj jednak broju node-ova) kao ispravan rezultat",
+        "Agent navodi da bi neuspešna verifikacija značila STOP i izveštaj o neslaganju, bez prelaska na STEP 6"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Agent 'signal-tracker' ima evo-log.md sa tačno 20 zabeleženih unosa (evo-log entries), ni jednim više. Trenutni topK parametar kb_search node-a je i dalje podrazumevanih 5. Prema pravilima agent-scaffolder skilla — koja u DESIGN_SPEC i agent-card tabelama za resurse eksplicitno kažu 'increase to 15 after 20+ evo-log entries' — da li topK treba povećati sa 5 na 15 već sada, pri tačno 20 unosa, ili tek kada broj unosa PREĐE 20 (npr. na 21. unosu)?",
+      "expected_output": "DA, topK treba povećati VEĆ SADA, pri tačno 20 unosa. Formulacija '20+ evo-log entries', koja se u skillu pojavljuje dva puta (u DESIGN_SPEC Tools & Resources tabeli i u agent-card.md Knowledge Base sekciji), doslovno znači '20 ili više' — prag je dostignut TAČNO na 20. unosu, ne tek na 21. Ispravan poziv je as_patch_node_field(..., field_name='topK', field_value='15'). (Napomena: STEP 9 NEXT STEPS koristi labaviju formulaciju 'when evo-log exceeds 20 entries' koja bi doslovno značila >20; dobar odgovor prepoznaje ovu blagu neusaglašenost u tekstu skilla, ali se oslanja na eksplicitniju i dvaput ponovljenu '20+' formulaciju kao merodavnu.)",
+      "expectations": [
+        "Agent zaključuje da topK treba povećati SADA, pri tačno 20 unosa, a ne čekati 21. unos",
+        "Agent eksplicitno tumači '20+' kao 'dvadeset ili više', ne kao 'više od dvadeset'",
+        "Agent ne daje odgovor koji prosto ignoriše brojčani prag bez obrazloženja (npr. 'zavisi')",
+        "Poželjno: agent primećuje da STEP 9 koristi drugačiju reč ('exceeds') i eksplicitno bira '20+' kao merodavnije jer se ponavlja na dva mesta"
+      ]
+    }
+  ]
+}

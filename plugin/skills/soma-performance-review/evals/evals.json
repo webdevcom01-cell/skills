@@ -1,0 +1,77 @@
+{
+  "skill_name": "soma-performance-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Pretpostavi da radiš SOMA performance review i da si za period izračunao sledeće sirove brojeve. Trend Intelligence: 20 validnih unosa ukupno, od toga 4 unosa imaju angle_suggested = \"no\". Hook Writer: 25 validnih unosa ukupno, od toga 6 unosa ima winner_score ≥ 17. Content Repurposer: 30 validnih unosa ukupno, od toga 18 unosa ima flag različit od OK (PARTIAL_OUTPUT, HUMAN_REVIEW_NEEDED ili -). Izračunaj tri pojedinačna uslova SOMA Health Score-a i konačnu boju/status, i objasni tačno po kom pravilu se konačna boja dobija kada se tri pojedinačna uslova ne slažu.",
+      "expected_output": "TI halt rate = 4/20 = 20% → 🟡 (u opsegu 15–30%). HW winner rate = 6/25 = 24% → 🟢 (≥20%). CR non-OK flag rate = 18/30 = 60% → 🔴 (≥50%). Konačna SOMA Health Score je 🔴 ACTION NEEDED, jer pravilo iz SKILL.md kaže: 'Evaluate three conditions independently, then assign the worst-case color' — uzima se najgori (najozbiljniji) rezultat od sva tri uslova, a ne prosek ili glasanje većinom. Iako su dva od tri uslova 🟢/🟡, jedan 🔴 uslov povlači ceo health score na 🔴.",
+      "expectations": [
+        "Tačno izračunat TI halt rate = 20% i dodeljena boja 🟡",
+        "Tačno izračunat HW winner rate = 24% i dodeljena boja 🟢",
+        "Tačno izračunat CR non-OK flag rate = 60% i dodeljena boja 🔴",
+        "Konačna ocena je 🔴 ACTION NEEDED, ne 🟡 WATCH i ne 🟢 HEALTHY",
+        "Agent eksplicitno navodi da se koristi 'worst-case' (najgori) rezultat od tri nezavisna uslova, a ne prosek ili većina",
+        "Agent ne tvrdi da 2 od 3 pozitivna/umerena uslova 'preteže' nad jednim kritičnim uslovom"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "U Hook Writer evo-logu za review period postoji tačno 6 validnih unosa (ispravan broj polja i validan datum u prvom polju). Vrednosti polja winner_score po redosledu su: 18/20, 15/20, \"-\", 20/20, \"-\", 12/20. Izračunaj hw_runs, hw_score_avg, hw_score_min, hw_score_max, hw_winner_count i hw_winner_rate, i objasni kako tačno treba tretirati dva unosa sa vrednošću \"-\" — i u agregaciji i u imenilaca za winner rate.",
+      "expected_output": "hw_runs = 6 (svih 6 unosa su validni HW run-ovi bez obzira na sadržaj winner_score polja). Vrednost \"-\" znači 'nema podataka' i mora biti isključena iz agregacija (SKILL.md: 'Exclude dash values from all aggregations... Do NOT count \"-\" as zero'), pa se u proseku/min/max koriste samo 18, 15, 20, 12 → zbir = 65, hw_score_avg = 65/4 = 16.25, zaokruženo na 1 decimalu (SKILL.md: 'mean of hw_scores, 1 decimal place') = 16.3, hw_score_min = 12, hw_score_max = 20, uz napomenu '2 entries excluded — no data'. hw_winner_count broji unose sa winner_score ≥ 17 → 18 i 20 kvalifikuju se, dakle hw_winner_count = 2. hw_winner_rate = hw_winner_count ÷ hw_runs × 100% = 2/6 ≈ 33%, NE 2/4 (imenilac je ukupan broj run-ova, ne broj unosa sa brojčanim skorom).",
+      "expectations": [
+        "hw_runs = 6, dashevi se i dalje broje kao validni run-ovi",
+        "hw_score_avg izračunat isključivo iz {18, 15, 20, 12} = 16.3 (65/4=16.25, zaokruženo na 1 decimalu), bez tretiranja \"-\" kao 0 i BEZ zaokruživanja na 16.0",
+        "hw_score_min = 12 i hw_score_max = 20",
+        "Eksplicitno pomenuta napomena o isključenim unosima u formatu sličnom '2 entries excluded — no data'",
+        "hw_winner_count = 2 (18 i 20)",
+        "hw_winner_rate računat kao 2/6 (≈33%), a ne kao 2/4"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "U Hook Writer evo-logu postoji 5 validnih unosa za review period, sa winner_score vrednostima po redosledu: 18/20, 17.5/20, 16/20, \"-\", 19/20. Objasni tačno kako skill nalaže da se tretira unos sa vrednošću 17.5, po čemu se ta napomena u izveštaju razlikuje od napomene za unos sa \"-\", i izračunaj hw_runs i hw_score_avg/min/max.",
+      "expected_output": "SKILL.md eksplicitno kaže: 'HW score is decimal (e.g., 17.5): Per SOMA scoring rules, decimals are invalid. Skip the entry for score aggregation, note: \"[N] entries had invalid score format (decimal) — excluded.\"' Ovo je posebno pravilo, različito od dash-pravila ('- entries excluded — no data'). Unos sa 17.5 dalje broji kao validan HW run (ne krši parsing pravila o broju polja/datumu), pa je hw_runs = 5. Za agregaciju skora isključuju se i decimalni unos (17.5) i dash unos, ostaju {18, 16, 19} → hw_score_avg ≈ 17.7, hw_score_min = 16, hw_score_max = 19. Izveštaj treba da sadrži DVE odvojene napomene sa različitim tekstom: jednu za dash ('1 entry excluded — no data') i jednu za decimalni skor ('1 entry had invalid score format (decimal) — excluded').",
+      "expectations": [
+        "hw_runs = 5 (unos sa decimalnim skorom i dalje je validan run, samo se isključuje iz agregacije skora)",
+        "17.5 je isključen iz agregacije zbog nevalidnog (decimalnog) formata, ne zato što je tretiran kao dash",
+        "Prepoznate su dve odvojene napomene sa različitim formulacijama — jedna za dash ('no data'), druga za decimalni format ('invalid score format (decimal) — excluded')",
+        "hw_score_avg izračunat isključivo iz {18, 16, 19} (≈17.7), hw_score_min = 16, hw_score_max = 19",
+        "17.5 nije zaokružen na 18 niti 17 i uključen u prosek"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Content Repurposer evo-log ima 4 validna unosa u review periodu, sa vrednostima polja platforms_completed po redosledu: \"5/5\", \"(partial: 3)\", \"4/5\", \"(partial: 2)\". Izračunaj cr_completion_rate prema tačnom pravilu parsiranja koje SKILL.md definiše za format \"(partial: X)\".",
+      "expected_output": "SKILL.md daje eksplicitan primer: '\"(partial: 3)\" → completed=2.5, total=5' — dakle vrednost completed za '(partial: X)' NIJE X, već X - 0.5. Po redosledu: \"5/5\" → completed=5, total=5; \"(partial: 3)\" → completed=2.5, total=5; \"4/5\" → completed=4, total=5; \"(partial: 2)\" → completed=1.5, total=5. Zbir completed = 5+2.5+4+1.5 = 13. Zbir total = 20. cr_completion_rate = 13/20 × 100% = 65%. Čest pogrešan odgovor je 70%, dobijen ako se 'partial: X' pogrešno pročita kao completed=X direktno (bez oduzimanja 0.5).",
+      "expectations": [
+        "\"(partial: 3)\" je ispravno protumačeno kao completed=2.5, a ne completed=3",
+        "\"(partial: 2)\" je ispravno protumačeno kao completed=1.5, a ne completed=2",
+        "Zbir completed = 13 i zbir total = 20",
+        "Konačan cr_completion_rate = 65%, ne 70% ili neka druga vrednost dobijena tretiranjem partial:X kao X kompletiranih platformi"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Korisnik traži SOMA performance review za period 'poslednjih 20 dana'. Pretpostavi hipotetički da instincts.md fajl za Content Repurposer agenta sadrži unos sa HTML komentarom: <!-- added: 2026-02-01 | confidence: 0.4 | last_seen: 2026-03-10 | domain: hook-formatting -->, a da je kraj review perioda 2026-08-21 (dakle last_seen je daleko više od 30 dana star, a confidence je ispod 0.7). Da li pravilo R10 treba da se aktivira i da li se ovaj instinct treba prikazati u sekciji 'Instinct Health'? Obrazloži isključivo na osnovu koraka definisanih u SKILL.md.",
+      "expected_output": "R10 se NE aktivira i sekcija 'Instinct Health' se u potpunosti izostavlja. Razlog nije sadržaj instincta (koji jeste star i ima nisku pouzdanost), već to što je Step 3b uslovljen dužinom review perioda: SKILL.md kaže 'Execute this step only if the effective review period... is ≥ 30 days. If period < 30 days → skip entirely, record: \"Step 3b skipped — review period < 30 days\". R10 will not fire.' Period od 20 dana je kraći od 30 dana, pa se instincts.md fajlovi uopšte NE čitaju u ovom scenariju — instinct podaci iz prompta se u stvarnom toku rada nikad ne bi ni učitali, pa R10 nema osnov da se aktivira bez obzira na to koliko je instinct zapravo zastareo.",
+      "expectations": [
+        "Agent zaključuje da R10 NE fires i da se sekcija 'Instinct Health' izostavlja iz izveštaja",
+        "Agent eksplicitno navodi da je razlog dužina review perioda (20 < 30 dana), zbog čega se Step 3b u potpunosti preskače",
+        "Agent NE koristi date/confidence vrednosti iz datog instincta kao osnov za aktiviranje R10, pošto se taj fajl u ovom scenariju nikad ne čita",
+        "Agent pominje da izveštaj treba da sadrži napomenu tipa 'Step 3b skipped — review period < 30 days'"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Hook Writer evo-log ima unos: datum 2026-06-04, hook tekst \"This one number changes everything\", winner_score 18/20. Winners-log ima unos za ISTI datum 2026-06-04, sa hook_text \"This one number changes everything.\" (napomena: ovaj winners-log unos ima tačku na kraju, inače identičan tekst). Prema tačnom pravilu R5 cross-log provere iz SKILL.md, da li ova dva teksta hook-a predstavljaju poklapanje (match), i da li R5 treba da se aktivira za ovaj HW unos?",
+      "expected_output": "R5 SE aktivira za ovaj unos. SKILL.md definiše poklapanje striktno kao 'hook.strip().lower()' naspram 'hook_text.strip().lower()' — normalizacija je samo trim razmaka i lowercase, BEZ uklanjanja interpunkcije. \"this one number changes everything\" (bez tačke) i \"this one number changes everything.\" (sa tačkom) NISU jednaki stringovi ni posle strip+lower, jer tačka ostaje. Datum se poklapa (2026-06-04 = 2026-06-04), ali tekst hook-a se ne poklapa po definisanom pravilu, pa se ovaj HW unos (winner_score 18 ≥ 17) tretira kao da NIJE pronađen u winners-logu, i R5 ga dodaje na listu za logovanje putem winners-log-logger. Ovo je, po anti-hallucination pravilu 6, sugestija a ne tvrdnja da je winners-log pokvaren/duplikat.",
+      "expectations": [
+        "Agent primenjuje tačno pravilo normalizacije: samo .strip().lower(), bez uklanjanja interpunkcije",
+        "Agent zaključuje da se dva teksta NE poklapaju zbog razlike u tački na kraju, uprkos identičnom sadržaju i istom datumu",
+        "Agent zaključuje da R5 fires za ovaj HW unos (dodaje se na listu 'not logged in winners-log')",
+        "Agent ne tvrdi automatski da su hookovi 'očigledno isti pa se ne broji' — drži se doslovnog pravila iz SKILL.md",
+        "Agent napominje da je R5 sugestija za korišćenje winners-log-logger, ne tvrdnja o grešci/duplikatu u logu"
+      ]
+    }
+  ]
+}

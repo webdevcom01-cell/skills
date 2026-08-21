@@ -1,0 +1,79 @@
+{
+  "skill_name": "pdf",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a PDF report called sales_report.pdf with several data tables spread across multiple pages, and I need to pull those tables out (not just the raw text) so I can work with the rows and columns in Python. Which library and method should I use, and how would you extract all the tables from page 1?",
+      "expected_output": "The correct approach follows the skill's Quick Reference table, which states: \"| Extract tables | pdfplumber | `page.extract_tables()` |\" — so pdfplumber is the tool, not pypdf (pypdf's only documented operations are under \"### pypdf - Basic Operations\": Merge PDFs, Split PDF, Extract Metadata, Rotate Pages — no table-extraction method appears anywhere under pypdf in SKILL.md). The correct method comes from the \"### pdfplumber - Text and Table Extraction\" section, subsection \"#### Extract Tables\", whose example code is:\n```python\nwith pdfplumber.open(\"document.pdf\") as pdf:\n    for i, page in enumerate(pdf.pages):\n        tables = page.extract_tables()\n```\nSo the agent should open the file with `pdfplumber.open(...)`, iterate `pdf.pages`, and call `page.extract_tables()` on the target page, matching both the Quick Reference row and the worked example — not pypdf's text-only capabilities, since pypdf has no table method shown anywhere in SKILL.md.",
+      "expectations": [
+        "Agent recommends pdfplumber, not pypdf, as the tool for extracting tables.",
+        "Agent names the exact method `page.extract_tables()` (not `extract_text()` or a pypdf method) as the way to pull tables.",
+        "Agent's code sample opens the file with `pdfplumber.open(...)` and iterates over `pdf.pages`, matching the '#### Extract Tables' example.",
+        "Agent does not propose pypdf as capable of table extraction (pypdf is only shown for merge, split, metadata, and rotate in SKILL.md).",
+        "Agent's reasoning traces back to the Quick Reference table row 'Extract tables | pdfplumber | page.extract_tables()'."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Using reportlab, create a PDF page that shows the chemical formula for water (H2O, with the 2 as a subscript) and the equation x squared plus y squared, with the exponents as superscripts. Show me the actual Python code you'd use to render the subscript and superscripts correctly.",
+      "expected_output": "SKILL.md flags this exact scenario as \"**IMPORTANT**\" under \"#### Subscripts and Superscripts\": \"Never use Unicode subscript/superscript characters (₀₁₂₃₄₅₆₇₈₉, ⁰¹²³⁴⁵⁶⁷⁸⁹) in ReportLab PDFs. The built-in fonts do not include these glyphs, causing them to render as solid black boxes.\" It then instructs: \"Instead, use ReportLab's XML markup tags in Paragraph objects,\" giving the exact examples `chemical = Paragraph(\"H<sub>2</sub>O\", styles['Normal'])` for subscripts and `squared = Paragraph(\"x<super>2</super> + y<super>2</super>\", styles['Normal'])` for superscripts. So the correct code renders the formula as `Paragraph(\"H<sub>2</sub>O\", styles['Normal'])` and the equation using `<super>` tags around each exponent, never the literal glyphs ₂ or ². If any of this text were instead drawn directly on a canvas rather than through a Paragraph, SKILL.md separately instructs: \"For canvas-drawn text (not Paragraph objects), manually adjust font the size and position rather than using Unicode subscripts/superscripts.\"",
+      "expectations": [
+        "Agent's generated code contains no literal Unicode subscript/superscript characters (e.g. ₂, ², ⁰¹²³⁴⁵⁶⁷⁸⁹, ₀₁₂₃₄₅₆₇₈₉) anywhere in the output text.",
+        "Agent explains the reason, citing that ReportLab's built-in fonts 'do not include these glyphs, causing them to render as solid black boxes.'",
+        "Agent renders the water formula using the `<sub>` XML tag inside a Paragraph, e.g. `Paragraph(\"H<sub>2</sub>O\", styles['Normal'])`.",
+        "Agent renders the exponents using the `<super>` XML tag inside a Paragraph, e.g. text containing `x<super>2</super>` and `y<super>2</super>`.",
+        "Agent uses reportlab.platypus.Paragraph objects (not a raw canvas.drawString call with unicode glyphs) as the mechanism for the formatted text.",
+        "If the agent mentions canvas-drawn text at all, it says to manually adjust font size and position rather than use Unicode subscript/superscript characters."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have three PDF files — intro.pdf, chapter1.pdf, chapter2.pdf — and I want to combine them into a single PDF called combined.pdf, in that order, using Python. Write the code.",
+      "expected_output": "SKILL.md's \"#### Merge PDFs\" section (under \"### pypdf - Basic Operations\") gives the exact pattern to follow:\n```python\nwriter = PdfWriter()\nfor pdf_file in [\"doc1.pdf\", \"doc2.pdf\", \"doc3.pdf\"]:\n    reader = PdfReader(pdf_file)\n    for page in reader.pages:\n        writer.add_page(page)\n\nwith open(\"merged.pdf\", \"wb\") as output:\n    writer.write(output)\n```\n`writer = PdfWriter()` is created exactly once, before the loop over files, and every page from every reader is added to that same writer via `writer.add_page(page)`; only a single `writer.write(output)` call happens at the end. This matches the Quick Reference row \"| Merge PDFs | pypdf | `writer.add_page(page)` |\". Creating a new `PdfWriter()` inside the per-file loop would only end up capturing the last file's pages in the output — that per-iteration-writer pattern is in fact what SKILL.md uses for a different operation, \"#### Split PDF\": `for i, page in enumerate(reader.pages): writer = PdfWriter(); writer.add_page(page)`, where a fresh writer is deliberately created once per output page. The correct merge code for intro.pdf, chapter1.pdf, chapter2.pdf into combined.pdf reuses one writer across all three readers, following the Merge PDFs pattern, not the Split PDF pattern.",
+      "expectations": [
+        "Agent creates exactly one `PdfWriter()` instance that is used across all three input files, not one writer per file.",
+        "Agent loops over the three files (intro.pdf, chapter1.pdf, chapter2.pdf), creates a `PdfReader` for each, and calls `writer.add_page(page)` for every page onto the single shared writer.",
+        "Agent writes the output only once, after all three files have been processed, via a single `writer.write(...)` call producing combined.pdf.",
+        "Agent does not instantiate `PdfWriter()` inside the per-file loop — it does not reproduce the Split PDF pattern (a new writer per page/file) for this merge task.",
+        "Agent's code structurally matches the '#### Merge PDFs' example in SKILL.md (writer created before the loop, reader created inside the loop)."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I scanned a stack of paper contracts into a single PDF called scanned_contracts.pdf. It's just images of the pages — when I try to select or copy text from it in a PDF viewer, nothing is selectable. I need to get searchable/extractable text out of it. How do I do that?",
+      "expected_output": "Because the PDF is scanned (image-only, with no existing text layer), this falls under SKILL.md's \"### Extract Text from Scanned PDFs\" section, not standard text extraction — pypdf's `page.extract_text()` and pdfplumber's `page.extract_text()` both read an existing text layer and would return empty/no text on a scanned image. The Quick Reference table confirms the routing: \"| OCR scanned PDFs | pytesseract | Convert to image first |\". The section states: \"Requires: pip install pytesseract pdf2image\", then converts the PDF to images (\"Convert PDF to images\") with `images = convert_from_path('scanned.pdf')`, then OCRs each page (\"OCR each page\") with `text += pytesseract.image_to_string(image)` inside a loop over the images. So the correct workflow is: install pytesseract and pdf2image, convert scanned_contracts.pdf to images using `convert_from_path`, then run `pytesseract.image_to_string(image)` on each page image to produce extractable text — not a plain pypdf or pdfplumber text-extraction call.",
+      "expectations": [
+        "Agent identifies that this is a scanned/image-only PDF requiring OCR, not standard text extraction.",
+        "Agent does not propose pypdf's `extract_text()` or pdfplumber's `page.extract_text()` as the solution, noting these operate on a text layer that a scanned PDF lacks.",
+        "Agent specifies the required installs, matching 'pip install pytesseract pdf2image'.",
+        "Agent's workflow uses `convert_from_path` from pdf2image to convert the PDF's pages to images.",
+        "Agent's workflow uses `pytesseract.image_to_string(image)` to OCR each converted page image.",
+        "Agent's recommendation matches the Quick Reference row 'OCR scanned PDFs | pytesseract | Convert to image first'."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I have a large PDF called manual.pdf and I just need to pull out pages 6 through 10 into their own file, called pages6-10.pdf. I don't want to write a Python script — just give me the command-line command.",
+      "expected_output": "SKILL.md's \"### qpdf\" section, under \"# Split pages\", gives this exact command as a worked example: `qpdf input.pdf --pages . 6-10 -- pages6-10.pdf`. Since the user explicitly wants a command-line solution and not a Python script, qpdf is the right tool — SKILL.md's Python/pypdf split example instead produces one file per single page (\"One page per file\", per the Quick Reference row \"| Split PDFs | pypdf | One page per file |\"), which doesn't match a 6-10 range request as directly as qpdf's `--pages` syntax does, and would require writing a script rather than a single command. Substituting the user's filenames gives: `qpdf manual.pdf --pages . 6-10 -- pages6-10.pdf` — the input file (`manual.pdf`), the `--pages . 6-10` syntax (the `.` referring back to the input file, `6-10` the page range), then `--` followed by the output filename `pages6-10.pdf`, exactly matching the syntax pattern SKILL.md shows for both its 1-5 and 6-10 examples in that section.",
+      "expectations": [
+        "Agent recommends qpdf, a command-line tool, rather than writing a Python script, consistent with the user's stated preference.",
+        "Agent's command follows the exact syntax pattern `qpdf input.pdf --pages . 6-10 -- pages6-10.pdf` as shown under '### qpdf' / '# Split pages'.",
+        "Agent substitutes the correct input filename (manual.pdf), correct page range (6-10), and correct output filename (pages6-10.pdf) into that syntax.",
+        "Agent's command uses the `--pages . 6-10 --` structure (dot for the input file, page range, then `--` before the output name) rather than inventing different flag syntax.",
+        "Agent does not propose pdftotext or a Python/pypdf script as the primary answer, since the user asked for a single command-line command."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I have two separate tasks for two different PDFs. First, secure_report.pdf needs a password added so only people with the password 'Report2026' can open it (the owner password should be 'AdminPass99'). Second, I have a different file, encrypted.pdf, that already has the password 'OldPass123' on it, and I need to remove that password entirely so I get a plain decrypted.pdf. Show me exactly what to do for each, in the right direction, without mixing them up.",
+      "expected_output": "These are two different, non-interchangeable operations in SKILL.md and must not be conflated. Adding a password is covered under \"### Password Protection\", using pypdf: `writer.encrypt(\"userpassword\", \"ownerpassword\")`, applied after building a `PdfWriter` from all of `reader.pages` via `writer.add_page(page)` and writing out with `writer.write(output)`. For secure_report.pdf this becomes `writer.encrypt(\"Report2026\", \"AdminPass99\")`, since SKILL.md's signature places the user/open password first and the owner password second. Removing a password is a distinct operation covered under \"### qpdf\", subsection \"# Remove password\": `qpdf --password=mypassword --decrypt encrypted.pdf decrypted.pdf`. For encrypted.pdf with existing password 'OldPass123', this becomes `qpdf --password=OldPass123 --decrypt encrypted.pdf decrypted.pdf`, producing decrypted.pdf. SKILL.md never shows pypdf's `encrypt()` used to remove a password, nor qpdf used to add one — each is documented for exactly one direction, and the correct answer keeps them separate: pypdf's `writer.encrypt(...)` to add a password, qpdf's `--decrypt` to remove one.",
+      "expectations": [
+        "For adding a password to secure_report.pdf, agent uses pypdf's `writer.encrypt(...)` method, matching `writer.encrypt(\"userpassword\", \"ownerpassword\")` under '### Password Protection'.",
+        "Agent maps the user password 'Report2026' and owner password 'AdminPass99' into the encrypt call in the correct order (user/open password first, owner password second).",
+        "For removing the password from encrypted.pdf, agent uses the qpdf command pattern `qpdf --password=mypassword --decrypt encrypted.pdf decrypted.pdf`, substituting OldPass123, rather than pypdf.",
+        "Agent does not use qpdf to add the password to secure_report.pdf, and does not use pypdf's `encrypt()` to remove the password from encrypted.pdf — the two directions stay separate.",
+        "Agent's decrypt command outputs to decrypted.pdf, matching the filename pattern (encrypted.pdf to decrypted.pdf) used in SKILL.md's example."
+      ]
+    }
+  ]
+}

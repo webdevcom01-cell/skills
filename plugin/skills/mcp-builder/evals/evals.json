@@ -1,0 +1,71 @@
+{
+  "skill_name": "mcp-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Upravo si završio implementaciju MCP servera za integraciju sa API-jem servisa za upravljanje projektima (16 alata: create/list/update za projekte, taskove, komentare i korisnike). Za Fazu 4 (Create Evaluations) napisao si 6 pažljivo osmišljenih, kompleksnih i proverljivih evaluacionih pitanja koja pokrivaju najvažnije radne tokove, i sačuvao ih u ispravnom XML formatu. Da li je ovaj eval set kompletan prema SKILL.md, ili nešto nedostaje pre nego što se Faza 4 može smatrati završenom?",
+      "expected_output": "Eval set NIJE kompletan. Sekcija 4.2 SKILL.md eksplicitno se zove 'Create 10 Evaluation Questions' i traži tačno 10 pitanja, ne 'nekoliko dovoljno dobrih' pitanja. Kvalitet 6 postojećih pitanja (kompleksnost, realizam) ne kompenzuje nedovoljan broj — broj pitanja je odvojen, eksplicitan numerički zahtev i mora se dostići dodavanjem još 4 pitanja.",
+      "expectations": [
+        "Agent zaključuje da set NIJE kompletan/spreman za Fazu 4",
+        "Agent eksplicitno navodi da SKILL.md (sekcija 4.2) zahteva tačno 10 evaluacionih pitanja, ne proizvoljan 'dovoljan' broj",
+        "Agent NE prihvata 6 pitanja kao dovoljno samo zato što su kompleksna i realistična",
+        "Agent predlaže dodavanje još pitanja da bi se dostigao broj 10"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Praviš MCP server koji će se pokretati isključivo lokalno na mašini korisnika: MCP host (npr. Claude Desktop) ga starta kao child proces preko stdin/stdout, korisnik ga ne hostuje kao mrežni servis niti mu drugi klijenti pristupaju preko interneta. Prema preporučenom stack-u iz SKILL.md, koji transport mehanizam treba da koristiš za ovaj server — Streamable HTTP ili stdio — i zašto?",
+      "expected_output": "stdio. SKILL.md (sekcija 1.3, 'Recommended stack') eksplicitno deli preporuku o transportu na dve nezavisne grane: 'Streamable HTTP for remote servers... stdio for local servers'. Server iz scenarija je lokalni (child proces, bez mrežnog pristupa), pa važi druga grana pravila bez obzira na to što je Streamable HTTP opštije 'preporučeniji' izbor za servere uopšte.",
+      "expectations": [
+        "Agent bira stdio, ne Streamable HTTP",
+        "Agent eksplicitno prepoznaje da pravilo iz SKILL.md ima dve nezavisne grane: remote server → Streamable HTTP, lokalni server → stdio",
+        "Agent NE generalizuje 'Streamable HTTP je preporučen transport' bez obzira na to da li je server lokalni ili udaljen",
+        "Agent navodi da je 'lokalni, child-proces server bez mrežnog pristupa' konkretan signal koji aktivira granu za stdio"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Radiš na Fazi 4.2 (Create 10 Evaluation Questions) za MCP server koji pokriva CRM API. Napravio si listu od 10 kompleksnih, realističnih pitanja i za svako si odmah upisao odgovor onako kako očekuješ da glasi, oslanjajući se na svoje opšte poznavanje tipičnih CRM podataka — nisi pozivao alate MCP servera niti istraživao stvarne podatke da bi potvrdio te odgovore. Da li je ovaj proces ispravan prema koracima iz SKILL.md, ili nedostaje neki korak?",
+      "expected_output": "Proces NIJE ispravan — nedostaje korak. SKILL.md (sekcija 4.2) propisuje tačno 4 koraka po redu: 1) Tool Inspection, 2) Content Exploration (READ-ONLY operacijama), 3) Question Generation, 4) Answer Verification — 'Solve each question yourself to verify answers'. Pisanje očekivanih odgovora iz opšteg znanja, bez stvarnog rešavanja pitanja pomoću samog MCP servera, preskače korak 4 i ugrožava zahteve 'Verifiable' i 'Stable' iz sekcije 4.3.",
+      "expectations": [
+        "Agent zaključuje da proces NIJE kompletan/ispravan",
+        "Agent imenuje nedostajući korak kao Answer Verification (korak 4 u sekciji 4.2)",
+        "Agent navodi da se odgovori moraju potvrditi stvarnim rešavanjem pitanja pomoću MCP servera, a ne pretpostaviti iz opšteg znanja o tipu API-ja",
+        "Agent pominje da su to 4 koraka u propisanom redosledu (Tool Inspection → Content Exploration → Question Generation → Answer Verification)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Jedno od tvojih 10 evaluacionih pitanja za MCP server za task-management servis glasi: 'Obriši task sa ID 4471, a zatim potvrdi da task lista za projekat Q3-Migracija sada ima tačno 12 preostalih taskova umesto 13.' Pitanje je realistično i zahteva više uzastopnih poziva alata da bi se rešilo. Da li ovo pitanje zadovoljava zahteve iz SKILL.md za evaluaciona pitanja?",
+      "expected_output": "NE zadovoljava. SKILL.md (sekcija 4.3, 'Evaluation Requirements') eksplicitno zahteva da svako pitanje bude 'Read-only: Only non-destructive operations required'. Pitanje traži brisanje taska, što je destruktivna operacija, i to krši ovaj uslov nezavisno od toga koliko je pitanje inače realistično i kompleksno — ta dva kriterijuma ne kompenzuju kršenje read-only zahteva.",
+      "expectations": [
+        "Agent zaključuje da pitanje NE zadovoljava zahteve",
+        "Agent eksplicitno citira/parafrazira 'Read-only: Only non-destructive operations required' iz sekcije 4.3",
+        "Agent prepoznaje brisanje (delete) taska kao destruktivnu operaciju bez obzira na realizam i kompleksnost ostatka pitanja",
+        "Agent ne opravdava pitanje pozivanjem na to da je 'realistic' i 'complex' — read-only je nezavisan uslov koji mora biti zadovoljen"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Jedno od predloženih evaluacionih pitanja za MCP server koji pokriva alat za saradnju na dokumentima glasi: 'Nabroj sve korisnike koji su komentarisali na dokumentu Q3-Budžet tokom prošle nedelje.' Zapisani očekivani odgovor je: 'Ana, Marko i Jovana (prihvatljiv je bilo koji redosled ili podskup ovih imena, u zavisnosti od toga kako model formatira listu)'. Da li ovaj par pitanje-odgovor zadovoljava zahteve iz SKILL.md za evaluaciona pitanja?",
+      "expected_output": "NE zadovoljava. SKILL.md (sekcija 4.3) zahteva 'Verifiable: Single, clear answer that can be verified by string comparison'. Odgovor koji eksplicitno dozvoljava proizvoljan redosled i proizvoljan podskup imena nije jedan jasan odgovor proveriv prostim string poređenjem, pa krši Verifiable kriterijum. Pitanje treba preformulisati da traži jedan deterministički odgovor (npr. tačan broj komentatora, ili ime jednog konkretnog korisnika/specifičan detalj), a ne otvorenu listu promenljivog formata.",
+      "expectations": [
+        "Agent zaključuje da par pitanje-odgovor NE zadovoljava zahteve",
+        "Agent eksplicitno navodi 'Verifiable' kriterijum iz sekcije 4.3 i frazu 'verified by string comparison'",
+        "Agent objašnjava da lista sa dozvoljenim promenljivim redosledom/podskupom nije pouzdano proveriva jednostavnim string poređenjem",
+        "Agent predlaže preformulisanje pitanja tako da traži jedan jasan, deterministički odgovor umesto otvorene liste"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Za Fazu 4.4 (Output Format) sačuvao si svojih 10 evaluacionih pitanja i odgovora kao JSON fajl u ovom obliku: [{\"query\": \"...\", \"expected_answer\": \"...\"}, ...]. Da li ovo zadovoljava format koji SKILL.md propisuje za evaluacije?",
+      "expected_output": "NE zadovoljava. SKILL.md (sekcija 4.4) eksplicitno propisuje XML format sa strukturom <evaluation><qa_pair><question>...</question><answer>...</answer></qa_pair>...</evaluation>. Predloženi fajl krši format na dva nezavisna nivoa: (1) koristi JSON umesto propisanog XML-a, i (2) čak i da je konvertovan u XML, koristi pogrešna imena polja ('query'/'expected_answer' umesto propisanih 'question'/'answer').",
+      "expectations": [
+        "Agent zaključuje da JSON format NE zadovoljava propisani format iz SKILL.md",
+        "Agent eksplicitno navodi da SKILL.md zahteva XML strukturu <evaluation><qa_pair><question>/<answer></qa_pair></evaluation>",
+        "Agent prepoznaje da su pogrešna i imena tagova/polja (query/expected_answer umesto question/answer), ne samo tip fajla (JSON vs XML)",
+        "Agent predlaže konkretnu konverziju u tačnu XML strukturu iz SKILL.md, ne samo generičku napomenu da 'treba ispraviti format'"
+      ]
+    }
+  ]
+}

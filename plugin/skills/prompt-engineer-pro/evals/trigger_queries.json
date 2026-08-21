@@ -1,0 +1,27 @@
+[
+  { "class": "A", "why": "needs the audit script", "query": "evo mog system prompta, audituj ga i reci mi liniju po liniju sta moze da se obrise:\n\nTi si iskusan asistent za podrsku. VAZNO: uvek proveri svoj rad pre nego sto odgovoris. Duplo proveri svaki odgovor. Ako ima vise od 5 tiketa, delegiraj. NIKADA ne izmisljaj. Odgovaraj profesionalno.", "should_trigger": true },
+  { "class": "A", "why": "needs compare_prompts, claim must be measured", "query": "skratio sam prompt sa 3000 na 800 tokena, dokazi mi da to nije regresija a ne da mi kazes na osecaj", "should_trigger": true },
+  { "class": "A", "why": "shrink + prove, both scripts", "query": "moj system prompt je narastao na 3000 tokena, skrati ga i pokazi mi sta si tacno izbacio i zasto", "should_trigger": true },
+  { "class": "A", "why": "craft procedure + test cases", "query": "napisi mi produkcijski system prompt koji klasifikuje dolazne mejlove po hitnosti, sa edge case testovima", "should_trigger": true },
+  { "class": "A", "why": "diagnostic procedure over the prompt", "query": "moj agent preterano verifikuje, cita fajlove ponovo da potvrdi ono sto je vec uradio i trosi tokene, prodji kroz prompt i nadji uzrok", "should_trigger": true },
+  { "class": "A", "why": "audit procedure on CLAUDE.md", "query": "prepisi mi ovaj CLAUDE.md, pun je pravila koja se medjusobno kose i model ih ignorise", "should_trigger": true },
+  { "class": "A", "why": "security procedure + verification", "query": "prompt mi prima korisnicki unos, ojacaj ga protiv injectiona i proveri da li sam sve pokrio", "should_trigger": true },
+  { "class": "A", "why": "interface design procedure", "query": "napisi mi opis alata za function calling ukljucujuci kada NE treba da se zove, i proveri semu", "should_trigger": true },
+  { "class": "A", "why": "needs generate_test_cases script", "query": "generisi mi edge case testove za ovaj prompt da vidim gde puca", "should_trigger": true },
+  { "class": "A", "why": "audit at scale", "query": "prodji kroz sve promptove mojih agenata i reci koji su naduveni i sta da obrisem", "should_trigger": true },
+
+  { "class": "B", "why": "advice — a strong model should answer inline, no procedure needed", "query": "how many few-shot examples should I put in a classification prompt", "should_trigger": false },
+  { "class": "B", "why": "advice — conceptual question", "query": "the same instruction is in my system prompt and my rules file, does that actually hurt", "should_trigger": false },
+  { "class": "B", "why": "advice — definition question", "query": "sta tacno radi prompt caching i koliko stedi", "should_trigger": false },
+
+  { "class": "collision", "why": "skill-creator-pro", "query": "napravi mi skill koji od transkripta sastanka pravi zapisnik", "should_trigger": false },
+  { "class": "collision", "why": "skill-creator-pro", "query": "optimizuj opis mog skilla da bolje okida i ne krade trigere drugima", "should_trigger": false },
+  { "class": "collision", "why": "skill-creator-pro", "query": "kako da napisem SKILL.md i test slucajeve za njega", "should_trigger": false },
+  { "class": "collision", "why": "skill-creator-pro", "query": "izmeri da li moj skill uopste nesto donosi u odnosu na baseline", "should_trigger": false },
+  { "class": "collision", "why": "agent-scaffolder", "query": "napravi novog agenta u AgentStacku koji cita bazu i pravi izvestaj", "should_trigger": false },
+  { "class": "collision", "why": "agent-architect", "query": "koji arhitektonski pattern da koristim za agenta koji zove tri druga agenta", "should_trigger": false },
+  { "class": "collision", "why": "geo-prompt-library", "query": "napravi mi biblioteku upita koje kupci postavljaju ChatGPT-u o mojoj firmi", "should_trigger": false },
+  { "class": "collision", "why": "agent-dependency-mapper", "query": "sta puca u pipeline-u ako obrisem ovog agenta", "should_trigger": false },
+  { "class": "unrelated", "why": "no overlap at all", "query": "sredi mi ovaj CSV i izbaci duplikate", "should_trigger": false },
+  { "class": "unrelated", "why": "no overlap at all", "query": "napisi blog post o AI trendovima u auto industriji", "should_trigger": false }
+]

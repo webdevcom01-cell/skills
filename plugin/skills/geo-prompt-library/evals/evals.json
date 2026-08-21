@@ -1,0 +1,115 @@
+{
+  "skill_name": "geo-prompt-library",
+  "evals": [
+    {
+      "id": 0,
+      "name": "local-service-sr",
+      "prompt": "Napravi geo prompt biblioteku za https://dentio.rs — stomatološka ordinacija u Novom Sadu, uglavnom lokalni klijenti.",
+      "expected_output": "JSON biblioteka od ~40 intenata (sr-RS + en par za svaki), sa `local` kategorijom vezanom za Novi Sad. Sve usluge u `company.offerings` imaju stvaran citat sa sajta (`source_url` + `evidence`), ne izmišljene. Gate prolazi (`validation.passed: true`).",
+      "files": [],
+      "expectations": [
+        "A1 — izlaz je validan JSON prema assets/library.schema.json",
+        "A2 — 30 <= n_intents <= 50, svaki intent ima tacno 2 upita (lokalni + en)",
+        "A3 — branded udeo <= 15%",
+        "A4 — svaka kategorija unutar svog kvotnog raspona (branded gornja granica = floor(0.15xN))",
+        "A5 — 0 placeholder tokena u bilo kom query.text",
+        "A6 — 0 G7a/G7b near-duplicate parova",
+        "A7 — svaki comparison upit sadrzi ime iz competitors[] ili obrazac 'alternativa za'",
+        "A8 — inferred udeo <= 25%",
+        "A9 — svi lokalni upiti 4-20 reci, svi en 3-18",
+        "A10 — variants.ascii == deterministicki ascii fold teksta za svaki lokalni red",
+        "A14 — validation report postoji, validation.passed odgovara stvarnom stanju checks[] liste",
+        "A16 — matrix_plan.planned_total == n_intents, svaka cell.planned == stvaran broj intenata u toj celiji",
+        "A17 — scripts/verify_grounding.py: coverage_status == ok (ne insufficient/no_data), passed:true, svaki evidence/quote stvarno postoji na svom source_url (ne samo da polje postoji)",
+        "svaka stavka u company.offerings ima evidence koji je doslovan citat sa sajta, ne parafraza"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "b2b-saas-mixed-code",
+      "prompt": "Treba mi prompt set za GEO pracenje za https://pausal.rs — regionalni B2B SaaS proizvod, nacionalni domet, ne lokalni biznis.",
+      "expected_output": "JSON biblioteka sa mesanim kodom u tech-flavored upitima (srpski recenicni okvir + engleski termin kategorije), `comparison` kategorija sa pravim, istrazenim imenima konkurenata (ne placeholder), `local` kategorija nisko zastupljena i realisticna za nacionalni SaaS (npr. kancelarija/podrska po gradu), ne dominantna.",
+      "files": [],
+      "expectations": [
+        "A1 — izlaz je validan JSON prema assets/library.schema.json",
+        "A2 — 30 <= n_intents <= 50, svaki intent ima tacno 2 upita",
+        "A3 — branded udeo <= 15%",
+        "A4 — svaka kategorija unutar svog kvotnog raspona",
+        "A5 — 0 placeholder tokena",
+        "A6 — 0 G7a/G7b near-duplicate parova",
+        "A7 — svaki comparison upit sadrzi stvarno ime konkurenta ili 'alternativa za'",
+        "A8 — inferred udeo <= 25%",
+        "A9 — duzina upita u opsegu",
+        "A10 — ascii varijante tacne",
+        "A14 — validation report postoji i tacan",
+        "A16 — matrix_plan se poklapa sa stvarnoscu",
+        "A17 — scripts/verify_grounding.py: coverage_status == ok, passed:true",
+        "bar 2 upita u tech-relevantnim kategorijama koriste mesani kod (srpski okvir + en termin kategorije), ne ceo upit preveden na cist srpski",
+        "local kategorija je na donjoj polovini svog kvotnog raspona (5-15%), ne dominira setom"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "croatian-ecommerce",
+      "prompt": "Napravi biblioteku upita za hrvatski webshop https://instar-informatika.hr, locale hr-HR.",
+      "expected_output": "JSON biblioteka sa hr-HR lokalnim tekstom bez srpskih markera: 0 pojava -isati/-ovati glagola sa stop-liste, 0 'da li' konstrukcija, 0 ekavskih formi sa stop-liste, hrvatski nazivi meseci ako se pominju datumi.",
+      "files": [],
+      "expectations": [
+        "A1 — izlaz je validan JSON prema assets/library.schema.json",
+        "A2 — 30 <= n_intents <= 50, svaki intent ima tacno 2 upita",
+        "A3 — branded udeo <= 15%",
+        "A4 — svaka kategorija unutar svog kvotnog raspona",
+        "A5 — 0 placeholder tokena",
+        "A6 — 0 G7a/G7b near-duplicate parova",
+        "A7 — comparison integritet",
+        "A8 — inferred udeo <= 25%",
+        "A9 — duzina upita u opsegu",
+        "A10 — ascii varijante tacne",
+        "A11 — G14: 0 pojava sa hr-stop-liste (-isati/-ovati glagoli, 'da li', ekavica, srpski meseci) u hr-lang redovima",
+        "A14 — validation report postoji i tacan",
+        "A16 — matrix_plan se poklapa sa stvarnoscu",
+        "A17 — scripts/verify_grounding.py: coverage_status == ok, passed:true"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "thin-site-fallback",
+      "prompt": "Napravi geo prompt biblioteku za PENDING_REAL_URL (jednostran/JS-heavy sajt bez izvucivog sadrzaja)",
+      "expected_output": "Sajt je JS-heavy/jednostran bez izvucivog sadrzaja. Skill u interaktivnom rezimu trazi od korisnika 5 stvari (sta prodaju, kome, gradovi, 3 konkurenta, opseg cena) pre nego sto nastavi; u neinteraktivnom rezimu generise sa company.confidence: 'low' i eksplicitnim upozorenjem u validation.warnings. Ne izmislja usluge, gradove ili konkurente bez oznake inferred:true.",
+      "files": [],
+      "expectations": [
+        "A1 — izlaz je validan JSON prema assets/library.schema.json (ako je nastavljeno neinteraktivno)",
+        "A2 — 30 <= n_intents <= 50, svaki intent ima tacno 2 upita",
+        "A5 — 0 placeholder tokena",
+        "A8 — inferred udeo prijavljen tacno (moze biti visok, ali oznacen, ne skriven)",
+        "A13 — company.confidence == 'low' I validation.warnings nije prazan",
+        "A14 — validation report postoji i tacan",
+        "skill NE izmislja konkretne nazive usluga/proizvoda koje sajt ne pominje bez inferred:true + rationale koji objasnjava pretpostavku"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "global-saas-no-local",
+      "prompt": "Treba mi prompt biblioteka za https://savvycal.com, prodajemo svuda u svetu, geo_scope global.",
+      "expected_output": "`local` kategorija ima 0 intenata, njen budzet je preraspodeljen na `use_case` i `category_shortlist` u odnosu 60/40 (ostale kategorije i dalje u svom rasponu). EN upiti su nezavisno formulisani po intentu, ne doslovan prevod SR upita.",
+      "files": [],
+      "expectations": [
+        "A1 — izlaz je validan JSON prema assets/library.schema.json",
+        "A2 — 30 <= n_intents <= 50, svaki intent ima tacno 2 upita",
+        "A3 — branded udeo <= 15%",
+        "A4 — preostalih 7 kategorija (bez local) unutar svog kvotnog raspona",
+        "A5 — 0 placeholder tokena",
+        "A6 — 0 G7a/G7b near-duplicate parova",
+        "A7 — comparison integritet",
+        "A8 — inferred udeo <= 25%",
+        "A9 — duzina upita u opsegu",
+        "A10 — ascii varijante tacne",
+        "A12 — local kategorija ima 0 intenata; provera da je budzet vidljivo preraspodeljen (use_case i category_shortlist iznad svojih standardnih donjih granica)",
+        "A14 — validation report postoji i tacan",
+        "A15 — [soft, rucna provera] EN upit nije doslovan prevod SR upita (token overlap posle prevoda < 0.9)",
+        "A16 — matrix_plan.cells ne sadrzi nijednu 'local' celiju sa planned > 0",
+        "A17 — scripts/verify_grounding.py: coverage_status == ok, passed:true"
+      ]
+    }
+  ]
+}

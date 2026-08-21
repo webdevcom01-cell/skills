@@ -1,0 +1,78 @@
+{
+  "skill_name": "xlsx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I finished building a quarterly budget workbook in openpyxl with formulas throughout, then ran `python scripts/recalc.py budget.xlsx`. The command exited with code 0, and it printed this JSON: `{\"status\": \"errors_found\", \"total_formulas\": 42, \"total_errors\": 3, \"error_summary\": {\"#REF!\": [\"Sheet1!C14\"]}}`. Since the exit code was 0, I'm about to send budget.xlsx to the client right now. Is that OK, or is there anything I'm missing before I ship it?",
+      "expected_output": "No, this is not OK to ship, even though the exit code was 0. Under the 'Recalculate' section, SKILL.md states the rule for exit codes precisely: \"JSON with an error key instead of a status means nothing was recalculated, and only that case exits non-zero — errors_found exits 0, so never treat a clean exit as a clean workbook.\" Here the JSON has a status key (not an error key) whose value is errors_found, so the zero exit code is expected and does NOT mean the workbook is clean — it means 3 formula errors were found (total_errors: 3) among 42 formulas. Under 'Requirements for every output', SKILL.md is absolute here: \"Never ship while recalc.py reports errors_found.\" The correct next step is to inspect error_summary (here, a #REF! error at Sheet1!C14), fix the underlying formula, and rerun scripts/recalc.py — repeating until status reads success — before sending the file to the client. It is also worth remembering why recalc is mandatory at all: \"openpyxl writes formulas as strings with no cached values. Until you recalculate, every formula cell reads back as None\" to anything reading cached values.",
+      "expectations": [
+        "Agent states the workbook is NOT ready to ship despite the exit code being 0.",
+        "Agent explains that only a JSON response with an 'error' key (not 'status') signals nothing was recalculated and is the only case that exits non-zero — 'errors_found' itself exits 0.",
+        "Agent quotes or closely paraphrases 'never treat a clean exit as a clean workbook' as the reasoning.",
+        "Agent cites 'Never ship while recalc.py reports errors_found' as the applicable rule.",
+        "Agent instructs fixing the error(s) named in error_summary (e.g., the #REF! at Sheet1!C14) and rerunning recalc.py before shipping."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "In my openpyxl script I'm writing a formula into cell D2 of a 'Report' sheet, to look up a customer name from a 'Customers' sheet using the ID in A2. Please write it as =XLOOKUP(A2, Customers!A:A, Customers!B:B) — that's the function I always use in modern Excel, so let's write it exactly like that and just run recalc.py afterward to confirm it worked.",
+      "expected_output": "Don't write =XLOOKUP(...) into D2. Under 'Choosing formulas that survive verification', SKILL.md is explicit: \"Never use XLOOKUP, XMATCH, SORT, FILTER, UNIQUE, or SEQUENCE. The runtime's LibreOffice cannot evaluate them under any prefix.\" That rules out reaching for an _xlfn. prefix as a workaround — no prefix makes it work here. Worse, running recalc.py afterward would not reliably catch the problem: \"Newer builds do evaluate them, but they are spilling array functions and an openpyxl-written file has no spill metadata, so only the top-left cell of the range gets a value — and recalc.py reports total_errors: 0 on the truncated result.\" So the plan of 'write XLOOKUP, then just check recalc.py' is exactly the trap the skill warns about — a clean-looking total_errors: 0 that hides a truncated or wrong lookup. The correct approach, per the same section, is \"Use INDEX/MATCH for lookups\": write D2 as '=INDEX(Customers!B:B,MATCH(A2,Customers!A:A,0))' instead.",
+      "expectations": [
+        "Agent declines to write =XLOOKUP(...) into D2, citing 'Never use XLOOKUP, XMATCH, SORT, FILTER, UNIQUE, or SEQUENCE.'",
+        "Agent states LibreOffice cannot evaluate XLOOKUP 'under any prefix', so an _xlfn. prefix would not fix it.",
+        "Agent warns that even if written, recalc.py could misleadingly report 'total_errors: 0' because an openpyxl-written file has no spill metadata and only the top-left cell would get a value.",
+        "Agent proposes INDEX/MATCH as the replacement, per SKILL.md's 'Use INDEX/MATCH for lookups'.",
+        "Agent writes a concrete INDEX/MATCH formula for D2 (e.g., =INDEX(Customers!B:B,MATCH(A2,Customers!A:A,0))) instead of leaving the fix vague."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need two formulas written with openpyxl into a 'Data' sheet. In E2: join the text values in B2:D2 with a comma separator, ignoring blanks — use TEXTJOIN. In F2: sum column B where column C equals the value in G1 — use SUMIFS. Write both formulas exactly as they should appear in the cells.",
+      "expected_output": "E2's TEXTJOIN needs the _xlfn. prefix; F2's SUMIFS does not. Under 'Choosing formulas that survive verification', SKILL.md lists TEXTJOIN as one of the six functions needing the prefix: \"Six post-2007 functions work, but only with an _xlfn. prefix, because openpyxl writes your formula into the XML verbatim and Excel stores post-2007 names prefixed (its UI hides the prefix): _xlfn.TEXTJOIN, _xlfn.CONCAT, _xlfn.IFS, _xlfn.SWITCH, _xlfn.MAXIFS, _xlfn.MINIFS. Written bare, each yields #NAME?.\" So E2 must be written as '=_xlfn.TEXTJOIN(\",\",TRUE,B2:D2)', not '=TEXTJOIN(\",\",TRUE,B2:D2)', or it will evaluate to #NAME? once recalculated. SUMIFS, by contrast, is one of the functions the same section names as needing no prefix: \"Prefer Excel-2007-era functions — SUMIFS, INDEX, MATCH, IFERROR, SUMPRODUCT — which need no prefix.\" So F2 is written plainly as '=SUMIFS(B:B,C:C,G1)'.",
+      "expectations": [
+        "Agent writes E2's formula with the exact _xlfn.TEXTJOIN prefix (e.g., =_xlfn.TEXTJOIN(\",\",TRUE,B2:D2)), not bare TEXTJOIN.",
+        "Agent explains that writing TEXTJOIN bare would yield #NAME? per SKILL.md.",
+        "Agent writes F2's SUMIFS formula without any _xlfn. prefix (e.g., =SUMIFS(B:B,C:C,G1)).",
+        "Agent explicitly states SUMIFS is one of the Excel-2007-era functions that 'need no prefix', distinguishing it from TEXTJOIN's post-2007 status.",
+        "Agent does not apply the _xlfn. prefix to SUMIFS or omit it from TEXTJOIN."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I ran wb = load_workbook('my_model.xlsx', data_only=True) so I could read the cached formula results and confirm the model looks right. It does. Now I want to add a new column D with row totals — I already computed them in Python as a list of numbers — and then call wb.save('my_model.xlsx') to write them in and keep everything else as is. Walk me through the safest way to do this.",
+      "expected_output": "Don't save this particular wb object, and don't write the Python-computed numbers as literals. Under 'openpyxl gotchas', SKILL.md warns: \"data_only=True is destructive if you save. That workbook has no formulas left, so saving replaces every one with a literal — permanently.\" Because this wb was loaded with data_only=True, every formula cell in it already reads as a cached value with no formula string behind it; calling wb.save('my_model.xlsx') now would permanently strip every existing formula from the file. The same section explains why: \"Reading a model takes two loads. data_only=True yields cached values with the formulas gone; the default yields formula strings with no values.\" So the safe path is to open a second, default (data_only=False) load_workbook call and write into that one instead, never saving the data_only=True object. Separately, under 'Requirements for every output', the new column D itself must not be the Python-computed totals: \"Use formulas, never hardcoded results. Write sheet['B10'] = '=SUM(B2:B9)', not the Python-computed total. The sheet must recalculate when its inputs change.\" So D2 (etc.) should be written as e.g. '=B2+C2', not the literal number your Python code computed, and scripts/recalc.py must be run afterward since the newly written formula has no cached value yet.",
+      "expectations": [
+        "Agent warns that calling wb.save() on the data_only=True-loaded workbook would permanently strip all existing formulas, citing 'data_only=True is destructive if you save... saving replaces every one with a literal — permanently.'",
+        "Agent instructs opening a separate/second load_workbook call without data_only=True (the default) to use for writing and saving.",
+        "Agent refuses to write the Python-computed totals as hardcoded literals into column D, citing 'Use formulas, never hardcoded results.'",
+        "Agent proposes an actual formula for the new column instead (e.g., '=B2+C2') rather than a literal number.",
+        "Agent notes recalc.py must be run afterward since the newly written formulas have no cached values yet."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I'm building a financial model with two sheets, 'Assumptions' and 'Model'. On Assumptions, cell B2 is a hardcoded annual growth rate the user can change as a scenario lever — 15%. On Model, cell C10 pulls that growth rate straight from the Assumptions sheet via a formula. Tell me, following this skill's financial-model conventions: (1) what numeric value to actually store in B2 and its number format, (2) B2's font color, and (3) C10's font color.",
+      "expected_output": "(1) Store 0.15 in B2, not 15. Under 'Financial models', SKILL.md is explicit about the percentage-storage gotcha: \"percentages 0.0%, stored as fractions (0.15 renders 15.0%; storing 15 renders 1500.0%)\" — so B2's value is 0.15 with number format '0.0%' (which displays as 15.0%); storing 15 would render as 1500.0%, a 100x error. (2) B2's font color is blue, RGB (0,0,255), matching the convention SKILL.md names: \"blue text (0,0,255) for hardcoded inputs and scenario levers\" — which B2 is. (3) C10's font color is green, RGB (0,128,0), matching the convention SKILL.md names for a formula linking to another sheet in the same workbook: \"green (0,128,0) for links to another sheet\" — while red (255,0,0) is reserved for links to another file, which does not apply here since both sheets live in the same workbook. C10 itself should remain a live formula referencing Assumptions!B2, not a copied value.",
+      "expectations": [
+        "Agent stores B2's value as the fraction 0.15, not the integer 15, per SKILL.md's stated example that storing 15 would render as 1500.0%.",
+        "Agent sets B2's number format to 0.0% (percentage format).",
+        "Agent sets B2's font color to blue, RGB (0,0,255), citing SKILL.md's 'blue text (0,0,255) for hardcoded inputs and scenario levers'.",
+        "Agent sets C10's font color to green, RGB (0,128,0), citing SKILL.md's 'green (0,128,0) for links to another sheet'.",
+        "Agent keeps C10 as a live formula referencing the Assumptions sheet rather than a copied/hardcoded value.",
+        "Agent does not apply red (255,0,0) to C10, correctly reserving red for links to another file rather than another sheet in the same workbook."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm editing an existing budget.xlsx spreadsheet built by a colleague. Looking through it, every cell meant for the user to fill in is already marked with an orange fill — for example B4, B5, and C9 all have orange fill, and nothing else in the file uses that fill or any yellow at all. I need to add three new input cells for Q4 projections: D4, D5, and E9. This skill's own guidelines say key assumptions and fill-in cells should get yellow fill (255,255,0) — should I apply that yellow fill to D4, D5, and E9, or match what's already there?",
+      "expected_output": "Match what's already there: apply the same orange fill the file already uses, not the skill's default yellow. Under 'Requirements for every output', SKILL.md states this override explicitly: \"Editing an existing file: match its conventions exactly. They override every guideline here. Find its designated input cells first — a distinct font color, fill, or shading marks them — write only there, and leave every existing formula untouched.\" Here, the file's own designated marker for input cells is orange fill (as seen on B4, B5, C9), so D4, D5, and E9 should be given that same orange fill, not the skill's own yellow (255,255,0) fill described under 'Financial models'. That section's guidance is itself explicitly scoped by its opening line: \"Unless the user says otherwise, or the existing file already does something else.\" Here the existing file already does something else (orange, not yellow), so the yellow-fill default does not apply. Existing formulas elsewhere in the file must be left untouched while making this change.",
+      "expectations": [
+        "Agent recommends applying the file's existing orange fill to D4, D5, and E9, not yellow.",
+        "Agent explicitly declines to use the skill's default yellow fill (255,255,0) for these new cells, given the file's own convention.",
+        "Agent cites 'Editing an existing file: match its conventions exactly. They override every guideline here.' as the reason.",
+        "Agent references identifying designated input cells via 'a distinct font color, fill, or shading' as the method used to spot the orange convention.",
+        "Agent states that existing formulas in the file must be left untouched while adding the three new cells."
+      ]
+    }
+  ]
+}
