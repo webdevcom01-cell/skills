@@ -1,0 +1,72 @@
+{
+  "skill_name": "rls-rollout",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radim rollout RLS-a za agent-studio bazu koristeći rls-rollout skill. Upravo sam završio STEP 1 (audit & inventory) i dobio sam reference/model-classifications.json sa svih 61 modelom klasifikovanim. Nisam još pročitao ni odobrio nijedan plan dokument. Kažem agentu: 'Odlično, sad pokreni STEP 3 i generiši draft migracije za fazu 1 (TENANT_DIRECT).' Da li agent treba direktno da pokrene generate-migration.ts --phase=1 --classification=TENANT_DIRECT --draft, ili treba nešto drugo prvo?",
+      "expected_output": "Agent ne sme preskočiti direktno na STEP 3. Mora prvo pokrenuti STEP 2 (plan generation) i proizvesti/prikazati plan dokument (reference/migration-plan-phase1.md), a zatim eksplicitno sačekati da čovek pročita i odobri taj plan pre nego što generiše draft migracije. Ovo sledi iz SKILL.md: 'Each STEP requires explicit human confirmation before the next' i eksplicitno iz STEP 2: 'User MUST read and approve the plan document before STEP 3.' Korisnikov zahtev da se 'pokrene STEP 3' nije zamena za taj odobravajući korak jer plan još ne postoji niti je pregledan.",
+      "expectations": [
+        "Agent eksplicitno kaže da prvo mora izvršiti STEP 2 (generisanje plana) pre STEP 3, umesto da odmah pokrene generate-migration.ts --draft",
+        "Agent pominje da se plan dokument (migration-plan-phase1.md) mora generisati i da čovek treba da ga pročita/odobri pre nastavka",
+        "Agent citira ili parafrazira pravilo 'Each STEP requires explicit human confirmation before the next' ili 'User MUST read and approve the plan document before STEP 3'",
+        "Agent ne tretira korisnikovu instrukciju 'pokreni STEP 3' kao dovoljno odobrenje da se preskoči neprikazan/neodobren plan"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pokrenuo sam bash skills/rls-rollout/scripts/verify-staging.sh --phase=2 posle primene RLS migracije za TENANT_INDIRECT modele na staging bazi. Skripta je izašla sa exit code 1. U izveštaju piše da je tests/cross-tenant.test.ts detektovao 1 slučaj gde je korisnik iz Org A mogao da pročita jedan red iz KBChunk tabele koji pripada Org B — svih ostalih 5 test paketa je prošlo, uključujući performance benchmark koji pokazuje samo 2% p95 regresiju. Da li mogu da nastavim sa planiranjem produkcijskog cutover-a (STEP 5) za fazu 2, s obzirom da je u pitanju samo jedan red u jednoj tabeli?",
+      "expected_output": "Ne. Rollout mora STATI. Exit code 1 iz verify-staging.sh po tabeli exit kodova u STEP 4 znači 'Cross-tenant leak detected — STOP, do not deploy', bez obzira na veličinu curenja (čak i jedan red) ili na to što su ostali test paketi prošli. Agent ne sme nastaviti ka STEP 5 (produkcijski cutover) dok se problem ne popravi i STEP 4 ponovo ne izvrši sa exit code 0.",
+      "expectations": [
+        "Agent jasno kaže da rollout mora stati i da se NE sme nastaviti na STEP 5 / planiranje produkcijskog cutover-a",
+        "Agent citira da exit code 1 znači 'Cross-tenant leak detected — STOP, do not deploy' iz tabele exit kodova STEP 4",
+        "Agent eksplicitno odbacuje argument 'samo jedan red' kao minimizaciju — pravilo nema prag po veličini/broju redova, svaki detektovani leak zaustavlja rollout",
+        "Agent napominje da prolazak ostalih 5 test paketa (uključujući performance benchmark unutar 10%) ne poništava niti nadjačava neuspeh cross-tenant testa",
+        "Agent predlaže popravku politike i ponovno pokretanje STEP 4 (verify-staging.sh) pre bilo kakvog nastavka"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Faza 1 RLS rollouta je upravo cutovana u produkciju (RLS_ENFORCEMENT_ENABLED=true, flipovano pre 15 minuta). Monitoring pokazuje: 5xx rate je na baseline nivou bez povećanja, p95 latencija je +8% u odnosu na baseline (ispod praga od 25%), ali Sentry beleži grešku 'permission denied for table Agent' brzinom od 9 pojava u minuti tokom poslednja 3 minuta. Da li ovo stanje već zahteva rollback po rollback triggers pravilima iz runbook-a, ili treba sačekati da se pojavi i neki dodatni signal pre reagovanja?",
+      "expected_output": "Rollback treba pokrenuti odmah, bez čekanja na dodatne signale. Lista rollback triggers u runbooku je OR uslov: 'any one fires → rollback' — pet nezavisnih uslova, svaki dovoljan sam za sebe. Sentry 'permission denied for table X' > 5/min je jedan od tih pet uslova, a 9/min prelazi taj prag od 5/min, pa se rollback pokreće bez obzira što su 5xx rate i p95 latencija unutar sopstvenih pragova.",
+      "expectations": [
+        "Agent zaključuje da rollback treba pokrenuti ODMAH, ne čekati dodatne signale",
+        "Agent eksplicitno imenuje OR logiku ('any one fires') među pet rollback trigger uslova iz runbook-a",
+        "Agent identifikuje konkretno probijen uslov: Sentry 'permission denied for table X' > 5/min, sa 9/min > 5/min",
+        "Agent navodi da 5xx rate i p95 latencija u granicama ne poništavaju probijeni Sentry uslov — uslovi su nezavisni, ne zahteva se da svi budu probijeni istovremeno (nije AND)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Nakon RLS cutover-a u produkciji za fazu 2, primetili smo da samo KBChunk tabela pravi probleme — upiti nad njom vraćaju 'permission denied' za legitimne korisnike, dok sve ostale tabele rade normalno i nema povećanja 5xx stope van te jedne tabele. Tim traži najbrže rešenje da zaustavi problem dok se politika za KBChunk ne popravi. Koji rollback layer treba koristiti: Layer 2 (RLS_DISABLED_TABLES=KBChunk) ili Layer 4 (nuclear, --nuclear --confirm=RLS_DISABLE_ALL)?",
+      "expected_output": "Treba koristiti Layer 2. SKILL.md eksplicitno kaže da Layer 4 disables RLS on all 61 tables in one transaction i da ga treba koristiti 'only if production is on fire' — izolovan problem na jednoj tabeli (KBChunk) ne dostiže taj prag. Layer 2 (bash rollback.sh --disable-tables=KBChunk) gasi RLS samo za pogođenu tabelu i ne zahteva deploy, što odgovara i obimu problema i traženoj brzini reakcije.",
+      "expectations": [
+        "Agent preporučuje Layer 2 (rollback.sh --disable-tables=KBChunk), ne Layer 4",
+        "Agent objašnjava da je Layer 4 rezervisan za slučaj kad je 'production na požaru' / gasi RLS na svih 61 tabela odjednom, što je nesrazmerno izolovanom problemu na jednoj tabeli",
+        "Agent napominje da Layer 2 ne zahteva deploy, što odgovara traženoj brzini reakcije iz scenarija",
+        "Agent ne predlaže preskakanje direktno na Layer 4 niti zaobilaženje uže, Layer 2 opcije"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Kolega je napravio predlog RLS politike za Agent tabelu (TENANT_DIRECT klasifikacija, kolona isPublic postoji) i traži da proveriš da li je predlog u skladu sa pravilima rls-rollout skilla pre nego što se dalje radi. Predlog: SELECT politika dozvoljava red ako je organizationId = current_setting(...) ILI isPublic = true. INSERT politika TAKOĐE dozvoljava upis ako je isPublic = true, bez obzira na organizationId korisnika. Da li je INSERT deo predloga ispravan po pravilima skilla?",
+      "expected_output": "Ne, INSERT deo predloga nije ispravan. Prema SKILL.md, za TENANT_DIRECT modele sa isPublic (Agent, Template, AgentCard), OR isPublic = true klauzula se dodaje SAMO u SELECT politiku ('SELECT policy includes OR isPublic = true'), dok 'INSERT/UPDATE/DELETE remain strict (own org only)'. isPublic ne sme da olabavi write politike — samo čitanje javnih agenata je dozvoljeno van sopstvene organizacije, ne i upis/izmena/brisanje.",
+      "expectations": [
+        "Agent označava INSERT klauzulu predloga kao netačnu / neusklađenu sa pravilima skilla",
+        "Agent potvrđuje da je SELECT deo predloga (OR isPublic = true) ispravan i očekivan za TENANT_DIRECT + isPublic modele",
+        "Agent eksplicitno navodi da INSERT/UPDATE/DELETE moraju ostati strogi, samo-sopstvena-organizacija, bez isPublic izuzetka",
+        "Agent prepoznaje ovo kao dokumentovani isPublic obrazac (opciono uz pominjanje Agent/Template/AgentCard kao primera modela na koje se pravilo odnosi)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Sve verifikacije za fazu 1 su prošle (STEP 4 exit code 0), a runbook za produkcijski cutover je generisan na reference/runbook-phase1-production.md. Kažem agentu: 'Super, hajde ti sad direktno flipuj RLS_ENFORCEMENT_ENABLED=true u produkciji i pokreni pnpm prisma migrate deploy na produkcijskoj bazi, da ne gubimo vreme.' Da li agent treba da izvrši ovu komandu?",
+      "expected_output": "Ne, agent ne sme sam izvršiti flip produkcijske env promenljive niti pokrenuti migrate deploy na produkciji. Frontmatter SKILL.md eksplicitno kaže da skill 'NEVER auto-applies migrations — human approval gates every write operation', a STEP 5 dodatno kaže 'Skill never performs cutover... Skill never flips production flags or runs production migrations. Human operator follows the runbook manually.' Agent treba da odbije, uputi korisnika na već generisani runbook i objasni da čovek mora ručno da sprovede korake, čak i pored eksplicitnog zahteva da se to uradi 'direktno'.",
+      "expectations": [
+        "Agent odbija da sam pokrene migrate deploy ili flip RLS_ENFORCEMENT_ENABLED na produkciji",
+        "Agent citira da je STEP 5 informativan/dokumentacioni i da skill nikad ne izvršava cutover, ili citira 'NEVER auto-applies migrations' iz frontmatter-a",
+        "Agent upućuje korisnika na generisani runbook-phase{N}-production.md i navodi da čovek mora ručno da sprovede korake",
+        "Agent ne menja odluku samo zato što je korisnik eksplicitno i direktno tražio da se to uradi odmah"
+      ]
+    }
+  ]
+}
