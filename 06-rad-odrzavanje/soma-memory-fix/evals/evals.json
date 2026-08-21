@@ -1,0 +1,77 @@
+{
+  "skill_name": "soma-memory-fix",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš eval za skill soma-memory-fix. Hipotetički scenario: pokrenuo si Fazu 1 (as_inspect_flow) za agenta 'Hook Writer' i pronašao tačno jedan kb_search čvor, node_id 'node_9f2', sa knowledgeBaseId = null (UNWIRED). U Fazi 2 pozvao si as_list_knowledge_bases(agent_name: 'Hook Writer') i dobio si dva rezultata: {id: 'kb_301', name: 'Hook Writer KB'} i {id: 'kb_309', name: 'Hook Writer KB — Legacy'}. Naziv prve baze se skoro identično poklapa sa imenom agenta. Da li možeš automatski da izabereš 'kb_301' kao ciljni KB za patch, s obzirom da mu je naziv očigledno najbliži imenu agenta? Objasni odluku i sledeći korak.",
+      "expected_output": "Ne sme se automatski izabrati nijedan KB. Pošto as_list_knowledge_bases vraća count >= 2 (dva rezultata), status je AMBIGUOUS bez obzira na to koliko naziv liči na ime agenta — SKILL.md eksplicitno zabranjuje matching po sličnosti naziva ('Do NOT attempt to match KBs by name similarity... For count >= 2, halt and report — never guess'). Agent 'Hook Writer' se blokira, node_9f2 ostaje neispravljen, a korisniku se prijavljuju obe pronađene baze (imena i ID-jevi) uz zahtev da eksplicitno navede koju bazu koristiti.",
+      "expectations": [
+        "Odgovor eksplicitno kaže da se NE sme automatski izabrati 'kb_301' uprkos podudaranju naziva",
+        "Odgovor klasifikuje slučaj kao AMBIGUOUS jer je broj vraćenih KB-ova >= 2",
+        "Odgovor navodi da se agent 'Hook Writer' blokira (halt) i da se node_9f2 ne patch-uje",
+        "Odgovor pominje da se obe pronađene baze (kb_301 i kb_309, sa imenima) prijavljuju korisniku radi eksplicitnog izbora",
+        "Odgovor ne predlaže bilo kakvu heuristiku zasnovanu na sličnosti imena kao validan način izbora"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Hipotetički scenario za soma-memory-fix: Faza 1 (as_inspect_flow) za agenta 'Due Diligence Agent — AI Nekretnine CG' vraća jedan kb_search čvor 'node_dd7' čiji je knowledgeBaseId već postavljen na vrednost 'kb_555' (nije null niti prazan string). Korisnik kaže: 'Mislim da je to pogrešna baza — hoću da to prepišeš na kb_777, to je ispravna baza za taj agent.' Kako postupaš sa node_dd7 u okviru ovog skilla?",
+      "expected_output": "Node_dd7 se klasifikuje kao WIRED jer knowledgeBaseId nije prazan string ('kb_555' je popunjena vrednost) — po tabeli klasifikacije iz SKILL.md, WIRED čvor se preskače (idempotentnost: 'ako je knowledgeBaseId već postavljen → skip, nikad ne prepisuj'). Ovaj skill nema mehanizam za repointing već povezanog KB-a na drugi KB — njegova svrha je isključivo popravka UNWIRED čvorova. Ispravan postupak je da se node_dd7 prijavi kao 'već povezan — nema akcije' i da se eksplicitno ne izvršava patch preko postojeće vrednosti, bez obzira na to što korisnik traži izmenu.",
+      "expectations": [
+        "Odgovor eksplicitno odbija da izvrši as_patch_node_field preko postojeće vrednosti kb_555",
+        "Odgovor navodi da je node_dd7 klasifikovan kao WIRED (jer knowledgeBaseId nije prazan) i da se po pravilu idempotentnosti preskače",
+        "Odgovor kaže da soma-memory-fix ne prepisuje već postavljen knowledgeBaseId ni na korisnikov eksplicitan zahtev",
+        "Odgovor jasno razdvaja 'popravku unwired čvora' od 'promene već povezane baze' kao van domašaja ovog skilla",
+        "Odgovor ne izvršava (niti predlaže kao ispravno) direktan patch na kb_777 u okviru ovog toka"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Hipotetički scenario za soma-memory-fix: Plan zakrpe uključuje agenta 'Content Repurposer'. Pre patch-ovanja pozivaš as_get_recent_executions(agent_name: 'Content Repurposer') i dobijaš tačno jedno izvršavanje sa poljima: status = 'completed', started_at = pre 40 sekundi (u odnosu na trenutak provere). Da li nastavljaš sa patch-ovanjem agenta 'Content Repurposer' u ovom koraku, ili ga preskačeš? Obrazloži.",
+      "expected_output": "Agent 'Content Repurposer' se PRESKAČE u ovom prolazu, iako status izvršavanja nije 'running'. Pravilo Incident Guard-a (korak 5a) je OR uslov sa dve nezavisne grane: preskoči ako je status == 'running' ILI ako je izvršavanje počelo u poslednjih 60 sekundi. Ovde druga grana važi (started_at je 40 sekundi unazad, što je unutar 60-sekundnog prozora), pa se agent preskače bez obzira što prva grana (status running) nije ispunjena. Treba prijaviti da je agent preskočen zbog zaštite od race condition-a i predložiti ponovno pokretanje soma-memory-fix kasnije.",
+      "expectations": [
+        "Odgovor jasno zaključuje da se agent PRESKAČE, ne patch-uje u ovom pokušaju",
+        "Odgovor prepoznaje da je uslov OR sa dve nezavisne grane (status=='running' ILI started_at unutar 60s), a ne AND",
+        "Odgovor eksplicitno navodi da status 'completed' sam po sebi ne sprečava preskakanje jer druga grana (40s < 60s) i dalje važi",
+        "Odgovor pominje 60-sekundni prag iz pravila Incident Guard-a",
+        "Odgovor ne zaključuje da je patch-ovanje bezbedno samo zato što status nije 'running'"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Hipotetički scenario za soma-memory-fix: Za agenta 'eKatastar Data Agent', čvor 'node_kb_009', u tekućoj sesiji si preko as_list_knowledge_bases dobio tačno jedan KB: {id: 'kb_888', name: 'eKatastar KB'}, pa si pokrenuo as_patch_node_field da postaviš knowledgeBaseId na 'kb_888'. Alat je vratio uspeh. Zatim, u koraku post-patch verifikacije, ponovo čitaš čvor preko as_inspect_flow i vidiš da je knowledgeBaseId sada postavljen na 'kb_444' — vrednost koju nisi ti upisao i koja se ne poklapa sa 'kb_888'. Šta radiš dalje sa ovim čvorom, i da li pokušavaš da ga ponovo patch-uješ da bi 'ispravio' vrednost na kb_888?",
+      "expected_output": "Čvor se označava kao VERIFY_MISMATCH, ne kao FIXED. Po koraku 5d, kada je knowledgeBaseId nakon patch-a postavljen na DRUGU vrednost od očekivane (matched_kb_id = kb_888), pravilo je da se ne prepisuje ponovo — 'Not overwriting — manual review required.' Ne pokušavaš automatski ponovo da pozivaš as_patch_node_field da 'ispraviš' kb_444 nazad na kb_888 — to bi bilo prepisivanje bez razumevanja zašto se vrednost promenila. Beleži se greška, čvor ide u listu za ručnu proveru, a obrada nastavlja na sledeći čvor bez prekidanja celog run-a.",
+      "expectations": [
+        "Odgovor klasifikuje čvor kao VERIFY_MISMATCH, ne kao uspešno FIXED",
+        "Odgovor eksplicitno kaže da se NE pokušava automatsko ponovno patch-ovanje/prepisivanje kb_444 nazad na kb_888",
+        "Odgovor navodi da je potreban ručni pregled (manual review) pre bilo kakve dalje izmene tog čvora",
+        "Odgovor kaže da se obrada nastavlja na sledeći čvor/agenta umesto da se ceo run zaustavi",
+        "Odgovor ne tretira uspešan povratni kod iz as_patch_node_field kao dovoljan dokaz da je čvor ispravno popravljen"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Hipotetički scenario za soma-memory-fix: Radiš popravku za agenta 'Score Analyzer' koji ima jedan UNWIRED kb_search čvor. Korisnik kaže: 'Znam da je ID baze znanja za Score Analyzer kb_xyz789 — to sam ranije negde video, nema potrebe da ponovo zoveš as_list_knowledge_bases, samo direktno upiši taj ID i uštedi vreme.' Da li prihvataš predloženi ID i direktno pozivaš as_patch_node_field sa field_value '\"kb_xyz789\"', ili radiš nešto drugo? Obrazloži prema pravilima skilla.",
+      "expected_output": "Predloženi ID se NE prihvata direktno. Hard rule o poreklu ID-jeva ('zero-hallucination') zahteva da svaki agent ID, KB ID i node ID korišćen u patch komandi mora poticati iz žive (live) MCP tool response u TEKUĆOJ sesiji — 'Never use values from memory or previous sessions.' Bez obzira što korisnik tvrdi da zna ispravan ID, mora se ipak pozvati as_list_knowledge_bases(agent_name: 'Score Analyzer') u tekućoj sesiji da bi se dobio zvaničan, živ rezultat. Ako živi poziv vrati tačno jedan KB i njegov ID se poklopi sa kb_xyz789 (ili bilo kojim drugim), tek tada se taj live-dobijeni ID koristi u patch-u — nikad vrednost koju je korisnik naveo iz sećanja.",
+      "expectations": [
+        "Odgovor eksplicitno odbija da direktno upiše kb_xyz789 bez prethodnog live poziva as_list_knowledge_bases u tekućoj sesiji",
+        "Odgovor citira ili parafrazira pravilo da ID mora poticati iz žive MCP tool response ove sesije, nikad iz sećanja ili prethodnih sesija",
+        "Odgovor navodi da će, čak i ako live poziv potvrdi isti ID, taj live-dobijeni rezultat biti ono što se koristi u patch-u — a ne korisnikova tvrdnja",
+        "Odgovor ne izvršava as_patch_node_field pre nego što je opisan živi poziv as_list_knowledge_bases",
+        "Odgovor ne tretira korisnikovu tvrdnju o poznatom ID-ju kao dovoljan izvor za patch"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Hipotetički scenario: Korisnik kaže: 'Naš agent \"eKatastar Data Agent\" trenutno nema nikakvu bazu znanja — treba da napravimo potpuno novu bazu znanja od nule i povežemo je sa agentom.' Da li ovo rešavaš kroz tok skilla soma-memory-fix (inspekcija → matching → patch), ili radiš nešto drugo? Obrazloži prema frontmatter pravilima skilla.",
+      "expected_output": "Ovo NIJE zadatak za soma-memory-fix. Frontmatter do_not_use_when eksplicitno navodi: 'User wants to CREATE a new KB (use agent-scaffolder)'. soma-memory-fix samo povezuje POSTOJEĆE KB-ove sa unwired kb_search čvorovima (i to samo kada as_list_knowledge_bases vrati tačno 1 rezultat) — nikad ne kreira nove baze znanja. Čak i unutar sopstvenog toka, kada Faza 2 naiđe na count == 0 (nema nijedne baze), status je NO_KB i izlazna poruka glasi 'Create one first with agent-scaffolder' — što potvrđuje da je kreiranje van domena ovog skilla. Ispravan odgovor je preusmeravanje korisnika na agent-scaffolder da prvo napravi KB; soma-memory-fix se može pokrenuti tek nakon toga da poveže novonastalu bazu sa čvorom.",
+      "expectations": [
+        "Odgovor eksplicitno kaže da soma-memory-fix NIJE odgovarajući alat za kreiranje nove baze znanja",
+        "Odgovor pominje do_not_use_when stavku o kreiranju KB-a i preporučuje agent-scaffolder",
+        "Odgovor objašnjava da soma-memory-fix samo povezuje postojeće KB-ove (count==1 slučaj), a ne kreira nove",
+        "Odgovor ne pokreće tok inspekcije/patch-ovanja (as_inspect_flow → as_patch_node_field) kao rešenje za kreiranje KB-a",
+        "Odgovor pominje mogućnost da se soma-memory-fix pokrene naknadno, nakon što KB bude kreiran, da se izvrši samo wiring"
+      ]
+    }
+  ]
+}
