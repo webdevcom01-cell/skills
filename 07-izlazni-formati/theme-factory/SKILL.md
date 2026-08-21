@@ -55,5 +55,9 @@ After a preferred theme is selected:
 3. Ensure proper contrast and readability
 4. Maintain the theme's visual identity across all slides
 
+## Partial or Scoped Requests
+
+If asked to apply the theme to only part of the artifact — a single slide, a section, "just to preview it" — flag this before proceeding. Applying the theme is meant to happen consistently throughout the deck (Application Process, step 2) and its visual identity is meant to be maintained across all slides (step 4), so a partial application is a valid preview step but not a finished result. State clearly that the styling is partial, and ask whether or when to extend it to the rest of the artifact — do not present a partial application as done.
+
 ## Create your Own Theme
 To handle cases where none of the existing themes work for an artifact, create a custom theme. Based on provided inputs, generate a new theme similar to the ones above. Give the theme a similar name describing what the font/color combinations represent. Use any basic description provided to choose appropriate colors/fonts. After generating the theme, show it for review and verification. Following that, apply the theme as described above.
