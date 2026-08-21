@@ -5,7 +5,7 @@ compatibility: Reads (read-only) DESIGN_SPEC.md, instincts.md, evo-log.md and re
 metadata:
   version: "0.2.0"
   owner: "buky <webdevcom01@gmail.com>"
-  evaluation_status: "11 evals across 2 iterations (5 + 6), with-skill vs without-skill baseline, both rounds 100% with-skill pass rate vs 40-42% baseline. See evals/evals.json and evals/README.md."
+  evaluation_status: "6 evals (prva iteracija), groundovani u eksplicitnim, imenovanim pravilima iz SKILL.md (Mode 1-4, hard rules, write boundaries, anti-hallucination disciplina). Vidi evals/evals.json i evals/README.md."
 ---
 
 # Agent Architect
