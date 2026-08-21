@@ -1,0 +1,66 @@
+{
+  "skill_name": "skill-creator-pro",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Napravio sam skill za čišćenje CSV fajlova, u ~/skills/csv-cleaner. Hoću da vidim da li stvarno pomaže. Pokreni dva test slučaja sa skillom i bez njega, oceni rezultate i pokaži mi kvantitativno poređenje.",
+      "expected_output": "Iteration direktorijum sa po jednim with_skill i without_skill run-om za svaki test slučaj, grading.json u svakom, benchmark.json sa nenultim runs nizom, benchmark.md sa tačnim brojem run-ova, i generisan eval viewer.",
+      "expectations": [
+        "benchmark.json postoji i njegov runs niz ima najmanje 4 elementa (2 test slučaja x 2 konfiguracije)",
+        "benchmark.md ne sadrži string '3 runs each per configuration' kada je izvršen 1 run po konfiguraciji",
+        "benchmark.md prikazuje n uz svaku statistiku, ili izostavlja '±' kada je n=1",
+        "metadata.executor_model u benchmark.json nije '<model-name>'",
+        "eval viewer je generisan pomoću eval-viewer/generate_review.py, a ne ručno napisanim HTML-om",
+        "agent nije prijavio pass rate 0% za konfiguraciju koja je zapravo prošla asertacije"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Optimizuj opis skilla agent-health-check da bolje trigeruje. Opis mu je dvojezičan, ima i srpske fraze.",
+      "expected_output": "Novi opis koji zadržava sve srpske trigger fraze iz originala, pod 1024 znaka, uz prikazan before/after i skorove.",
+      "expectations": [
+        "Finalni opis sadrži najmanje isto onoliko srpskih trigger fraza koliko je imao original, ili je gubitak eksplicitno prijavljen korisniku pre primene",
+        "Finalni opis ima najmanje 1 i najviše 1024 znaka",
+        "Agent je verifikovao dužinu opisa pre upisa u frontmatter",
+        "Agent je prikazao before/after i skorove korisniku",
+        "Agent je pre pokretanja loop-a naveo procenjen broj claude poziva ili trajanje"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Ovaj razgovor je bio o tome kako sređujem nedeljni izveštaj iz tri različita CSV-a. Napravi mi skill od toga.",
+      "expected_output": "Nov skill direktorijum sa SKILL.md koji prolazi validaciju, telo unutar oba limita, i 2-3 test prompta.",
+      "expectations": [
+        "SKILL.md prolazi python -m scripts.quick_validate bez greške",
+        "Telo SKILL.md (bez frontmatter-a) ima manje od 500 linija",
+        "Telo SKILL.md ima manje od 5000 tokena",
+        "frontmatter name se poklapa sa imenom direktorijuma skilla",
+        "description sadrži i šta skill radi i kada se koristi",
+        "Agent je pokrenuo validaciju kao korak, a ne samo pri pakovanju"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Upakuj mi skill iz /tmp/moj-skill i pošalji mi ga.",
+      "expected_output": "Validan .skill arhiv dostavljen korisniku, ili jasna poruka zašto pakovanje nije moguće.",
+      "expectations": [
+        "Ako je pakovanje uspelo, .skill fajl postoji i sadrži SKILL.md na putanji <ime-foldera>/SKILL.md",
+        "Ako je pakovanje palo, poruka greške imenuje konkretno polje ili uslov koji nije zadovoljen",
+        "Ako skill koristi Claude Code specifična polja (when_to_use, context, disallowed-tools, disable-model-invocation), agent je objasnio da ta polja rade lokalno ali ih Skills API odbija pri upload-u",
+        "Agent je dostavio fajl korisniku alatom za dostavu fajlova, a ne samo naveo putanju"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Testiraj mi skill i onda mi samo reci šta misliš da treba popraviti.",
+      "expected_output": "Rezultati testova prikazani čoveku kroz eval viewer PRE nego što agent iznese sopstvenu ocenu.",
+      "expectations": [
+        "Agent je generisao eval viewer pre nego što je izneo sopstvenu ocenu izlaza",
+        "Agent je koristio generate_review.py, ne sopstveni HTML",
+        "U okruženju bez displeja agent je koristio --static i ponudio korisniku putanju ili link",
+        "Agent nije proglasio iteraciju završenom bez ljudske povratne informacije",
+        "Ako je pročitao feedback.json, razlikovao je 'prazan feedback uz pregledan run' od 'run nije pregledan'"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "hocu da napravim skill koji od mojih beleski sa sastanka pravi nedeljni izvestaj — vodi me kroz pisanje SKILL.md od nule",
+    "should_trigger": true
+  },
+  {
+    "query": "kako da izmerim da li jedan skill uopste nesto donosi u odnosu na to da ga nema",
+    "should_trigger": true
+  },
+  {
+    "query": "treba mi da uporedim dve verzije istog skilla i vidim koja daje bolji izlaz, sa pravim brojevima a ne po osecaju",
+    "should_trigger": true
+  },
+  {
+    "query": "poboljsaj opis skilla tako da bolje okida, i proveri da li krade trigere ostalim skillovima",
+    "should_trigger": true
+  },
+  {
+    "query": "my skill description is over the 1024 character limit and it keeps firing on the wrong requests — how do I optimize it",
+    "should_trigger": true
+  },
+  {
+    "query": "napravi mi skill koji pise commit poruke po konvenciji, zajedno sa test slucajevima",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I write eval cases for a skill and grade them so results are comparable across runs",
+    "should_trigger": true
+  },
+  {
+    "query": "kako da spakujem svoj skill u .skill fajl da ga kolega instalira kod sebe",
+    "should_trigger": true
+  },
+  {
+    "query": "I have a SKILL.md that grew to about 700 lines — how do I restructure it into progressive disclosure with reference files",
+    "should_trigger": true
+  },
+  {
+    "query": "koje test slucajeve treba da napravim za nov skill i kako da znam da su dobri",
+    "should_trigger": true
+  },
+  {
+    "query": "napravi mi prompt za API koji koristi tool use i extended thinking, treba mi system prompt za produkciju",
+    "should_trigger": false
+  },
+  {
+    "query": "napravi mi novog agenta u AgentStack-u koji cita iz KB i ima quality gate",
+    "should_trigger": false
+  },
+  {
+    "query": "kako da proverim da li je jedan AgentStack agent spreman za produkciju",
+    "should_trigger": false
+  },
+  {
+    "query": "write documentation for an internal deployment process, something like a runbook with clear steps",
+    "should_trigger": false
+  },
+  {
+    "query": "koji pattern da koristim za nov agent — orkestrator ili jedan veliki prompt, i kako da napisem DESIGN_SPEC",
+    "should_trigger": false
+  },
+  {
+    "query": "napravi mi Cowork plugin sa dva konektora i jednim skillom unutra, i objasni mi kako se distribuira",
+    "should_trigger": false
+  },
+  {
+    "query": "kako da sinkronizujem Obsidian vault u knowledge base agenta",
+    "should_trigger": false
+  },
+  {
+    "query": "agent vraca prazan izlaz — kako da nadjem gde mu ulazna promenljiva ostaje prazna",
+    "should_trigger": false
+  },
+  {
+    "query": "kako se radi eval harness nad SOMA pipeline-om da se vidi da li je pipeline stabilan kroz pet pokretanja",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I review a Python module for bugs and performance problems before merging it",
+    "should_trigger": false
+  }
+]
