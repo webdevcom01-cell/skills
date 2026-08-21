@@ -1,0 +1,72 @@
+{
+  "skill_name": "agent-health-check",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš health check po pravilima agent-health-check skilla. Poziv as_find_broken_flows() je vratio ovaj issue u nizu issues: { agent: \"Hook Writer\", severity: \"ERROR\", issue: \"ai_response node ima prazan prompt\", fix: \"Dodaj prompt tekst u node ar_003\" }. U health reportu, u kojoj sekciji (CRITICAL ili WARNING) treba da se prikaže ovaj issue, i koji tekst treba da stoji uz 'Fix:' liniju za njega?",
+      "expected_output": "Issue ide u CRITICAL sekciju, ne WARNING. Pravilo iz skilla (Call 1 — D0 napomena i STEP 4 Dimension D0 mapiranje) kaže da je jedina potvrđena vrednost koja mapira na WARNING doslovno severity: \"WARN\"; svaka druga vrednost (uključujući \"ERROR\", koja nije eksplicitno pomenuta) tretira se konzervativno kao CRITICAL. Fix linija mora da glasi tačno \"Dodaj prompt tekst u node ar_003\" — preuzeto doslovno iz tool odgovora, jer skill eksplicitno zabranjuje da Claude izmišlja ili parafrazira fix komande za D0 (\"D0 fix commands come from the tool, not from Claude\").",
+      "expectations": [
+        "Agent klasifikuje issue kao CRITICAL, ne WARNING",
+        "Agent eksplicitno obrazlaže da je razlog to što je jedina potvrđena WARNING vrednost tačno 'WARN', a 'ERROR' nije ta vrednost pa se tretira konzervativno kao CRITICAL",
+        "Agent NE zaključuje da su 'WARN' i 'ERROR' suštinski isto pa treba WARNING",
+        "Agent koristi fix tekst doslovno iz tool odgovora ('Dodaj prompt tekst u node ar_003'), bez izmene ili sopstvene parafraze"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "U Phase 2 health checka za tri produkcijska agenta, as_list_knowledge_bases je vratio po jednu knowledge bazu za svaki: (1) 'Trend Intelligence' → embeddingStatus: \"processing\"; (2) 'Content Repurposer' → embeddingStatus: \"partial_failure\", statusBreakdown: { ready: 8, pending: 0, processing: 0, failed: 2 }; (3) 'Score Analyzer' → embeddingStatus: \"failed\". Za svakog od ova tri agenta reci: (a) da li je to CRITICAL ili WARNING u finalnom izveštaju, i (b) koji dodatni detalj izveštaj mora da sadrži za taj konkretan slučaj po pravilima skilla.",
+      "expected_output": "Trend Intelligence (processing) → WARNING; izveštaj treba da navede da je stanje privremeno i predloži ponovno pokretanje health checka za ~60 sekundi (tabela u STEP 3: 'Temporary — retry in 60s', i STEP 4 Dimension C: 'For processing: note timestamp and suggest re-running health check in 60s'). Content Repurposer (partial_failure) → WARNING; izveštaj mora da uključi statusBreakdown ({ready:8, pending:0, processing:0, failed:2}) da bi korisnik znao koliko je dokumenata pogođeno (STEP 4 Dimension C: 'For partial_failure: include statusBreakdown in report'). Score Analyzer (failed) → CRITICAL, jer je embedding trajno pokvaren ('Embedding permanently broken' iz tabele u STEP 3) — ovde nema dodatnog obaveznog detalja osim same CRITICAL oznake.",
+      "expectations": [
+        "Trend Intelligence je klasifikovan kao WARNING sa napomenom o ponovnom pokretanju za ~60s",
+        "Content Repurposer je klasifikovan kao WARNING i izveštaj eksplicitno sadrži statusBreakdown brojeve (8 ready, 2 failed)",
+        "Score Analyzer je klasifikovan kao CRITICAL",
+        "Agent ne meša 'processing' i 'partial_failure' sa CRITICAL, niti 'failed' sa WARNING",
+        "Agent ne tretira sva tri slučaja identično bez razlikovanja dodatnih detalja koje pravilo traži"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Dva produkcijska agenta imaju as_list_knowledge_bases rezultat { bases: [], count: 0 } — nijedan nema kreiranu knowledge bazu. Agent 'Master Orchestrator — AI Nekretnine CG': as_inspect_flow(node_type: kb_search) vraća jedan kb_search node u njegovom flow-u. Agent 'eKatastar Data Agent': as_inspect_flow(node_type: kb_search) vraća prazan nodes niz — nema nijedan kb_search node u flow-u. Da li count:0 rezultat treba da se prijavi kao CRITICAL greška za svakog od ova dva agenta, ili samo kao informativna napomena? Obrazloži za svakog posebno.",
+      "expected_output": "Za 'Master Orchestrator' → CRITICAL, jer njegov flow SADRŽI kb_search node (očekuje memoriju) a nema nijednu KB da je opskrbi. Za 'eKatastar Data Agent' → SAMO informativna napomena, NE greška, jer flow uopšte nema kb_search node (agent ne koristi memoriju pa mu ni ne treba KB). Ovo direktno sledi pravilo iz STEP 3: 'If count: 0 ... This is an informational note, NOT an automatic error. Only flag as CRITICAL if the agent's flow also has a kb_search node' — dakle count:0 sam po sebi NIKAD nije dovoljan uslov; mora se kombinovati sa nalazom iz Memory Wiring provere (Dimenzija B).",
+      "expectations": [
+        "Master Orchestrator je flagovan kao CRITICAL",
+        "eKatastar Data Agent NIJE flagovan kao CRITICAL/greška, već samo informativno pomenut",
+        "Agent eksplicitno navodi da odluka zavisi od prisustva kb_search node-a u flow-u (Dimenzija B), a ne samo od count:0 vrednosti (Dimenzija C) posmatrane izolovano",
+        "Agent NE zaključuje da oba agenta automatski dobijaju CRITICAL samo zato što je count:0"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Health check je izvršio ukupno 40 pojedinačnih provera (total_checks = 40). Od toga je 4 provere vratilo CRITICAL, a 8 provera je vratilo WARNING. Po formuli za scoring i tabeli kategorija iz agent-health-check skilla, izračunaj: (a) broj provera koje su prošle (passing_checks), (b) finalni numerički score, i (c) status oznaku (HEALTHY / DEGRADED / AT RISK / CRITICAL) koja ide u liniju 'OVERALL HEALTH' izveštaja.",
+      "expected_output": "passing_checks = 40 - 4 - 8 = 28. score = round((28/40)*100) = round(70.0) = 70. Po tabeli kategorija (STEP 5): 90–100 HEALTHY, 70–89 DEGRADED, 50–69 AT RISK, 0–49 CRITICAL — 70 spada u opseg 70–89, dakle status je DEGRADED, a NE AT RISK (koji počinje tek na 69 i ispod). Konačna linija: '70/100 ⚠️ DEGRADED'.",
+      "expectations": [
+        "Agent tačno računa passing_checks = 28",
+        "Agent tačno računa score = 70",
+        "Agent bira status DEGRADED, ne AT RISK, za score tačno 70",
+        "Agent ne koristi apsolutnu formulu penala pomenutu kao odbačenu u skillu, već relativnu formulu (passing/total*100)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Korisnik traži: 'Uradi health check samo za Score Analyzer agenta.' Po pravilima agent-health-check skilla (sekcija 'Scope override'), odgovori na tri pitanja: (a) Da li Phase 1 pozivi (as_find_broken_flows, as_diagnose_models, as_list_agents) treba da se ograniče samo na Score Analyzer, ili se izvršavaju nad svim agentima kao inače? (b) Dimenzija F (Duplicate Agent Names) izvodi se iz Phase 1 liste agenata — da li treba da uzme u obzir duplikate imena među SVIM agentima u sistemu, ili samo eventualne duplikate koji uključuju Score Analyzer? (c) Koji agent(i) prolaze kroz Phase 2 provere (Memory Wiring i KB Embedding Status)?",
+      "expected_output": "(a) Phase 1 se IZVRŠAVA NAD SVIM AGENTIMA bez obzira na scope override — skill eksplicitno kaže 'Phase 1 always runs on all agents regardless of scope.' (b) Dimenzija F takođe gleda SVE agente iz pune Phase 1 liste, jer je 'derived from Phase 1 base list' koja nije ograničena scope-om — scope override utiče samo na Phase 2. (c) Samo Score Analyzer prolazi Phase 2 (Memory Wiring i KB Embedding Status), jer scope override eksplicitno kaže 'restrict Phase 2 to those agents only'.",
+      "expectations": [
+        "Agent zaključuje da Phase 1 pozivi ostaju nad svim agentima, ne samo Score Analyzer-om",
+        "Agent zaključuje da Dimenzija F (duplikati) i dalje pokriva sve agente u sistemu, ne samo Score Analyzer-a",
+        "Agent zaključuje da SAMO Score Analyzer prolazi kroz Phase 2 (Memory Wiring + KB Embedding)",
+        "Agent NE tvrdi da i Phase 1 treba suziti samo na Score Analyzer-a"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Memory Wiring provera za agenta 'Due Diligence Agent — AI Nekretnine CG' otkriva: as_inspect_flow(node_type: kb_search) vraća jedan kb_search node čiji je knowledgeBaseId prazan string. Zatim as_list_knowledge_bases(agent_name: 'Due Diligence Agent — AI Nekretnine CG') vraća { bases: [], count: 0 } — agent nema nijednu kreiranu knowledge bazu. Koji tačno tekst treba da stoji uz 'Fix:' liniju za ovaj Memory Wiring issue u izveštaju, i da li je dozvoljeno da agent sam smisli/pretpostavi neki knowledgeBaseId (npr. 'kb_default_001') da bi popunio as_patch_node_field komandu?",
+      "expected_output": "Nije dozvoljeno izmišljati knowledgeBaseId. Pošto as_list_knowledge_bases nije vratio nijednu KB za ovog agenta, ne postoji stvaran ID koji bi se mogao ubaciti u as_patch_node_field komandu, pa pravilo iz STEP 4 Dimenzija B eksplicitno nalaže: 'If no KB exists for the agent → flag as: \"Manual fix required: create KB first, then set knowledgeBaseId\"'. Ovo je pojačano i Constraint-om #1 skilla ('No invented data... every KB ID... must come from a real MCP tool response... Never use IDs from memory or previous sessions'), pa bilo kakav izmišljen ID poput 'kb_default_001' je direktno kršenje pravila.",
+      "expectations": [
+        "Agent klasifikuje issue kao CRITICAL Memory Wiring problem (Dimenzija B) zbog praznog knowledgeBaseId",
+        "Fix tekst je tačno 'Manual fix required: create KB first, then set knowledgeBaseId', a ne as_patch_node_field komanda sa konkretnim ID-jem",
+        "Agent eksplicitno kaže da NIJE dozvoljeno izmišljati knowledgeBaseId, pozivajući se na pravilo o zabrani izmišljenih podataka",
+        "Agent ne predlaže placeholder vrednost tipa 'kb_default_001' ili sličnu kao da je stvarna"
+      ]
+    }
+  ]
+}

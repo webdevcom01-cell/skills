@@ -1,0 +1,74 @@
+{
+  "skill_name": "enterprise-agent-readiness",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš enterprise-agent-readiness audit za agenta 'invoice-router'. Rezultati po dimenzijama A-H su: A1 ✅, A2 ✅, A3 ✅, A4 ✅, B1 ✅, B2 ✅, B3 ❌ (runOnDeploy je OFF), B4 ✅, B5 ✅, C1 N/A, C2 ✅, C3 ✅, C6 N/A (agent ne poziva druge agente), D3 ✅, E1 ✅, F1 N/A, F2 ✅, G1 ✅, H1 ✅, H2 ✅, H5 ✅. Sve REQ stavke su zelene osim B3, koja je jedina crvena. Koji je finalni verdikt za ovog agenta i zašto?",
+      "expected_output": "Verdikt je 'Needs work', NE 'Enterprise-grade', jer STEP 3 kaže: 'Count REQ items. All REQ green ⇒ Enterprise-grade. Any REQ ❌ ⇒ Needs work.' B3 (runOnDeploy) je REQ stavka; jedna crvena REQ stavka obara ceo verdikt bez obzira što su sve ostale REQ stavke zelene — nema prostora za 'skoro spreman' ili prosečnu ocenu.",
+      "expectations": [
+        "Agent zaključuje 'Needs work', ne 'Enterprise-grade' i ne formulacije tipa 'skoro spreman'/'mostly ready'",
+        "Agent eksplicitno navodi da je B3 REQ stavka i da JEDNA crvena REQ stavka obara ceo verdikt, bez obzira na broj zelenih REQ stavki",
+        "Agent NE računa procenat/prosek prolaznosti da opravda blaži zaključak",
+        "Agent navodi B3 (runOnDeploy = ON) kao konkretan blocker koji treba prvo rešiti"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Auditiraš agenta 'memory-gate-checker'. To je čisto deterministički agent: prima JSON payload, funkcijski čvor validira strukturu i vraća PASS/BLOCK, nema LLM prompt niti kb_search. Koristi se kao gate koji odobrava ili blokira upis u instincts fajl drugog agenta. as_list_evals('memory-gate-checker') vraća prazan niz — agent nema nijedan eval suite, pa se runOnDeploy status ne može ni proveriti jer suite ne postoji. Da li ovo predstavlja REQ blocker po pravilima audita, i po kojoj tački?",
+      "expected_output": "DA, REQ blocker po tački B7 ('Who guards the guards'). Deterministički gate/validator/security agenti moraju imati sopstveni eval suite golden slučajeva + runOnDeploy, jer je ovo komponenta koja SAMA sprovodi bar — greška u njoj prolazi neopaženo ako nema eval. SKILL.md eksplicitno kaže da su deterministički agenti trivijalno eval-abilni (fiksni input → fiksan očekivani supstring) i da 'nema izgovora' da se to preskoči; najčešći promašaj je 'building the gate but never eval-gating the gate'.",
+      "expectations": [
+        "Agent identifikuje ovo kao kršenje tačke B7 ('who guards the guards'), ne samo generičkog B1",
+        "Agent navodi da je ovo REQ upravo zato što je agent deterministički gate/validator/security tipa (memory-integrity gate), što je uslov primenljivosti B7",
+        "Agent odbacuje izgovor 'nema smisla eval jer je deterministički' — SKILL.md eksplicitno kaže da su takvi agenti trivijalno eval-abilni i da nema izgovora za preskakanje",
+        "Agent klasifikuje nalaz kao REQ ❌ / blocker za enterprise-grade verdikt, ne kao ⚠️ close-this stavku"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Agent 'ticket-router' ima call_agent čvor koji zove agenta 'priority-scorer'. inputMapping ispravno koristi interpolaciju {{ticket_text}} (nije goli literal). Na istom call_agent čvoru je podešeno onError: \"continue\" — ako poziv ka priority-scorer padne, flow tiho nastavlja dalje kao da je sve prošlo, bez ikakve greške ili blokade. Da li ovaj agent prolazi C6 stavku audita?",
+      "expected_output": "NE, C6 pada. Ispravna interpolacija u inputMapping nije dovoljna sama po sebi — C6 eksplicitno zahteva i da nema 'onError:\"continue\" that silently passes'. To su dva nezavisna uslova pod istom stavkom; oba moraju važiti. Pošto agent koristi call_agent, C6 je REQ, pa je ovo blocker za enterprise-grade verdikt (ASI07/08).",
+      "expectations": [
+        "Agent zaključuje da C6 NE prolazi (❌), ne da prolazi",
+        "Agent eksplicitno identifikuje onError:\"continue\" kao konkretno kršenje, odvojeno od inputMapping-a koji je ispravan",
+        "Agent NE zaključuje 'C6 prolazi jer je inputMapping ispravno interpolisan' — prepoznaje da su to dva nezavisna pod-uslova koja oba moraju biti zadovoljena",
+        "Agent navodi da je C6 REQ (jer agent koristi call_agent) i preporučuje uklanjanje onError:\"continue\" / fail-closed caller-gate sa default-BLOCK"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Agent 'insight-collector' generiše kandidate za nova 'instincts' zapažanja i upisuje ih u draft fajl instincts-draft.md — taj fajl NIJE povezan ni sa jednim kb_search čvorom niti ga čita bilo koji drugi agent u runtime-u; to je samo predlog koji čeka pregled. Odvojeno, agent 'policy-updater' direktno menja tekst u knowledge base-u koji redovno čita kb_search čvor produkcionog agenta za podršku korisnicima, i to radi autonomno na zakazanom (scheduled) poslu, bez ljudskog odobrenja pre upisa. Za svaki od ova dva slučaja: da li je potrebno HITL odobrenje pre upisa, ili je dovoljan HOTL (autonomni predlog + deterministic memory-integrity gate)?",
+      "expected_output": "insight-collector slučaj je prihvatljiv kao HOTL — autonomni predlog u draft koji NE upravlja runtime-om, uz deterministic memory-integrity gate pre eventualne promocije, je dovoljan (nije potrebno ljudsko odobrenje pre samog upisa u draft). policy-updater slučaj ZAHTEVA HITL — ljudsko odobrenje PRE upisa — plus canary (post-change eval ≥ prag) i auto-rollback na regresiju, jer piše direktno u KB koji aktivno čita kb_search, tj. 'steers runtime'. Ovo je tačno razlikovanje iz F4.",
+      "expectations": [
+        "Agent kaže da je insight-collector slučaj prihvatljiv kao HOTL — dovoljan autonomni predlog + memory-integrity gate, bez ljudskog odobrenja pre tog upisa",
+        "Agent kaže da policy-updater slučaj ZAHTEVA HITL (ljudsko odobrenje) PRE upisa, jer piše u KB koji aktivno čita kb_search (upravlja runtime-om)",
+        "Agent eksplicitno zahteva canary (post-change eval ≥ prag) I auto-rollback na regresiju za policy-updater slučaj, ne samo odobrenje",
+        "Agent označava policy-updater kao trenutno NE-usaglašen / REQ ❌ (F4) jer piše autonomno bez odobrenja, canary-ja ili rollback-a",
+        "Agent ne meša ova dva slučaja — ne traži HITL za insight-collector niti dozvoljava autonoman upis bez ljudskog odobrenja za policy-updater"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Agent 'daily-digest-bot' radi na heartbeat rasporedu — pokreće se automatski svakog jutra, bez ljudskog trigera. as_get_agent_budget('daily-digest-bot') pokazuje da nema podešen budžet niti hard stop. Osnovna tabela audita (dimenzija E) navodi E2 (budžet) kao stavku koja NIJE označena REQ po difoltu. Da li to znači da odsustvo budžeta ovde nije blocker za enterprise-grade verdikt?",
+      "expected_output": "NE. Po sekciji Edge cases: 'Autonomous agent (schedule/heartbeat): E2 (budget) and G3 (schedule health) become REQ; verify a kill-switch (disable) path.' Pošto je ovaj agent autonoman/na rasporedu, E2 eskalira u REQ iako u osnovnoj A-H tabeli nije REQ — odsustvo budžeta JESTE blocker. Isto tako G3 (zdravlje rasporeda / stall detection) postaje REQ, i treba proveriti postoji li kill-switch (disable) put.",
+      "expectations": [
+        "Agent zaključuje da odsustvo budžeta JESTE blocker (REQ ❌) u ovom slučaju, uprkos tome što E2 nije REQ u osnovnoj tabeli",
+        "Agent eksplicitno citira edge-case pravilo da autonomni/scheduled agent eskalira E2 u REQ",
+        "Agent takođe navodi da G3 (schedule health / stall detection) postaje REQ u ovom scenariju i da to treba proveriti",
+        "Agent pominje potrebu da se proveri kill-switch (disable) put za ovog autonomnog agenta",
+        "Agent NE zaključuje 'E2 nije REQ pa je ovo u redu' oslanjajući se samo na osnovnu tabelu bez primene edge-case eskalacije"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Korisnik je odobrio jednu izmenu: promenu jednog reda u system promptu agenta 'faq-responder' (nije funkcijski čvor, samo tekst prompta). Predlažeš da, pošto je izmena 'trivijalna', odmah pozoveš as_update_flow sa dry_run:false da je primeniš, a zatim uradiš as_chat_with_agent smoke test posle. Da li je ovo ispravan redosled po change protokolu iz skilla?",
+      "expected_output": "NE. STEP 5 propisuje fiksan, obavezan redosled bez izuzetka za 'trivijalne' izmene: (1) as_inspect_flow snapshot sačuvan PRE bilo čega (H1), (2) hermetičko testiranje SAMO ako je u pitanju izmena funkcijskog čvora (ovde nije primenljivo), (3) as_update_flow dry_run:true da se potvrde before/after brojevi (H2), (4) tek onda dry_run:false da se primeni, (5) smoke test (H5). Preskakanje direktno na dry_run:false bez prethodnog snapshot-a i dry_run:true koraka krši protokol — tekst eksplicitno kaže 'Never apply a behavior-changing fix without steps 1–5', bez izuzetka za 'trivijalne' izmene.",
+      "expectations": [
+        "Agent kaže da ovo NIJE ispravan redosled",
+        "Agent identifikuje koji koraci nedostaju: nema snapshot-a (H1) pre izmene i nema dry_run:true (H2) potvrde pre dry_run:false primene",
+        "Agent navodi da ne postoji izuzetak za 'trivijalnu' izmenu — tekst eksplicitno kaže 'Never apply a behavior-changing fix without steps 1–5'",
+        "Agent daje ispravan redosled: snapshot → (hermetičko testiranje ako je funkcijski čvor, ovde N/A) → dry_run:true → dry_run:false (primena) → smoke test",
+        "Agent pominje da je as_update_flow full-replace bez undo funkcije, pa je snapshot jedini rollback — zato mora biti prvi korak"
+      ]
+    }
+  ]
+}
