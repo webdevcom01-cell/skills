@@ -1,0 +1,76 @@
+{
+  "skill_name": "roast",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Uradi roast ove ideje: hoću vikendom da šetam pse komšijama koje već poznajem, za 20 dolara po šetnji, kao dodatnu zaradu.",
+      "expected_output": "Pošto je ulaz jednolinijski i jasno nisko-rizičan, agent bira LITE režim (pravilo iz Faze 1, korak 5: 'For a one-line or clearly low-stakes input, run LITE (the 3 most relevant personas + a short verdict, skip or compress the steelman)'), a ne FULL. Korišćene personas odgovaraju weighting pravilu za business ulaz (Skeptic/Customer/Operator/Researcher vode), kritike su falsifikabilne u obliku 'X fails if/because Y', i dat je jasan verdikt (GO/GO-IF/NO-GO).",
+      "expectations": [
+        "Agent eksplicitno pokreće LITE režim (ne svih šest persona) jer je ulaz jednolinijski i nisko-rizičan, u skladu sa pravilom izbora režima iz Faze 1",
+        "Personas koje govore pripadaju vodećem skupu za business klasifikaciju (Skeptic, Customer, Operator, Researcher), a ne Architect/Pre-mortem-vođenom izboru",
+        "Svaka kritika je formulisana falsifikabilno, u obliku 'X fails if/because Y', a ne kao uopštena briga poput 'ovo je rizično'",
+        "Steelman deo je izostavljen ili sažet (LITE dozvoljava 'skip or compress the steelman'), a ne dat u punoj formi",
+        "Odgovor sadrži eksplicitan verdikt (GO / GO-IF / NO-GO)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Uradi roast ovog tehničkog plana: tokom sledećeg kvartala selimo naš monolitni Rails sistem na mikroservise, deleći ih po domenskim granicama, koristeći Kafku za komunikaciju između servisa, a radi na tome tim od 4 inženjera koji istovremeno mora da isporučuje redovne feature-e.",
+      "expected_output": "Pošto je ulaz suštinski tehnički plan i nije nisko-rizičan one-liner, agent pokreće FULL režim (svih šest personas + steelman + sinteza). Klasifikuje ulaz kao technical, pa po weighting pravilu vode Operator, Researcher, Architect i Pre-mortem — ali pravilo eksplicitno kaže da 'In FULL mode all six still speak, even if briefly', pa se i Skeptic i Customer moraju čuti. Hard rule o neslaganju ('The personas MUST clash on at least one point') mora biti ispoštovano, a Faza 4 sinteza mora ići tačno redosledom: verdikt → top 3 potencijalno fatalne mane → najrizičnija pretpostavka → kill-criteria → dokaz koji bi promenio verdikt → najjeftiniji sledeći test.",
+      "expectations": [
+        "Agent klasifikuje ulaz kao technical (ili hybrid) i to eksplicitno navodi",
+        "Svih šest persona (Skeptic, Customer, Operator, Researcher, Architect, Pre-mortem) se pojavljuje i govori, čak i ako Operator/Researcher/Architect/Pre-mortem nose glavninu kritike",
+        "Postoji bar jedna eksplicitna tačka neslaganja/sukoba između dve persone",
+        "Svaka kritika je oblika 'X fails if/because Y'",
+        "Faza 4 sinteza se pojavljuje tačno ovim redosledom: verdikt, top 3 fatalne mane, najrizičnija pretpostavka, kill-criteria, dokaz koji bi promenio verdikt, najjeftiniji sledeći test"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Uradi roast ovog biznis plana. Napomena: trenutno nemaš pristup web pretrazi. Pokrećemo pretplatnički box artizanalnih kafa zrna za milenijalce; tržište specialty kafe je ogromno i brzo raste, i nijedan postojeći konkurent u pretplatničkim kafa-boxovima ne kurira ponudu tako dobro kao što ćemo mi.",
+      "expected_output": "Pošto agent nema pristup web pretrazi, hard rule 'Never fabricate. If web search is unavailable, do NOT invent market sizes, competitor names, statistics, or benchmarks. Label them [assumption] and state what would need to be verified' se primenjuje direktno: tvrdnje o veličini tržišta i o konkurenciji moraju biti označene [assumption], a ne izmišljen konkretan broj ili ime konkurenta. Sve market/competitive/technical tvrdnje moraju biti tagovane [fact] ili [assumption] po pravilu 'Separate fact from assumption'.",
+      "expectations": [
+        "Svaka tržišna, konkurentska ili tehnička tvrdnja je eksplicitno označena sa [fact] ili [assumption]",
+        "Pošto je eksplicitno rečeno da web pretraga nije dostupna, agent ne izmišlja konkretne brojke veličine tržišta, imena konkurenata niti statistiku",
+        "Tvrdnja 'tržište je ogromno i brzo raste' i tvrdnja 'nijedan konkurent ne kurira tako dobro' su označene kao [assumption], ne iznete kao činjenica",
+        "Agent navodi šta bi trebalo proveriti da bi se te pretpostavke potvrdile",
+        "Odgovor ne počinje pohvalom ili ublaženim uvodom pre kritike (no flattery, no hedged openers)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Uradi roast ovog plana: naš IT tim želi da premesti lozinke za svih 40 zaposlenih sa deljenog Excel fajla na 1Password, etabliran komercijalni menadžer lozinki. Budžet je već odobren i ugovor sa dobavljačem je potpisan.",
+      "expected_output": "Ovo je relativno solidna, nisko-rizična ideja, pa hard rule 'Name a fatal flaw. Identify at least one plausibly fatal flaw, OR explicitly argue why none exists. Never silently skip this' postaje ključni test — agent mora ili imenovati fatalnu manu ili eksplicitno argumentovati da je nema, nikako prećutno preskočiti tu tačku. Takođe, pravilo 'The verdict may be GO' znači da agent ne sme automatski da forsira NO-GO samo zato što je format 'roast'. Faza 4 mora ići tačnim redosledom: verdikt → top 3 mane → najrizičnija pretpostavka → kill-criteria → dokaz koji bi promenio verdikt → najjeftiniji sledeći test, pri čemu je poslednja stavka opisana kao najvrednija linija celog izlaza.",
+      "expectations": [
+        "Agent eksplicitno ili imenuje bar jednu potencijalno fatalnu manu, ili eksplicitno argumentuje zašto nijedna ne postoji — ne preskače ovu tačku ćutke",
+        "Faza 4 sinteza ide tačno ovim redosledom: verdikt, top 3 mane, najrizičnija pretpostavka, kill-criteria, dokaz koji bi promenio verdikt, najjeftiniji sledeći test",
+        "Verdikt nije automatski NO-GO samo zato što je u pitanju roast — GO je dozvoljen ishod ako je opravdan",
+        "Predloženi 'najjeftiniji sledeći test' je konkretna, izvodljiva akcija u roku od otprilike nedelju dana, a ne uopštena preporuka",
+        "Prisutna je bar jedna tačka neslaganja među personama i pored toga što je plan uglavnom solidan"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Evo finalnog teksta za landing page koji smo već objavili prošlog meseca. Ne želim nikakvu stratešku kritiku niti nove ideje — samo hoću da doteraš gramatiku i skratiš par rečenica da zvuče oštrije. Molim te nemoj dovoditi u pitanje strategiju, to je gotovo i live je.",
+      "expected_output": "SKILL.md eksplicitno kaže: 'Do NOT use for finished-work review where the user only wants polish... or for emotional support' i u sekciji 'When this runs': 'If they only want polish on finished work, or emotional support, this is the wrong tool; say so briefly instead of roasting.' Pošto korisnik traži samo jezičko doterivanje već objavljenog, gotovog teksta i eksplicitno odbija stratešku kritiku, agent treba kratko da kaže da roast/council proces ovde nije odgovarajući alat, umesto da svejedno pokreće šest persona i verdikt.",
+      "expectations": [
+        "Agent prepoznaje da je ovo zahtev za doterivanje već završenog, objavljenog materijala, a ne zahtev za kritiku ideje pre nego što se u nju uloži vreme/novac",
+        "Agent ne pokreće šest-personalni council, faze roasta niti GO/GO-IF/NO-GO verdikt",
+        "Agent eksplicitno i kratko navodi da roast nije odgovarajući alat za ovaj zahtev, umesto da ipak nastavi sa roastovanjem",
+        "Agent ne izmišlja fatalne mane niti nameće verdikt na zahtev koji je samo lektura teksta"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Uradi roast ovoga: zamenićemo našu produkcionu bazu podataka potpuno novim database engine-om koji je jedan junior inženjer napisao od nule tokom jednog vikenda, i odmah prebacujemo sav korisnički saobraćaj na nju, bez plana za rollback.",
+      "expected_output": "Pravilo iz Faze 1 zahteva da agent prvo 'Mirror it back. Restate the idea in 2–3 lines' i onda 'Surface hidden assumptions. List the 3–7 things the idea silently depends on being true.' Iako je ideja očigledno katastrofalna, hard rule 'Disagree. The personas MUST clash on at least one point. If all six agree, you're running one voice in six costumes — push them apart' i dalje važi — agent ne sme dozvoliti da svih šest persona samo ponavlja identičan prigovor. Takođe mora imenovati bar jednu fatalnu manu (hard rule 'Name a fatal flaw'), a Faza 4 mora sadržati najjeftiniji sledeći test opisan kao izvodljiv u roku od nedelju dana.",
+      "expectations": [
+        "Agent na početku prepričava ideju u otprilike 2-3 reda pre nego što počne kritiku",
+        "Agent nabraja između 3 i 7 skrivenih pretpostavki od kojih ideja zavisi",
+        "I pored toga što je ideja očigledno loša, prisutna je bar jedna eksplicitna tačka neslaganja/napetosti između dve persone, a ne šest persona koje ponavljaju isti prigovor",
+        "Bar jedna fatalna mana je eksplicitno imenovana",
+        "Faza 4 sinteza sadrži najjeftiniji sledeći test koji korisnik može da uradi za manje od nedelju dana, opisan konkretno i izvodljivo"
+      ]
+    }
+  ]
+}
