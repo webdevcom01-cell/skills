@@ -1,0 +1,74 @@
+{
+  "skill_name": "obsidian-knowledge-logger",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "U trenutnoj sesiji dostupna su dva alata koja mogu da upisuju u Obsidian vault korisnika: (a) MCP server 'obsidian-mcp' sa alatkama za kreiranje, pretragu i čitanje nota, i (b) generički alat za rad sa fajl sistemom koji ima direktan pristup folderu vaulta na disku (npr. može da piše .md fajlove direktno u '~/Vault/'). Korisnik kaže: 'Sačuvaj ovo kao concept notu o REST API-ju.' Koji od ova dva alata treba da koristiš za upis note, i zašto? Da li je prihvatljivo koristiti direktan pristup fajl sistemu jer je 'jednostavniji' ili 'već dostupan'?",
+      "expected_output": "Treba koristiti dedicated Obsidian MCP server ('obsidian-mcp'), ne direktan filesystem pristup — sekcija 'Choosing the tool at runtime' propisuje strog redosled prioriteta: dedicated Obsidian MCP server > Local REST API > direct filesystem, bez obzira na to koliko je filesystem pristup naizgled jednostavniji ili pogodniji.",
+      "expectations": [
+        "Agent bira MCP server ('obsidian-mcp') kao primarni alat za upis note, ne filesystem pristup",
+        "Agent eksplicitno navodi ili parafrazira redosled prioriteta iz sekcije 'Choosing the tool at runtime' (dedicated MCP server > Local REST API > direct filesystem)",
+        "Agent odbacuje tvrdnju da je filesystem pristup prihvatljiv samo zato što je 'jednostavniji' ili 'već dostupan' — izbor alata se određuje rangom, ne pogodnošću",
+        "Agent ne predlaže da se oba alata koriste paralelno ili da se korisnik pita koji od njih preferira, kada je redosled prioriteta jasno propisan"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Korisnik traži da se nova 'concept' nota sačuva pod nazivom 'mcp-protocol-overview.md' u folderu Concepts/. Pri proveri se ispostavi da u tom folderu već postoji fajl sa tačno tim imenom. Agent o tome obavesti korisnika i ponudi tri opcije (apend na postojeću notu, sačuvati kao '-2' varijantu, ili preimenovati), a korisnik odgovori samo: 'svejedno mi je, ti odluči' i ništa dalje ne precizira. Da li agent sme da tiho prepiše postojeći fajl, i koja je ispravna podrazumevana (default) akcija u ovoj situaciji?",
+      "expected_output": "Agent ne sme tiho da prepiše postojeći fajl; pošto je korisnik obavešten o konfliktu a nije precizirao izbor, sekcija 'Filename convention' propisuje eksplicitan default: sačuvati kao '-2' varijantu, odnosno 'mcp-protocol-overview-2.md'.",
+      "expectations": [
+        "Agent ne prepisuje (overwrite) postojeći fajl 'mcp-protocol-overview.md' bez najave",
+        "Agent potvrđuje da je korisnik već unapred obavešten o konfliktu imena pre bilo kakvog upisa",
+        "Pošto korisnik nije precizirao izbor, agent bira default akciju definisanu u SKILL.md: čuva notu kao 'mcp-protocol-overview-2.md'",
+        "Agent ne bira apendovanje ili preimenovanje kao podrazumevanu akciju kada korisnik to nije eksplicitno tražio"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Agent priprema frontmatter za novu 'insight' notu. Korisnik je u ranijim notama već više puta koristio tag 'agent-orchestration'. Predloženi frontmatter za novu notu glasi: tags: [#ai, #agent_orchestration, #llm, #performance, #cost, #latency, #production]. Nabroj SVE probleme sa ovim frontmatter blokom po pravilima skilla (sekcija 'Tagging guidelines'), i predloži ispravnu verziju.",
+      "expected_output": "Frontmatter krši tri odvojena pravila iz sekcije 'Tagging guidelines': (1) '#' prefiks u YAML frontmatter-u kvari tagove — '#' je Obsidian-ova sintaksa za inline tagove u telu note, ne u frontmatter-u; (2) lista ima 7 tagova, a preporučeni raspon je 2-5 tagova po noti ('more becomes noise'); (3) 'agent_orchestration' (snake_case) je novi, nekonzistentan oblik umesto ponovne upotrebe postojećeg 'agent-orchestration' (kebab-case) koji je korisnik već koristio.",
+      "expectations": [
+        "Agent identifikuje '#' prefiks u frontmatter tagovima kao grešku koja pravi 'broken tags'",
+        "Agent identifikuje da 7 tagova prekoračuje preporučeni raspon od 2-5 tagova po noti",
+        "Agent identifikuje da 'agent_orchestration' treba zameniti postojećim tagom 'agent-orchestration' umesto uvođenja novog, nekonzistentnog oblika",
+        "Ispravljena verzija koju agent predlaže nema '#' prefiks i ima između 2 i 5 tagova",
+        "Agent pominje da bi jedan tag trebalo da bude širi domenski tag (npr. 'ai'), a ostali specifičniji, u skladu sa vodičem za tagovanje"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Korisnik pošalje samo link (npr. 'https://example.com/some-article') bez ikakvog pastovanog teksta i kaže: 'sačuvaj ovo'. U trenutnoj sesiji NIJE dostupan nijedan alat koji može da otvori i pročita sadržaj web stranice (nema web-fetch alata). Da li agent sme da napiše 'Summary' i 'Key takeaways' sekcije pogađajući sadržaj na osnovu samog URL-a (npr. imena domena i putanje u linku), i ako ne, koje su ispravne opcije po pravilima skilla?",
+      "expected_output": "Agent ne sme da fabrikuje Summary/Key takeaways na osnovu samog URL-a — sekcija 'Edge cases' to eksplicitno zabranjuje jer bi to proizvelo notu koja zvuči uverljivo ali može pogrešno predstaviti izvor, 'worse than no note'. Pošto fetch alat nije dostupan, preostale ispravne opcije po redosledu preferencije su: pitati korisnika za jednorečeničan summary i 2-3 key takeaways-a, ili sačuvati stub notu sa URL-om u frontmatter-u i praznim Summary/Key takeaways poljima uz TODO marker — uz obavezno objašnjenje korisniku šta je urađeno i zašto.",
+      "expectations": [
+        "Agent eksplicitno odbija da izmisli Summary/Key takeaways na osnovu samog URL-a",
+        "Agent prepoznaje da opcija 'fetch stranice' otpada jer web-fetch alat nije dostupan u ovoj sesiji",
+        "Agent bira jednu od preostalih opcija: pitati korisnika za summary/takeaways, ili sačuvati stub notu sa TODO markerom",
+        "Agent navodi da mora korisniku da objasni šta je uradio i zašto, u skladu sa uputstvom 'tell the user what you did and why'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Korisnik je pre nekoliko nedelja sačuvao 'decision' notu 'Decision: use-typescript-for-agent-orchestration.md', sa popunjenim sekcijama Choice i Reasoning koje objašnjavaju zašto je izabran TypeScript. Danas korisnik kaže: 'Predomislio sam se, prelazimo na Python za orchestration — ažuriraj tu odluku.' Opiši ispravnu proceduru za ovu izmenu po pravilima skilla, i navedi konkretno šta se NE sme uraditi.",
+      "expected_output": "Sekcija 'Updating an existing note' (tačka 5) eksplicitno zabranjuje tiho prepisivanje kada korisnik menja mišljenje o odluci. Ispravno: prvo pronaći notu (pretraga po imenu/temi), zatim je pročitati pre bilo kakve izmene (nikad blind-write), pa promenu zabeležiti kroz novu sekciju '## Reversal <YYYY-MM-DD>' koja objašnjava promenu, ili postavljanjem 'status: revisiting' — u oba slučaja originalno TypeScript obrazloženje ostaje sačuvano. Frontmatter se ažurira dodavanjem 'modified: <YYYY-MM-DD>', dok se 'created' ne menja jer je istorijsko. NE sme se: direktno prepisati Choice/Reasoning sekcije da odražavaju Python, brišući originalno obrazloženje.",
+      "expectations": [
+        "Agent navodi da notu treba prvo pronaći, pa pročitati pre izmene (read-before-edit, nikad blind-write)",
+        "Agent eksplicitno zabranjuje tiho prepisivanje polja Choice/Reasoning da odražavaju novu odluku",
+        "Agent predlaže dodavanje '## Reversal <datum>' sekcije ili postavljanje 'status: revisiting' kao ispravan mehanizam, uz očuvanje originalnog TypeScript obrazloženja",
+        "Agent pominje ažuriranje 'modified' polja bez menjanja postojećeg 'created' polja",
+        "Agent eksplicitno imenuje 'samo prepisati Choice sekciju na Python' kao pogrešan pristup"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Korisnik u toku razgovora kaže: 'Sačuvaj ovo: shvatio sam da timeout treba da bude exponential backoff umesto fiksnog intervala — testirao sam oba na produkciji i backoff je smanjio broj retry-ja za 80%.' Korisnik NIJE rekao 'samo sačuvaj' niti 'ne pitaj, samo uradi'. Odgovori na dva nezavisna pitanja: (A) Da li agent treba da pita korisnika koji je od 6 tipova nota u pitanju, nabrajajući sve tipove? (B) Da li agent sme da preskoči predlaganje naziva fajla i foldera pre pisanja (korak 3), i preskoči potvrdu šta je sačuvano na kraju (korak 5)?",
+      "expected_output": "Dva nezavisna uslova iz radnog toka: preskakanje koraka 2 (potvrda tipa) zavisi od toga da li je tip očigledan iz sadržaja — ovde jeste ('insight': lična realizacija iz testiranja, 'shvatio sam da...'), pa se pitanje preskače bez nabrajanja svih 6 tipova. Preskakanje koraka 3 i 5 zavisi isključivo od eksplicitne korisnikove fraze ('samo sačuvaj' / 'ne pitaj, samo uradi'), koja ovde NIJE izgovorena, pa ta dva koraka ostaju obavezna — ispunjenje uslova za preskakanje koraka 2 ne podrazumeva ispunjenje uslova za preskakanje koraka 3 i 5.",
+      "expectations": [
+        "Agent zaključuje da je tip note 'insight' i da se pitanje o tipu preskače jer je očigledan iz sadržaja, bez nabrajanja svih 6 tipova",
+        "Agent NE preporučuje preskakanje koraka 3 (predlog naziva/foldera) u ovom scenariju, jer korisnik nije izgovorio eksplicitnu frazu",
+        "Agent NE preporučuje preskakanje koraka 5 (potvrda šta je sačuvano) u ovom scenariju, iz istog razloga",
+        "Agent eksplicitno razdvaja uslov za preskakanje koraka 2 od uslova za preskakanje koraka 3 i 5 kao dva nezavisna uslova",
+        "Agent ne predlaže nabrajanje svih šest tipova nota korisniku"
+      ]
+    }
+  ]
+}

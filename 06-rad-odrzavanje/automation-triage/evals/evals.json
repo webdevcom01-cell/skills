@@ -1,0 +1,72 @@
+{
+  "skill_name": "automation-triage",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Konsultant je upravo završio discovery poziv sa klijentom (kol-centar za korisničku podršku) i radi prvi, brzi prolaz (sito od četiri polja) kroz zadatke koje je tim naveo. Jedan zadatak: 'ručno gašenje eskalacija koje podrška dobije od ljutih klijenata', who=podrška, how-many=4 osobe, frequency-band=weekly, who-notices='niko, dok klijent ne raskine ugovor i menadžment ne vidi churn izveštaj na kraju kvartala'. Konsultant, videvši koliko je taj who-notices signal loš (kasna i skupa detekcija greške), zaključuje: 'Ovo je toliko rizično da ću ga odmah označiti REFUSE i preskočiti drugi prolaz — nema smisla trošiti deset polja na nešto što očigledno ne treba automatizovati.' Da li je konsultantov postupak ispravan prema pravilima prvog prolaza (sita)? Ako nije, koji je ispravan ishod sita za ovaj zadatak i zašto?",
+      "expected_output": "Konsultantov postupak je pogrešan. Sito (prvi prolaz) sme da vrati samo DROP ili ADVANCE i nikada ne sme da izrekne verdikt poput REFUSE — to je eksplicitno pravilo koraka 2 ('The sieve may only DROP or ADVANCE. It may never reach a verdict.'). Jedini uslov koji u situ vodi ka DROP je frequency-band == 'rarely'; ovde je frequency-band 'weekly', pa je jedini ispravan ishod ADVANCE. Loš who-notices signal je vredna informacija, ali ona treba da uđe u drugi prolaz (gde utiče na verifiability/error-cost), a ne da preskoči deset polja koja, prema tekstu skilla, čak i zadatak za koji se sumnja da treba odbiti — zaslužuje ('A client told do not automate this deserves the ten fields behind it, not four').",
+      "expectations": [
+        "Agent eksplicitno kaže da je konsultantov postupak (direktan REFUSE iz sita) pogrešan",
+        "Agent navodi da sito sme vratiti samo DROP ili ADVANCE, nikad pun verdikt (REFUSE/BUILD/TRAIN/WATCH)",
+        "Agent prepoznaje da je jedini uslov za DROP u situ frequency-band == 'rarely', i da 'weekly' to ne zadovoljava, pa je ispravan ishod ADVANCE",
+        "Agent objašnjava da loš who-notices signal treba da se koristi u drugom prolazu (deset polja), a ne da opravda preskakanje tog prolaza"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Tim za prodaju je na pozivu opisao zadatak: 'prepoznavanje koji potencijalni kupci deluju spremni da potpišu ugovor ovog meseca'. Kada ih konsultant pita odakle taj signal dolazi, odgovor je: 'Mi to zapravo nigde ne beležimo — nema polja u CRM-u, nema beleške, nema nikakvog traga; prodavci prosto znaju kad znaju, i to se ne zapisuje nigde, čak ni u razgovoru sa kolegama.' Zadatak je prošao sito (ADVANCE) i sada je u drugom prolazu ocenjen ovako: data-access = 0 (ulazi ne postoje ni u kom obliku), error-cost = low (ako pogreše, prodavac samo ponovo proveri i ništa se stvarno ne gubi), verifiability = 1 (postoji gruba jednorečenična smernica), stability = stable. Konsultant razmišlja: 'Pošto je error-cost nizak, rizik je mali — možda ovo ide u WATCH ili čak TRAIN, ne moramo odmah da odbijemo.' Koji je ispravan verdikt i zašto?",
+      "expected_output": "Ispravan verdikt je REFUSE. Kada je data-access = 0 ('Inputs do not exist'), to samo po sebi i bezuslovno vodi ka REFUSE — dimensions.md je eksplicitan: 'Score 0 honestly. It is a REFUSE.' Ovo pravilo se proverava PRVO, pre bilo kakvog razmatranja error-cost ili verifiability polja, tako da nizak error-cost ne može da 'spase' zadatak od odbijanja — nizak error-cost bi bio relevantan samo da postoje makar neki ulazi (data-access >= 1).",
+      "expectations": [
+        "Verdikt koji agent daje je REFUSE",
+        "Agent eksplicitno navodi da data-access = 0 sam po sebi, bezuslovno, vodi ka REFUSE, nezavisno od error-cost",
+        "Agent NE zaključuje WATCH ili TRAIN na osnovu 'niskog rizika' odnosno niskog error-cost",
+        "Agent pominje ili implicira da se ova provera dešava pre (ima prioritet nad) proverom error-cost/verifiability"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Finansijski tim opisuje zadatak: 'odobravanje isplata dobavljačima na osnovu procene da li faktura izgleda legitimno'. Volumen je ogroman — oko 300 sati mesečno raspoređeno na više ljudi. U drugom prolazu: data-access = 3 (sve je u sistemu, ERP ima API), error-cost = high (pogrešna isplata pomera novac i ne može se povući), verifiability = 0 (nema pravila niti izvora za poređenje — samo lično uverenje knjigovođe da 'ovo izgleda u redu'), stability = stable. Konsultant razmišlja: '300 sati mesečno je ogroman volumen, isplativost bi trebalo lako da pokrije cenu izgradnje — idemo na BUILD, uz obavezan human sign-off zbog visokog error-cost-a.' Da li je ovo ispravan zaključak? Obrazloži.",
+      "expected_output": "Konsultant greši. Kada su error-cost = high i verifiability = 0 istovremeno tačni, verdikt je REFUSE bez obzira na volumen — dimensions.md je eksplicitan: 'high with verifiability 0 is a REFUSE regardless of volume.' Ovo je provera koja se dešava pre bilo kakvog računanja isplativosti/volumena, pa 300 sati mesečno ne menja ishod. Supervizija (sign-off jedne osobe po izlazu) je relevantna samo za verdikt BUILD, a ovaj zadatak nikad ne stiže do te faze.",
+      "expectations": [
+        "Verdikt koji agent daje je REFUSE, ne BUILD",
+        "Agent eksplicitno navodi kombinaciju 'error-cost = high I verifiability = 0' kao razlog, tretirajući ih kao istovremeni (AND) uslov, ne kao dva odvojena rizika koja se mogu ublažiti odvojeno",
+        "Agent kaže da veliki volumen (300h) ne menja ishod jer pravilo važi 'regardless of volume'",
+        "Agent ne predlaže 'BUILD sa obaveznim sign-off-om' — objašnjava da je supervizija primenljiva samo posle BUILD verdikta, koji ovde nije dostignut"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Zadatak je 'pisanje nedeljnog sažetka podrške za menadžment' — trenutni izlaz je slobodan tekstualni pasus koji čovek piše ručno. Kada ga konsultant pita da li postoji nešto trenutno tačno/pogrešno proverljivo u tom izlazu, odgovor tima je: 'izlaz deluje ispravno, to je uglavnom osećaj — nemamo formalan kriterijum.' Konsultant razmišlja: 'Kada napravimo agenta, lako mogu da ga nateram da izbaci JSON sa poljima executive_summary, key_metrics i action_items — dakle ovo je jasno strukturiran izlaz, ocenjujem verifiability na 3 i pišem check-rule json_has_key:executive_summary.' Da li je ovo ispravno ocenjivanje verifiability polja? Objasni zašto da ili ne, i koja bi bila ispravna ocena.",
+      "expected_output": "Ocena verifiability = 3 je pogrešna. Pravilo iz references/dimensions.md ('The trap') kaže da se boduje ono što zadatak PROIZVODI DANAS, ne ono što bi mogao da proizvodi da se izgradi drugačiji sistem: 'That is a statement about a system that does not exist. Score what the task produces today.' Rečenica tima 'izlaz deluje ispravno' je doslovno primer koji dimensions.md vezuje za ocenu 1: 'If you find yourself writing the output looks right — that is a 1.' Dakle ispravna ocena je najviše 1 (čovek sudi po nejasnoj/nepostojećoj rubrici), ne 3. Pošto je 1 ispod praga od 2 potrebnog za BUILD (i pošto 2/3 zahtevaju check-rule za ono što izlaz DANAS proizvodi, a ne za budući dizajn), ovaj zadatak ne može dobiti BUILD verdikt na osnovu ove dimenzije — kandidat je za TRAIN, ne BUILD.",
+      "expectations": [
+        "Agent kaže da je konsultantovo bodovanje (verifiability = 3, sa check-rule za budući izlaz) pogrešno",
+        "Agent parafrazira ili citira pravilo da se boduje ono što zadatak proizvodi danas, ne ono što bi budući, drugačije izgrađen sistem mogao da proizvede",
+        "Agent prepoznaje frazu 'izlaz deluje ispravno' kao eksplicitan primer ocene 1 iz reference dimensions.md",
+        "Agent zaključuje da verifiability < 2 isključuje BUILD verdikt (BUILD zahteva verifiability >= 2 sa napisanim check-rule), pa je ispravan pravac TRAIN, ne BUILD"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Zadatak: 'kategorizacija ulaznih tiketa podrške po prioritetu', who=podrška, how-many=1. Klijent procenjuje: dešava se 350 puta mesečno, traje 12 minuta po tiketu. Konsultant koristi podrazumevanu ekonomiju: build-cost=4000, hour-value=25, payback-months=6 (podrazumevano), saved-fraction=0.5 (podrazumevana pretpostavka), godišnje održavanje = 20% cene izgradnje (800). Ostala polja: verifiability=3 uz check-rule 'json_key_in:priority=low,medium,high', data-access=3, error-cost=low, stability=stable, friction=4. Konsultant izračuna: volumen = 350×12×1/60 = 70 sati mesečno; trošak-prozora = 4000 + 800×6/12 = 4400; vrednost mesečno = 70×0.5×25 = 875; payback ≈ 4400/875 ≈ 5.03 meseca, unutar 6-mesečnog praga. Verifiability i data-access su oba ≥2, pa je verdikt BUILD. Konsultant zatim proverava osetljivost: 'Čak i pri duplo većem volumenu (140h), payback bi bio ~2.5 meseca — što je još sigurnije. Dakle verdikt je stabilan, nije fragile.' Da li je konsultantov zaključak 'nije fragile' ispravan? Ako klijentova procena volumena nije podcenjena nego precenjena za 2x (stvarni volumen je upola manji, 35 sati mesečno), šta se dešava sa verdiktom, i koji je konačan ispravan verdikt koji treba zapisati?",
+      "expected_output": "Konsultant je proverio samo jedan smer (2x volumen) i pogrešno zaključio da verdikt nije fragile. Pravilo koraka 5 zahteva proveru OBA faktora — i 0.5x i 2x procenjenog volumena — i ako BILO KOJI od njih promeni verdikt, on se degradira na WATCH i označava kao fragile ('Any verdict that a 2x error in the client's estimate would overturn is downgraded to WATCH'). Pri 0.5x volumenu (35h): trošak-prozora ostaje 4400, vrednost mesečno = 35×0.5×25 = 437.5, payback = 4400/437.5 ≈ 10.06 meseci, što premašuje 6-mesečni prag — payback uslov za BUILD više nije zadovoljen, pa zadatak pada na sledeće pravilo (volumen 35h i dalje ≥ train-floor-hours od 2) i postaje TRAIN. Pošto se verdikt menja iz BUILD u TRAIN kada se procena prepolovi, zadatak JE fragile, i konačan zapisan verdikt treba da bude WATCH (fragile), ne BUILD — uprkos tome što i originalna procena i 2x scenario oba daju BUILD.",
+      "expectations": [
+        "Agent kaže da konsultantov zaključak 'nije fragile' nije ispravan",
+        "Agent eksplicitno proverava/pominje OBA smera osetljivosti (i 0.5x i 2x procenjenog volumena), a ne samo 2x",
+        "Agent izračunava ili navodi da pri 35 sati mesečno payback prelazi 6 meseci (otprilike 10 meseci), zbog čega bi verdikt bio TRAIN, a ne BUILD",
+        "Agent zaključuje da je konačan verdikt WATCH sa oznakom fragile, a ne BUILD",
+        "Agent objašnjava da razlog degradacije leži u pravilu da se verdikt koji bi 2x greška u proceni klijenta srušila ne sme prijaviti kao čvrst"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Zadatak 'obrada zahteva za povraćaj novca' prošao je sito. U drugom prolazu sva polja su odlična: verifiability=3 uz check-rule 'json_has_key:refund_amount', data-access=3, error-cost=low, stability=stable, friction=5, who=finansije, how-many=2. Ali kada konsultant pita tim koliko puta mesečno se to dešava i koliko traje, odgovor je: 'Iskreno, nemamo pojma, nikad to nismo merili, teško bismo i pogodili.' Konsultant, ne želeći da zadatak stane, piše u belešci: 'Pošto tim kaže da se to dešava često, pretpostaviću razumnu srednju vrednost — recimo 40 puta mesečno, 15 minuta svaki put — i nastaviću sa scoring-om, jer je bolje imati broj nego nemati ga.' Da li je ovaj postupak u skladu sa pravilima skilla? Ako nije, koji je ispravan postupak i koji bi bio ispravan verdikt za ovaj zadatak?",
+      "expected_output": "Postupak krši eksplicitno pravilo iz sekcije 'Two rules that govern everything': 'Nothing you were not told may appear... If a field is missing it is NOT MEASURED and the task goes to WATCH — it does not get a plausible number.' Konsultant ne sme izmisliti ili pretpostaviti brojku za per-month ili minutes-each, ma koliko delovala razumno. Ispravan postupak je da se polje zabeleži kao NOT MEASURED, što bezuslovno vodi ka WATCH — ova provera ima prioritet nad (dešava se pre) proverom verifiability, error-cost ili računanjem isplativosti. Dakle ispravan verdikt je WATCH ('nothing to score it with'), bez obzira što su sve ostale dimenzije odlične (verifiability=3, data-access=3, error-cost=low, friction=5) — te dimenzije bi možda kasnije, sa izmerenim brojkama, dale BUILD, ali se to ne sme zaključiti bez stvarno izmerenih vrednosti.",
+      "expectations": [
+        "Agent kaže da je konsultantov postupak (izmišljanje procene 40× mesečno, 15 minuta) pogrešan i da krši pravilo skilla",
+        "Agent parafrazira ili citira pravilo da nedostajuće polje postaje NOT MEASURED i da se ne sme popuniti verovatnom/pretpostavljenom vrednošću",
+        "Agent zaključuje da je ispravan verdikt za ovaj zadatak WATCH, bez obzira na odlične ostale dimenzije",
+        "Agent prepoznaje da provera nedostajućeg polja ima prioritet nad (prethodi) izračunavanju isplativosti i ostalim proverama verdikta"
+      ]
+    }
+  ]
+}
