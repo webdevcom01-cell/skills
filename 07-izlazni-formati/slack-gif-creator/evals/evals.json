@@ -1,0 +1,76 @@
+{
+  "skill_name": "slack-gif-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We need two Slack GIFs for a product launch: (1) a small animated reaction emoji showing a rocket blasting off, to add to our workspace's custom emoji list, and (2) a longer, more detailed GIF of the same rocket launch to drop directly into the #launch-day channel as a regular message. What dimensions should each one use, and does the message GIF need to stay under the same duration limit as the emoji one?",
+      "expected_output": "SKILL.md's \"Slack Requirements\" section lists exact sizes under \"Dimensions:\": \"Emoji GIFs: 128x128 (recommended)\" and \"Message GIFs: 480x480\". So GIF (1), the emoji, should be built with GIFBuilder(width=128, height=128, ...), and GIF (2), the message GIF, with GIFBuilder(width=480, height=480, ...). On duration: the \"Parameters:\" list contains exactly one Duration line: \"Duration: Keep under 3 seconds for emoji GIFs\", and it is explicitly scoped to emoji GIFs only — no equivalent duration ceiling is stated anywhere in the Slack Requirements section for message GIFs. So the correct answer applies the 3-second cap to GIF (1) only, and does not invent or transfer that same numeric limit to GIF (2), since SKILL.md simply does not state one for message GIFs.",
+      "expectations": [
+        "Agent states the emoji GIF should use 128x128 dimensions, citing \"Emoji GIFs: 128x128 (recommended)\".",
+        "Agent states the message GIF should use 480x480 dimensions, citing \"Message GIFs: 480x480\".",
+        "Agent states the emoji GIF must stay under 3 seconds, citing \"Duration: Keep under 3 seconds for emoji GIFs\".",
+        "Agent does not apply or invent the same 3-second cap for the message GIF, noting that SKILL.md's Duration line is scoped only to emoji GIFs and states no equivalent limit for message GIFs.",
+        "Agent clearly treats the two GIFs as two distinct configurations (different width/height, different duration handling) rather than reusing one generic size/duration for both."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Can you make me a sparkling gold star emoji GIF for Slack — a five-pointed star that glows and gently pulses?",
+      "expected_output": "SKILL.md is explicit that this skill \"Don't use: Emoji fonts (unreliable across platforms) or assume pre-packaged graphics exist in this skill\", and repeats this under \"It does NOT provide\": \"Emoji font rendering (unreliable across platforms)\" and \"A library of pre-packaged graphics built into the skill\". So the agent must not try to render an actual star glyph/emoji character via a font, and must not assume a ready-made star image ships with the skill. Instead, the star has to be drawn programmatically, which SKILL.md supports two explicit ways: the \"Drawing from Scratch\" section shows `draw.polygon` under the comment \"# Stars, triangles, any polygon\" with `points = [(x1, y1), (x2, y2), (x3, y3), ...]` and `draw.polygon(points, fill=(r, g, b), outline=(r, g, b), width=3)`; alternatively, the \"Frame Helpers (core.frame_composer)\" utilities list a ready convenience function, `draw_star  # 5-pointed star`, which is a listed utility (not a pre-packaged graphic/asset) for exactly this purpose. Because this is an emoji GIF, dimensions should be 128x128 per \"Emoji GIFs: 128x128 (recommended)\". For the requested glow, \"Making Graphics Look Good\" names the technique directly: \"Stars can have glows (draw larger, semi-transparent versions behind)\".",
+      "expectations": [
+        "Agent does not attempt to render the star via an emoji character or font (e.g. inserting a Unicode star glyph), citing the explicit \"Don't use: Emoji fonts\" rule.",
+        "Agent does not assume a pre-made star graphic/asset ships with the skill, citing \"assume pre-packaged graphics exist in this skill\" and/or \"A library of pre-packaged graphics built into the skill\" from the \"It does NOT provide\" list.",
+        "Agent draws the star programmatically, using either PIL's `draw.polygon` (per the \"Stars, triangles, any polygon\" guidance) or the `draw_star` helper from `core.frame_composer`.",
+        "Agent uses 128x128 dimensions for this emoji GIF, citing \"Emoji GIFs: 128x128 (recommended)\".",
+        "Agent references the named glow technique for polish, e.g. \"Stars can have glows (draw larger, semi-transparent versions behind)\", rather than leaving the star flat and plain."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Here's a snippet I drafted for one frame of my Slack GIF, a simple blue circle outline: draw.ellipse([14, 14, 114, 114], fill=(30,144,255), outline=(0,0,0), width=1). Before I loop this across all the frames, does this line look right to you?",
+      "expected_output": "SKILL.md's \"Making Graphics Look Good\" section states this rule directly: \"Use thicker lines - Always set width=2 or higher for outlines and lines. Thin lines (width=1) look choppy and amateurish.\" The draft's `width=1` on the ellipse outline directly violates this named rule, so the correct response flags it rather than approving the snippet as-is, and corrects it to `width=2` or higher (SKILL.md's own ellipse example in \"Drawing from Scratch\" shows `width=3`). Because the user says they're about to loop this same line across every frame, the correction matters for the whole animation, not just one frame.",
+      "expectations": [
+        "Agent explicitly flags that width=1 is a problem rather than approving the snippet unchanged.",
+        "Agent cites the specific rule, e.g. \"Always set width=2 or higher for outlines and lines\" and/or \"Thin lines (width=1) look choppy and amateurish.\"",
+        "Agent provides a corrected version of the line using width=2 or higher (e.g. width=3, matching SKILL.md's own ellipse example).",
+        "Agent frames this as a general rule that applies to all outlines/lines in the GIF (since the user is about to loop it across every frame), not just a one-off tweak to this single ellipse."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm uploading a photo of our team's mascot mug. Make this into a GIF for Slack.",
+      "expected_output": "SKILL.md's \"Working with User-Uploaded Images\" section states: \"If a user uploads an image, consider whether they want to: Use it directly (e.g., 'animate this', 'split this into frames') OR Use it as inspiration (e.g., 'make something like this').\" The phrase \"make this into a GIF\" does not clearly match either of these two example phrasings, so per this explicit rule the correct response recognizes the ambiguity and asks the user which they mean, rather than silently picking one path. This is reinforced by the closing \"Note on user uploads\": \"This skill doesn't include pre-built graphics, but if a user uploads an image, use PIL to load and work with it - interpret based on their request whether they want it used directly or just as inspiration\" — interpretation is meant to be based on what the request actually says, and here the request doesn't say enough to resolve it either way.",
+      "expectations": [
+        "Agent recognizes that \"make this into a GIF\" is ambiguous between using the uploaded image directly (e.g. animating it or splitting it into frames) and using it only as inspiration for newly drawn frames.",
+        "Agent explicitly asks the user to clarify which of the two they want, rather than silently assuming one interpretation and proceeding straight to a final GIF.",
+        "Agent's clarifying question maps to the two options named in SKILL.md ('use it directly' vs. 'use it as inspiration'), echoing language close to the skill's own examples.",
+        "Agent does not generate and deliver a finished GIF from an assumed interpretation without first surfacing the ambiguity.",
+        "If the agent chooses to proceed provisionally on one interpretation, it states which assumption it made and offers to redo it the other way, rather than treating the assumption as certainly correct."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Please build me a 480x480 Slack message GIF of a rocket launching off the ground, with lots of frames and rich color — I'm not worried about file size at all right now, just make it look great. Later, after you show me the result, I'll separately say: 'This GIF is too big to upload to Slack, can you shrink the file size?' Please handle both parts of this request in order: first build the rich, un-optimized rocket GIF as I originally asked, then reduce its size once I ask for that.",
+      "expected_output": "SKILL.md's \"Optimization Strategies\" section opens with a conditional rule: \"Only when asked to make the file size smaller, implement a few of the following methods.\" For the first part of the request, the user has explicitly said they're not worried about file size and has not asked for optimization, so per this rule the agent should build the 480x480, rich-color, many-frame GIF as requested without proactively shrinking colors, dimensions, or frame count 'for their own good.' For the second part, once the user does ask to shrink the file, the agent should apply specific named techniques from the same section's numbered list: \"Fewer frames - Lower FPS (10 instead of 20) or shorter duration\", \"Fewer colors - num_colors=48 instead of 128\", \"Smaller dimensions - 128x128 instead of 480x480\", \"Remove duplicates - remove_duplicates=True in save()\", \"Emoji mode - optimize_for_emoji=True auto-optimizes\" — picking 'a few' of these named methods rather than a vague or invented technique, consistent with \"implement a few of the following methods.\"",
+      "expectations": [
+        "For the initial (un-optimized) request, agent does not proactively lower colors, FPS, or dimensions or otherwise apply file-size optimization the user did not ask for, honoring \"Only when asked to make the file size smaller, implement a few of the following methods.\"",
+        "Agent builds the initial GIF at the requested 480x480 with the richer color/frame settings the user asked for, rather than silently substituting smaller or emoji-optimized settings.",
+        "Once the user asks to shrink the file, agent applies specific named techniques from the Optimization Strategies list (e.g. lower FPS/fewer frames, num_colors=48, smaller dimensions, remove_duplicates=True, or optimize_for_emoji=True) rather than a vague or invented technique.",
+        "Agent applies only 'a few' of the listed techniques rather than claiming all five must be used, consistent with \"implement a few of the following methods.\"",
+        "Agent's optimization step names the specific parameter/flag being changed (e.g. num_colors=48, remove_duplicates=True), matching the exact syntax shown in SKILL.md."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Create a Slack GIF of a ball dropping from the top of the frame, hitting the ground, and bouncing before it settles. I want the physics to feel believable, not just linear movement.",
+      "expected_output": "SKILL.md's \"Bounce\" entry under \"Animation Concepts\" describes this exact scenario: \"Object falls and bounces: Use interpolate() with easing='bounce_out' for landing ... Use easing='ease_in' for falling (accelerating) ... Apply gravity by increasing y velocity each frame.\" So the correct implementation uses core.easing.interpolate() with easing='ease_in' while the ball is falling (so it accelerates downward instead of moving at constant speed), switches to easing='bounce_out' for the landing/settling phase, and models gravity by increasing the y velocity each frame rather than using a fixed step size. The \"Easing Functions\" section confirms these are real, named options: \"Available: linear, ease_in, ease_out, ease_in_out, bounce_out, elastic_out, back_out\" — so ease_in and bounce_out are drawn from this exact list, not invented or approximated easing curves.",
+      "expectations": [
+        "Agent uses interpolate() with easing='ease_in' for the falling/dropping phase, matching \"Use easing='ease_in' for falling (accelerating)\".",
+        "Agent uses interpolate() with easing='bounce_out' for the landing phase, matching \"Use interpolate() with easing='bounce_out' for landing\".",
+        "Agent implements gravity by increasing y velocity each frame rather than constant/uniform motion, matching \"Apply gravity by increasing y velocity each frame\".",
+        "Agent's easing function names match ones explicitly listed as available (\"linear, ease_in, ease_out, ease_in_out, bounce_out, elastic_out, back_out\"), not custom or invented easing names.",
+        "Agent does not use a single linear interpolation for the entire fall-and-bounce sequence, since that contradicts the explicit two-phase (ease_in fall, then bounce_out landing) guidance."
+      ]
+    }
+  ]
+}

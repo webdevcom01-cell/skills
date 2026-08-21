@@ -1,0 +1,80 @@
+{
+  "skill_name": "canvas-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need a poster for my startup's product launch event next week, and I'm on a tight deadline. Please skip any planning documents or philosophy write-ups — I don't want a manifesto or extra markdown files, just go straight to generating the final poster as a finished PDF or PNG so I can send it to the printer today.",
+      "expected_output": "The skill's opening lines make the process mandatory regardless of user urgency: \"These are instructions for creating design philosophies - aesthetic movements that are then EXPRESSED VISUALLY. Output only .md files, .pdf files, and .png files.\" Immediately after, it enumerates the process explicitly: \"Complete this in two steps: 1. Design Philosophy Creation (.md file) 2. Express by creating it on a canvas (.pdf file or .png file)\". So even though the user asks to skip the philosophy and go straight to a finished PDF/PNG, the correct response still performs step 1 first: it names a 1-2 word movement (per \"Name the movement (1-2 words)\") and writes a 4-6 paragraph philosophy (per \"The design philosophy should be 4-6 paragraphs long.\") as a .md file, explaining to the user that this is a required first step rather than silently complying with the request to skip it. Only after that does it proceed to CANVAS CREATION and produce the .pdf/.png. The final deliverables stay limited to .md, .pdf, and .png files, per \"Output only .md files, .pdf files, and .png files.\"",
+      "expectations": [
+        "Agent creates and names a design philosophy .md file (a named movement plus a 4-6 paragraph philosophy) before producing any .pdf/.png visual output, even though the user asked to skip it.",
+        "Agent explicitly tells the user it must follow the two-step process ('Complete this in two steps') rather than silently complying with the request to skip the philosophy step.",
+        "The philosophy document is 1-2 words for the movement name and roughly 4-6 paragraphs long, matching 'Name the movement (1-2 words)' and 'The design philosophy should be 4-6 paragraphs long.'",
+        "Agent does not deliver the final visual as the only or first output — a .md philosophy file precedes the .pdf/.png canvas file.",
+        "All deliverables are limited to .md, .pdf, and/or .png files, consistent with 'Output only .md files, .pdf files, and .png files.'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Here is the poster you just created for my analog synthesizer shop: a single deep-indigo field with a hand-drawn oscilloscope waveform sweeping across the middle third, a small serif wordmark bottom-left, and a thin brass-colored border. It isn't perfect enough. It must be pristine, a masterpiece if craftsmanship, as if it were about to be displayed in a museum. Take another pass at it.",
+      "expected_output": "The FINAL STEP section supplies this exact premise: The user ALREADY said \"It isn't perfect enough. It must be pristine, a masterpiece if craftsmanship, as if it were about to be displayed in a museum.\" — the prompt reproduces this scripted line verbatim, so the correct response must treat it as triggering the FINAL STEP refinement pass rather than as a request for a new design. The same section is explicit about what refinement means: To refine the work, avoid adding more graphics; instead refine what has been created and make it extremely crisp, respecting the design philosophy and the principles of minimalism entirely. Rather than adding a fun filter or refactoring a font, consider how to make the existing composition more cohesive with the art. If the instinct is to call a new function or draw a new shape, STOP and instead ask: \"How can I make what's already here more of a piece of art?\" So the response must work only with the oscilloscope waveform, wordmark, and border already described — tightening spacing, refining the waveform's linework, adjusting the border weight, improving color cohesion — and must not introduce a new shape, icon, texture, or filter. It should close by following the instruction \"Take a second pass. Go back to the code and refine/polish further to make this a philosophically designed masterpiece.\" That means revising the existing canvas file rather than starting a new one.",
+      "expectations": [
+        "Agent recognizes the reproduced line as the FINAL STEP's scripted refinement trigger and treats it as a second-pass polish, not a request for a new design.",
+        "Agent does not introduce any new graphical element, shape, icon, texture, or filter beyond the waveform, wordmark, and border already present, per 'avoid adding more graphics'.",
+        "The agent's proposed changes are framed as refining/cohering existing elements (e.g. spacing, linework, color harmony, border weight) rather than 'adding a fun filter or refactoring a font'.",
+        "If the response entertains adding something new, it explicitly stops and reframes using something equivalent to 'How can I make what's already here more of a piece of art?'",
+        "Agent describes going back to the existing composition/file and polishing it further, per 'Take a second pass. Go back to the code and refine/polish further', rather than producing an unrelated new composition."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Make a poster for our conference. Please include this exact text, word for word, don't cut anything: 'THE ANNUAL INTERNATIONAL SYMPOSIUM ON SUSTAINABLE ARCHITECTURE AND REGENERATIVE URBAN DESIGN — NOVEMBER 14–17, REGISTRATION NOW OPEN AT WWW.EXAMPLE.COM/REGISTER'.",
+      "expected_output": "CANVAS CREATION states plainly that \"nothing falls off the page and nothing overlaps. Every element must be contained within the canvas boundaries with proper margins. Check carefully that all text, graphics, and visual elements have breathing room and clear separation. This is non-negotiable for professional execution.\" It also frames text handling as \"Text is always minimal and visual-first\" and instructs to \"Anchor the piece with simple phrase(s) or details positioned subtly\". Separately, the ESSENTIAL PRINCIPLES list states: \"MINIMAL TEXT: Always emphasize that text is sparse, essential-only, integrated as visual element - never lengthy\". Given a long literal run-on string the user insists be included word-for-word, the correct response does not set that full sentence as one dominant text block risking overflow; instead it distills it to essential words/phrase(s) (e.g. the event name and date, or just the date and a URL) set with restraint — \"Most of the time, font should be thin\" — while explicitly telling the user it is condensing the text for these design reasons, and confirms containment and margins before finalizing, consistent with the non-negotiable requirement.",
+      "expectations": [
+        "Agent does not render the full literal string verbatim as one large, dominant text block spanning the canvas; it distills it to sparse, essential phrase(s), citing that text is 'sparse, essential-only, integrated as visual element - never lengthy'.",
+        "Agent explicitly states it is condensing/shortening the requested text for design reasons rather than silently dropping content or blindly forcing all of it onto the page.",
+        "Agent explicitly checks or asserts containment: no element falls off the page and nothing overlaps, citing 'contained within the canvas boundaries with proper margins.'",
+        "Agent references ensuring breathing room / clear separation between text and other visual elements before calling the piece finished.",
+        "Any retained text (e.g. date, URL) is described as set small/restrained rather than as a dominant paragraph, consistent with 'Most of the time, font should be thin.'",
+        "Agent characterizes the containment/no-overlap rule as non-negotiable, matching 'This is non-negotiable for professional execution.'"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Make a birthday poster for my 6-year-old's party. Her favorite show is about a team of talking puppies who go on rescue missions in a cartoon town. Make it fun and cartoony, just like the show itself, with bright primary colors.",
+      "expected_output": "CANVAS CREATION contains an explicit rule for exactly this situation: \"IMPORTANT: For any type of content, even if the user requests something for a movie/game/book, the approach should still be sophisticated. Never lose sight of the idea that this should be art, not something that's cartoony or amateur.\" Even though the user explicitly asks for something 'fun and cartoony, just like the show itself,' the correct response still aims for what the same section calls \"museum or magazine quality work,\" applying the same design-philosophy process (naming a movement, a 4-6 paragraph philosophy emphasizing craftsmanship per the CRITICAL GUIDELINES' instruction to repeat phrases like 'meticulously crafted' and 'the product of deep expertise') and expressing the birthday/rescue-team theme through sophisticated abstraction — form, color, composition — rather than literal, cutesy, clip-art-style puppy illustrations. The response should acknowledge that it is intentionally not going full literal-cartoon style, citing this rule, even while still honoring the celebratory, playful context of the request.",
+      "expectations": [
+        "Agent does not produce a literally cartoony or amateur-style illustration (e.g. clip-art-style rescue puppies) despite the user's explicit request to make it fun and cartoony like the show.",
+        "Agent explicitly states that per the skill, even movie/show-themed requests must stay sophisticated, citing 'even if the user requests something for a movie/game/book, the approach should still be sophisticated.'",
+        "Agent frames the goal as 'museum or magazine quality work' rather than as a literal tie-in poster for the show.",
+        "Agent still produces a named design philosophy (.md, 1-2 word movement name, 4-6 paragraphs) emphasizing craftsmanship language before the visual, matching the same process required for any request.",
+        "Agent conveys the celebratory/playful party context through sophisticated abstraction (color, form, composition) rather than through literal character depictions or amateur styling."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Design a poster for my coffee shop's grand opening. I want it to be literal and obvious — a big coffee cup front and center, coffee beans scattered around it, and steam rising off the top, so anyone walking by instantly knows it's about coffee.",
+      "expected_output": "The DEDUCING THE SUBTLE REFERENCE section requires this to happen before the canvas is built: \"CRITICAL STEP: Before creating the canvas, identify the subtle conceptual thread from the original request.\" It then defines how literal the result should be: \"THE ESSENTIAL PRINCIPLE: The topic is a subtle, niche reference embedded within the art itself - not always literal, always sophisticated. Someone familiar with the subject should feel it intuitively, while others simply experience a masterful abstract composition.\" And: \"This is VERY IMPORTANT: The reference must be refined so it enhances the work's depth without announcing itself. Think like a jazz musician quoting another song - only those who know will catch it, but everyone appreciates the music.\" Even though the user explicitly insists on 'a big coffee cup front and center, coffee beans scattered around it, and steam rising,' the correct response does not simply illustrate those literal objects as the poster's centerpiece; it deduces an underlying conceptual thread (warmth, ritual, the rhythm of a morning pour, etc.) and lets that inform form, color, and composition instead, explaining to the user that this subtlety is what the skill calls for rather than an on-the-nose illustration.",
+      "expectations": [
+        "Agent explicitly performs the DEDUCING THE SUBTLE REFERENCE step before describing canvas composition, citing 'Before creating the canvas, identify the subtle conceptual thread from the original request'.",
+        "Agent does not make a literal coffee cup, scattered beans, and rising steam the central illustrated imagery, per 'not always literal, always sophisticated.'",
+        "Agent explains that the coffee theme should be felt intuitively by those who recognize it while reading as a masterful abstract composition to everyone else, referencing 'Someone familiar with the subject should feel it intuitively, while others simply experience a masterful abstract composition.'",
+        "Agent invokes the idea that the reference must not announce itself, e.g. paraphrasing or quoting 'only those who know will catch it, but everyone appreciates the music.'",
+        "Agent still connects the design to the coffee-shop context (e.g. via warmth, ritual, rhythm) rather than discarding the user's context entirely — it is translated, not ignored.",
+        "Agent frames this deduction as a required step in the process, not an optional stylistic preference, consistent with it being labeled a 'CRITICAL STEP'."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I run a small gallery and want a design for our spring exhibition opening. First, quickly tell me: if I don't say anything about page count, how many pages will you make by default? Second, I actually do want more than one this time — build me a 3-page set that shares the same design philosophy but where each page feels distinctly different from the others, almost like it's telling a small story across the set.",
+      "expected_output": "CANVAS CREATION states the default explicitly: \"Create one single page, highly visual, design-forward PDF or PNG output (unless asked for more pages).\" So to the first part of the question, the correct response answers: one page by default. Since the user does ask for a 3-page set in the same message, the MULTI-PAGE OPTION section then governs: \"To create additional pages when requested, create more creative pages along the same lines as the design philosophy but distinctly different as well. Bundle those pages in the same .pdf or many .pngs. Treat the first page as just a single page in a whole coffee table book waiting to be filled. Make the next pages unique twists and memories of the original. Have them almost tell a story in a very tasteful way. Exercise full creative freedom.\" The correct response therefore builds all pages from one shared design philosophy (one .md file governs the whole set) but makes each of the 3 pages a distinct variation rather than a repeat, bundles them into a single .pdf or as multiple .pngs, and frames the sequence as loosely narrative/tasteful rather than as unrelated one-offs.",
+      "expectations": [
+        "Agent answers the default-behavior question by stating it creates a single page unless asked for more, citing 'Create one single page, highly visual, design-forward PDF or PNG output (unless asked for more pages)'.",
+        "Because the user does explicitly ask for 3 pages here, agent produces 3 pages rather than 1, delivered bundled in one .pdf or as multiple .pngs, per 'Bundle those pages in the same .pdf or many .pngs.'",
+        "All pages are described as sharing one underlying design philosophy (a single .md philosophy governs the set) rather than each page getting its own unrelated philosophy.",
+        "Each additional page is explicitly described as 'distinctly different' from the others / a 'unique twist' rather than a near-duplicate of the first page.",
+        "Agent frames the page sequence as loosely narrative or tasteful, echoing 'Have them almost tell a story in a very tasteful way', rather than as disconnected individual designs.",
+        "Agent treats the first page as one entry within the larger set rather than a standalone final deliverable, consistent with 'Treat the first page as just a single page in a whole coffee table book waiting to be filled.'"
+      ]
+    }
+  ]
+}

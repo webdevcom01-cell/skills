@@ -1,0 +1,81 @@
+{
+  "skill_name": "doc-coauthoring",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to write a design doc for a new caching layer we're adding to our order service. Can you help me write it?",
+      "expected_output": "This request explicitly matches a listed trigger condition under 'When to Offer This Workflow' — 'User mentions specific doc types: \"PRD\", \"design doc\", \"decision doc\", \"RFC\"' — since the user says 'design doc' verbatim. Per the 'Initial offer' instructions, the correct response is not to start drafting or asking generic writing questions, but to 'Offer the user a structured workflow for co-authoring the document. Explain the three stages: 1. Context Gathering: User provides all relevant context while Claude asks clarifying questions 2. Refinement & Structure: Iteratively build each section through brainstorming and editing 3. Reader Testing: Test the doc with a fresh Claude (no context) to catch blind spots before others read it.' The agent should also explain the rationale, per the same section: 'Explain that this approach helps ensure the doc works well when others read it (including when they paste it into Claude).' It must then 'Ask if they want to try this workflow or prefer to work freeform,' and only proceed once the user responds — 'If user declines, work freeform. If user accepts, proceed to Stage 1.' Assuming which mode to use, or launching directly into Stage 1 questions or freeform drafting without asking, would skip this required offer.",
+      "expectations": [
+        "Agent explicitly offers the structured co-authoring workflow rather than immediately starting to draft the doc or asking freeform writing questions.",
+        "Agent names and briefly explains all three stages by name: Context Gathering, Refinement & Structure, and Reader Testing.",
+        "Agent explains the rationale that this approach helps ensure the doc works well when others read it, including when they paste it into Claude.",
+        "Agent explicitly asks whether the user wants to try the structured workflow or prefers to work freeform.",
+        "Agent does not begin Stage 1 questions or start drafting content before the user responds to the offer.",
+        "Agent recognizes 'design doc' as a listed trigger term rather than treating the request as a generic writing task."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're in Stage 1 (Context Gathering) for a decision doc about migrating our job queue from SQS to a self-hosted Kafka cluster. The user has already done an initial context dump. Here are two candidate clarifying questions under consideration: Question A: 'What is a job queue, and what does our current SQS setup actually do in the system today?' Question B: 'If we migrate to Kafka, how do we handle jobs that were already claimed by a worker at the moment of cutover, and are we okay with a brief dual-write period to avoid losing jobs during the transition?' Which of these questions signals that Stage 1's exit condition has been met, and why?",
+      "expected_output": "Per Stage 1's stated exit condition, 'Sufficient context has been gathered when questions show understanding - when edge cases and trade-offs can be asked about without needing basics explained.' Question B is the one that signals this: it asks about an edge case (jobs already claimed by a worker at the exact moment of cutover) and a trade-off (accepting a brief dual-write period to avoid job loss), and it does so without needing the basics of what a job queue or the current SQS setup are explained first. Question A, by contrast, is still asking for basics — 'What is a job queue, and what does our current SQS setup actually do' — which is exactly the kind of question the exit condition implies should no longer be necessary once sufficient context has been gathered. So Question A indicates Stage 1 is not yet done, while Question B is the signal that it may be time to move toward Stage 1's 'Transition' step (asking if there's more context to add, or if it's time to move to Stage 2).",
+      "expectations": [
+        "Agent quotes or clearly paraphrases the Stage 1 exit condition: sufficient context has been gathered when questions show understanding — when edge cases and trade-offs can be asked about without needing basics explained.",
+        "Agent identifies Question B (jobs claimed at cutover / dual-write trade-off) as the one signaling Stage 1's exit condition has been met.",
+        "Agent identifies Question A (asking what a job queue is / what the current setup does) as a basics question indicating context is still insufficient.",
+        "Agent explains the distinction using the edge-case/trade-off vs. basics framing from SKILL.md, not just a generic quality judgment.",
+        "Agent does not claim both questions are equally valid signals of sufficiency."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We're in Stage 2, Step 3 (Curation) for the 'Motivation' section of a decision doc. In Step 2 we brainstormed these 8 numbered options: 1. Current system reliability issues (2 outages last quarter) 2. Competitor comparison showing competitors use Kafka at similar scale 3. Timeline pressure from the Q3 roadmap commitment 4. Stakeholder concern from the on-call team about pager fatigue 5. Cost analysis showing SQS costs scaling poorly 6. Team's existing Kafka expertise from a previous project 7. Alignment with the platform team's broader event-streaming strategy 8. Regulatory requirement for message replay / audit trail. We asked the user which points to keep, remove, or combine. Instead of numbered selections, the user replied: 'I like most of it but we don't need the competitor comparison stuff, and can you merge the timeline pressure point with the stakeholder concern one?' What should happen next?",
+      "expected_output": "The user gave freeform feedback instead of the numbered Keep/Remove/Combine format the Curation step gives as examples ('Keep 1,4,7,9', 'Remove 3 (duplicates 1)', 'Remove 6 (audience already knows this)', 'Combine 11 and 12'). SKILL.md explicitly handles this case: 'If user gives freeform feedback (e.g., \"looks good\" or \"I like most of it but...\") instead of numbered selections, extract their preferences and proceed. Parse what they want kept/removed/changed and apply it.' The agent should not ask the user to redo their feedback in the numbered format. Instead, it should parse the freeform reply itself: 'we don't need the competitor comparison stuff' maps to removing option 2 ('Competitor comparison showing competitors use Kafka at similar scale'), and 'merge the timeline pressure point with the stakeholder concern one' maps to combining options 3 and 4 ('Timeline pressure from the Q3 roadmap commitment' and 'Stakeholder concern from the on-call team about pager fatigue'). Since the user said 'I like most of it,' the remaining options (1, 5, 6, 7, 8) should be treated as kept. The agent then proceeds — per Step 4 (Gap Check) and Step 5 (Drafting) — rather than stalling on the format of the user's answer.",
+      "expectations": [
+        "Agent does not ask the user to resubmit feedback in the numbered Keep/Remove/Combine format.",
+        "Agent cites or clearly paraphrases the rule that freeform feedback should be parsed to extract preferences and applied, rather than requiring numbered selections.",
+        "Agent correctly maps 'competitor comparison stuff' to option 2 and treats it as removed.",
+        "Agent correctly combines options 3 (timeline pressure) and 4 (stakeholder concern) per the user's 'merge' request.",
+        "Agent treats the unmentioned options (1, 5, 6, 7, 8) as kept, consistent with 'I like most of it'.",
+        "Agent proceeds forward in the workflow rather than stalling or re-requesting a differently formatted answer."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We're in Stage 2, Step 6 (Iterative Refinement) for the 'Risks' section of our spec, which is already drafted in the artifact. Here's what's happened in the last three consecutive rounds of feedback: Iteration 1: user asked to change 'may' to 'will' in the second bullet. Iteration 2: user asked to fix a typo, 'dependancy' to 'dependency'. Iteration 3: user asked to reword the closing sentence for tone, with no change in content or meaning. All three edits are done. The user hasn't said anything else yet. What should the agent do right now, before waiting for a fourth round of feedback?",
+      "expected_output": "This is exactly the situation the 'Quality Checking' step under Stage 2 addresses: 'After 3 consecutive iterations with no substantial changes, ask if anything can be removed without losing important information.' The three iterations described — a single word swap, a typo fix, and a tone-only reword with no content change — are all minor, non-substantial edits, and three of them have now happened consecutively. Rather than passively waiting for a fourth round of small tweaks, or silently deciding the section is finished without checking, the agent should proactively ask the user whether anything in the 'Risks' section can be removed without losing important information. This is a required check at this point in the workflow, not an optional suggestion — it should happen now, before continuing the edit loop further.",
+      "expectations": [
+        "Agent recognizes that three consecutive iterations occurred without substantial changes (a word swap, a typo fix, and a tone-only reword).",
+        "Agent proactively asks whether anything can be removed from the section without losing important information.",
+        "Agent cites or clearly paraphrases the rule: after 3 consecutive iterations with no substantial changes, ask if anything can be removed without losing important information.",
+        "Agent does not simply continue waiting for further small edits without raising this question.",
+        "Agent does not silently declare the section complete without asking the question first."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "This is a Claude Code session, so sub-agent tools are available to you. We've finished refining every section of our RFC in the artifact, and I've already done my own final read-through. Let's move on to Reader Testing now.",
+      "expected_output": "Because sub-agents are available in this environment, SKILL.md's Stage 3 branches to the sub-agent path: 'If access to sub-agents is available (e.g., in Claude Code): Perform the testing directly without user involvement.' This means the agent should not send the user to manually test the document — that instruction ('The user will need to do the testing manually,' including 'Open a fresh Claude conversation: https://claude.ai' and pasting the doc) only applies under 'If no access to sub-agents (e.g., claude.ai web interface).' Since sub-agents are available, the agent should instead: (Step 1) announce it will predict reader questions and 'Generate 5-10 questions that readers would realistically ask'; (Step 2) announce these will be tested with a fresh Claude instance, then 'For each question, invoke a sub-agent with just the document content and the question' — not the full conversation history or context — and 'Summarize what Reader Claude got right/wrong for each question'; (Step 3) 'Invoke sub-agent to check for ambiguity, false assumptions, contradictions' and 'Summarize any issues found'; and (Step 4) if issues are found, report the specific issues Reader Claude struggled with and indicate intention to fix them, looping back to refinement for problematic sections. Throughout, the doc is only considered ready per the exit condition that applies to both approaches: 'When Reader Claude consistently answers questions correctly and doesn't surface new gaps or ambiguities, the doc is ready.'",
+      "expectations": [
+        "Agent performs Reader Testing directly/autonomously rather than instructing the user to manually paste the doc into a fresh claude.ai conversation.",
+        "Agent predicts and lists 5-10 questions that readers would realistically ask about the document.",
+        "Agent invokes a sub-agent for each question, giving it only the document content and the question (not the full conversation context).",
+        "Agent summarizes what the sub-agent (Reader Claude) got right or wrong for each tested question.",
+        "Agent also runs an additional sub-agent check for ambiguity, false assumptions, and contradictions, and summarizes issues found.",
+        "Agent references the shared exit condition — that the doc is ready when Reader Claude consistently answers correctly and doesn't surface new gaps or ambiguities — rather than declaring completion after a single pass regardless of results."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We're mid-way through Stage 2 for our design doc, using an artifact that already has several sections fully drafted. Two things: (1) In the 'Alternatives Considered' section, the second paragraph is too long-winded — please tighten it to two sentences, and don't touch anything else in the doc. (2) Separately, for the not-yet-started 'Rollout Plan' section, just give me a quick list of 4-5 rollout approaches we could consider — I don't need anything written into the doc yet, I just want to see the options first.",
+      "expected_output": "Two separate rules from SKILL.md apply here. For request (1), the edit should be made surgically: 'Use `str_replace` to make edits (never reprint the whole doc)' (Step 6, Iterative Refinement), which is reinforced in the 'Artifact Management' section: 'Use `str_replace` for all edits' and 'Provide artifact link after every change'. So the agent should replace only the second paragraph of 'Alternatives Considered' with a tightened two-sentence version, leave every other section of the document untouched, and then provide the artifact link, rather than regenerating or reprinting the entire document's content in its response. For request (2), the 4-5 rollout approaches are a brainstorming list for a section that hasn't started yet, and the 'Artifact Management' section is explicit: 'Never use artifacts for brainstorming lists - that's just conversation'. So the agent should present these options as plain conversational text — not by creating a new artifact, and not by adding them into the existing document artifact — since brainstorming for 'Rollout Plan' hasn't reached the drafting step yet.",
+      "expectations": [
+        "Agent edits only the second paragraph of 'Alternatives Considered' using a targeted, str_replace-style edit rather than reprinting or regenerating the entire document.",
+        "Agent leaves all other sections of the document unchanged while making this edit.",
+        "Agent cites or clearly paraphrases the rule to use str_replace for edits and never reprint the whole doc.",
+        "Agent presents the 4-5 rollout brainstorm options as plain conversational text, not as content added to or created in an artifact.",
+        "Agent cites or clearly paraphrases the rule that artifacts should never be used for brainstorming lists, since that's just conversation.",
+        "Agent still confirms or provides the artifact link after completing the paragraph edit, consistent with providing an artifact link after every change."
+      ]
+    }
+  ]
+}

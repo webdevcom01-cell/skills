@@ -1,0 +1,83 @@
+{
+  "skill_name": "brand-guidelines",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm using Anthropic's brand-guidelines skill to build a one-page company overview document. I need the exact hex code and stated purpose for each of the four 'Main Colors' the skill defines. Then tell me which one I should use for body text sitting on a plain light-colored page, and which one I should use for text sitting on a dark title-slide background.",
+      "expected_output": "The skill's 'Main Colors' section lists exactly four colors, each with a hex code and a stated purpose, and the correct answer reproduces all four exactly: Dark `#141413` - \"Primary text and dark backgrounds\"; Light `#faf9f5` - \"Light backgrounds and text on dark\"; Mid Gray `#b0aea5` - \"Secondary elements\"; Light Gray `#e8e6dc` - \"Subtle backgrounds\". For the two application questions, the answer follows the stated purposes directly rather than guessing: text on a plain light page should use Dark `#141413`, since it is designated \"Primary text and dark backgrounds\" (i.e. the primary text color, used against light surfaces); text on a dark title-slide background should use Light `#faf9f5`, since it is designated \"Light backgrounds and text on dark\" (i.e. explicitly for text on dark). Mid Gray and Light Gray are not recommended for either slot, since their stated purposes are \"Secondary elements\" and \"Subtle backgrounds\" respectively, not primary text.",
+      "expectations": [
+        "States Dark = `#141413` with its stated purpose \"Primary text and dark backgrounds\".",
+        "States Light = `#faf9f5` with its stated purpose \"Light backgrounds and text on dark\".",
+        "States Mid Gray = `#b0aea5` with its stated purpose \"Secondary elements\".",
+        "States Light Gray = `#e8e6dc` with its stated purpose \"Subtle backgrounds\".",
+        "Recommends Dark `#141413` for text on a light background and Light `#faf9f5` for text on a dark background, consistent with each color's stated purpose (not swapped or reversed).",
+        "Does not invent any additional main color or hex code beyond these four, and does not recommend Mid Gray or Light Gray as the primary text color for either scenario."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "For a PPTX deck built with Anthropic's brand-guidelines skill, I have five non-text shapes on one slide (icons and boxes) that need brand accent colors. What are the three accent colors and their exact hex codes, and what rule should I follow when deciding which accent color goes on which shape?",
+      "expected_output": "The skill's 'Accent Colors' section lists exactly three colors with hex codes and roles: Orange `#d97757` - \"Primary accent\"; Blue `#6a9bcc` - \"Secondary accent\"; Green `#788c5d` - \"Tertiary accent\". The 'Shape and Accent Colors' feature section states the assignment rule explicitly: \"Non-text shapes use accent colors\" and \"Cycles through orange, blue, and green accents\". Applied correctly to five shapes, this means the colors rotate in that stated order rather than one shape getting a fixed accent for all of them or the choice being random: shape 1 orange, shape 2 blue, shape 3 green, shape 4 back to orange, shape 5 blue — cycling through the three-color sequence repeatedly across shapes.",
+      "expectations": [
+        "States Orange = `#d97757`, labeled \"Primary accent\".",
+        "States Blue = `#6a9bcc`, labeled \"Secondary accent\".",
+        "States Green = `#788c5d`, labeled \"Tertiary accent\".",
+        "States the rule that non-text shapes cycle through the accents, quoting or closely paraphrasing \"Cycles through orange, blue, and green accents\".",
+        "Applies the cycling rule correctly to 5 shapes as a repeating rotation in the stated order (orange, blue, green, orange, blue) rather than assigning one fixed accent to every shape or picking colors arbitrarily.",
+        "Does not invent a fourth accent color or reorder the stated primary/secondary/tertiary sequence (orange first, then blue, then green)."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm formatting a slide deck using Anthropic's brand style. Tell me exactly which font applies to each of these four text elements, and why: a section title set at 28pt, a slide title set at exactly 24pt, a subheading set at 20pt, and body paragraph text set at 11pt.",
+      "expected_output": "The skill states the heading rule with an explicit point-size threshold in two places: \"Applies Poppins font to headings (24pt and larger)\" and, restated under Text Styling, \"Headings (24pt+): Poppins font\". Both phrasings make the threshold inclusive of 24pt itself, not exclusive. So the 28pt section title gets Poppins (clearly at/above threshold), and the 24pt slide title also gets Poppins, because \"24pt and larger\"/\"24pt+\" includes exactly 24, not just sizes strictly over it. The skill does not define a separate 'subheading' tier — it only distinguishes headings at 24pt and larger from body text (\"Body text: Lora font\" / \"Applies Lora font to body text\"). Since the 20pt element falls below the 24pt heading threshold and no third category exists in SKILL.md, it does not qualify for Poppins under the stated rule; the correct answer says so explicitly rather than inventing an unstated threshold like 'headings over 20pt' or a distinct subheading font. The 11pt body paragraph text clearly gets Lora per \"Body text: Lora font\".",
+      "expectations": [
+        "States the heading threshold using the exact stated language, e.g. \"headings (24pt and larger)\" or \"Headings (24pt+)\", not a paraphrase that changes the number or the comparison.",
+        "Correctly assigns Poppins to the 28pt title.",
+        "Correctly assigns Poppins to the exactly-24pt title, explicitly reasoning that the threshold is inclusive ('24pt and larger' / '24pt+') rather than requiring sizes strictly greater than 24.",
+        "Does not invent a rule like 'headings over 20pt' or a separate 'subheading' font tier; explicitly notes SKILL.md defines only two categories (headings 24pt+ and body text).",
+        "States the 20pt element does not meet the 24pt heading threshold and therefore is not assigned Poppins under the stated rule.",
+        "Assigns Lora to the 11pt body paragraph text, citing \"Body text: Lora font\" or \"Applies Lora font to body text\"."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm applying Anthropic's brand styling to a PPTX artifact on a machine where the Poppins and Lora fonts are not installed. What happens to the heading and body fonts in that situation, and should I stop and tell the user the task can't be completed?",
+      "expected_output": "The skill explicitly addresses this scenario rather than treating it as a failure case. Under Smart Font Application: \"Automatically falls back to Arial/Georgia if custom fonts unavailable\". Under Technical Details > Font Management, the same behavior is restated with which fallback maps to which role: \"Provides automatic fallback to Arial (headings) and Georgia (body)\", and \"No font installation required - works with existing system fonts\". So the correct behavior is: headings automatically render in Arial, body text automatically renders in Georgia, and the artifact is still produced — the task should not be aborted or reported as impossible. Font Management also notes \"For best results, pre-install Poppins and Lora fonts in your environment\" (echoed at the top under Typography as \"Fonts should be pre-installed in your environment for best results\"), which is a recommendation for optimal fidelity, not a hard requirement — the skill works either way. No unlisted substitute font (e.g. Calibri, Helvetica) should be used, since the only fallback fonts SKILL.md names are Arial and Georgia.",
+      "expectations": [
+        "States that missing custom fonts triggers an automatic fallback rather than an error, quoting or closely paraphrasing \"Automatically falls back to Arial/Georgia if custom fonts unavailable\".",
+        "Correctly maps the fallback per role: headings fall back to Arial and body text falls back to Georgia specifically (not the reverse), per \"fallback to Arial (headings) and Georgia (body)\".",
+        "Does not substitute an unlisted font (e.g. Calibri, Helvetica, a generic sans-serif) in place of the stated Arial/Georgia fallback.",
+        "States that font installation is not strictly required, quoting or paraphrasing \"No font installation required - works with existing system fonts\", while distinguishing this from the separate recommendation to pre-install Poppins/Lora 'for best results'.",
+        "Concludes the artifact should still be produced/completed rather than halting the task because Poppins/Lora are missing.",
+        "Does not tell the user the task can't be completed due to missing fonts."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I'm building a PPTX artifact with python-pptx using Anthropic's brand-guidelines skill, and I want to apply the Dark brand color (`#141413`) to a text run. According to this skill, what mechanism should I use to apply that color, and why is it done that way?",
+      "expected_output": "The skill specifies the exact implementation mechanism under Technical Details > Color Application: \"Uses RGB color values for precise brand matching\" and \"Applied via python-pptx's RGBColor class\". The correct answer names python-pptx's `RGBColor` class specifically (e.g. converting `#141413` to its RGB components and setting something like `font.color.rgb = RGBColor(0x14, 0x14, 0x13)`), not a generic 'set the color' instruction and not a different mechanism such as a PowerPoint theme color, a CSS class, or a different Python library. The stated rationale for this approach is precision and consistency: \"Maintains color fidelity across different systems\" — i.e. RGBColor is used specifically so the brand hex values render identically regardless of the environment, rather than relying on named/theme colors that can shift appearance across systems.",
+      "expectations": [
+        "States that colors are \"Applied via python-pptx's RGBColor class\", naming that specific class rather than a generic or invented mechanism.",
+        "States the skill \"Uses RGB color values for precise brand matching\", tying the mechanism to hex-to-RGB conversion.",
+        "Describes converting `#141413` into RGB components for use with RGBColor (rather than only restating the hex code without connecting it to an implementation step).",
+        "Does not propose an alternative implementation approach not stated in SKILL.md — e.g. a PowerPoint theme/scheme color, a CSS/HTML color property, or a non-python-pptx library — as the way to apply the color.",
+        "States the stated rationale for this mechanism: it \"Maintains color fidelity across different systems\".",
+        "Correctly attributes this detail to the 'Technical Details > Color Application' section rather than the Font Management section."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Apply our brand colors to all the text in this document, including the body paragraphs — I specifically want the accent orange running through the body copy so it really pops on the page.",
+      "expected_output": "This request conflicts with an explicit scope rule in the skill and the correct response flags that rather than complying literally. Under Shape and Accent Colors: \"Non-text shapes use accent colors\" and \"Cycles through orange, blue, and green accents\" — the accent palette (orange/blue/green) is designated for non-text shapes, not for running body text. Under Text Styling, body text color is instead governed by \"Smart color selection based on background\" and the skill \"Preserves text hierarchy and formatting\" — uniformly recoloring all body paragraphs orange would work against both of those stated behaviors. The correct answer therefore does not apply the orange accent to body copy; instead it keeps body text (set in Lora per \"Body text: Lora font\") in one of the Main Colors chosen by background — Dark `#141413` (\"Primary text and dark backgrounds\") on a light page, or Light `#faf9f5` (\"Light backgrounds and text on dark\") on a dark page — and reserves the orange/blue/green accent cycle for non-text shapes only, explicitly telling the user why the literal request isn't being followed as-is.",
+      "expectations": [
+        "Identifies that accent colors are scoped to non-text shapes, quoting or closely paraphrasing \"Non-text shapes use accent colors\".",
+        "Does not apply the orange accent color uniformly across body paragraph text as literally requested.",
+        "States that body text color instead follows \"Smart color selection based on background\" rather than a fixed accent color.",
+        "Explains that applying an accent color across all body text would conflict with the skill's stated goal to preserve text hierarchy, referencing \"Preserves text hierarchy and formatting\".",
+        "Recommends body text remain in a Main Color appropriate to the background — Dark `#141413` on light backgrounds or Light `#faf9f5` on dark backgrounds — rather than an accent color.",
+        "Explicitly flags the conflict with the user's literal instruction (rather than silently reinterpreting it without explanation) before or while proposing the on-brand alternative."
+      ]
+    }
+  ]
+}
