@@ -17,10 +17,10 @@
     {
       "id": 2,
       "prompt": "U Hook Writer evo-logu za review period postoji tačno 6 validnih unosa (ispravan broj polja i validan datum u prvom polju). Vrednosti polja winner_score po redosledu su: 18/20, 15/20, \"-\", 20/20, \"-\", 12/20. Izračunaj hw_runs, hw_score_avg, hw_score_min, hw_score_max, hw_winner_count i hw_winner_rate, i objasni kako tačno treba tretirati dva unosa sa vrednošću \"-\" — i u agregaciji i u imenilaca za winner rate.",
-      "expected_output": "hw_runs = 6 (svih 6 unosa su validni HW run-ovi bez obzira na sadržaj winner_score polja). Vrednost \"-\" znači 'nema podataka' i mora biti isključena iz agregacija (SKILL.md: 'Exclude dash values from all aggregations... Do NOT count \"-\" as zero'), pa se u proseku/min/max koriste samo 18, 15, 20, 12 → hw_score_avg = 16.0, hw_score_min = 12, hw_score_max = 20, uz napomenu '2 entries excluded — no data'. hw_winner_count broji unose sa winner_score ≥ 17 → 18 i 20 kvalifikuju se, dakle hw_winner_count = 2. hw_winner_rate = hw_winner_count ÷ hw_runs × 100% = 2/6 ≈ 33%, NE 2/4 (imenilac je ukupan broj run-ova, ne broj unosa sa brojčanim skorom).",
+      "expected_output": "hw_runs = 6 (svih 6 unosa su validni HW run-ovi bez obzira na sadržaj winner_score polja). Vrednost \"-\" znači 'nema podataka' i mora biti isključena iz agregacija (SKILL.md: 'Exclude dash values from all aggregations... Do NOT count \"-\" as zero'), pa se u proseku/min/max koriste samo 18, 15, 20, 12 → zbir = 65, hw_score_avg = 65/4 = 16.25, zaokruženo na 1 decimalu (SKILL.md: 'mean of hw_scores, 1 decimal place') = 16.3, hw_score_min = 12, hw_score_max = 20, uz napomenu '2 entries excluded — no data'. hw_winner_count broji unose sa winner_score ≥ 17 → 18 i 20 kvalifikuju se, dakle hw_winner_count = 2. hw_winner_rate = hw_winner_count ÷ hw_runs × 100% = 2/6 ≈ 33%, NE 2/4 (imenilac je ukupan broj run-ova, ne broj unosa sa brojčanim skorom).",
       "expectations": [
         "hw_runs = 6, dashevi se i dalje broje kao validni run-ovi",
-        "hw_score_avg izračunat isključivo iz {18, 15, 20, 12} = 16.0, bez tretiranja \"-\" kao 0",
+        "hw_score_avg izračunat isključivo iz {18, 15, 20, 12} = 16.3 (65/4=16.25, zaokruženo na 1 decimalu), bez tretiranja \"-\" kao 0 i BEZ zaokruživanja na 16.0",
         "hw_score_min = 12 i hw_score_max = 20",
         "Eksplicitno pomenuta napomena o isključenim unosima u formatu sličnom '2 entries excluded — no data'",
         "hw_winner_count = 2 (18 i 20)",
