@@ -1,0 +1,71 @@
+{
+  "skill_name": "session-start-hook",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Praviš SessionStart hook za Node.js repozitorijum. Ovo je prva iteracija rada na hook-u i korisnik nigde nije pomenuo brzinu pokretanja sesije niti reč 'async'. Da bi smanjio latenciju pokretanja sesije, planiraš da skripta odmah na početku ispiše echo '{\"async\": true, \"asyncTimeout\": 300000}' i pusti npm install u pozadini. Da li je ovaj dizajn u skladu sa pravilima za dizajniranje hook-a iz ovog skilla?",
+      "expected_output": "Ne, nije u skladu. Skill eksplicitno kaže u odeljku 'Design Hook': 'Don't use async mode in the first iteration. Only switch to it if the user asks for it.' Pošto je ovo prva iteracija i korisnik nije tražio async, hook treba da bude sinhron (bez '{\"async\": true...}' linije), a async se uvodi tek naknadno i samo na eksplicitan zahtev korisnika.",
+      "expectations": [
+        "Odgovor eksplicitno kaže da hook NE treba da koristi async mod u ovom slučaju",
+        "Citira ili parafrazira pravilo 'Don't use async mode in the first iteration. Only switch to it if the user asks for it'",
+        "Prepoznaje da je 'prva iteracija bez eksplicitnog zahteva korisnika za async' tačan okidač za pravilo",
+        "Ne opravdava async mod isključivo argumentom smanjenja latencije, jer skill to dopušta tek nakon eksplicitnog zahteva korisnika"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Korisnik traži: 'Napravi mi session-start hook koji instalira sve zavisnosti za moj Python projekat.' Ne pominje da li hook treba da radi i van Claude Code on the web okruženja (npr. lokalno na njegovoj mašini). Projekat ima requirements.txt. Da li skripta treba bezuslovno da pokrene pip install -r requirements.txt čim se izvrši, ili treba nešto da proveri pre toga?",
+      "expected_output": "Skripta treba prvo da proveri promenljivu $CLAUDE_CODE_REMOTE i da izađe (exit 0) ako nije 'true', pre nego što instalira bilo šta. Skill eksplicitno kaže: 'Write the hook only for the web unless user asks otherwise (see $CLAUDE_CODE_REMOTE)', uz konkretan primer koda: if [ \"${CLAUDE_CODE_REMOTE:-}\" != \"true\" ]; then exit 0; fi. Pošto korisnik nije tražio da hook radi i van weba, treba primeniti tu proveru; bezuslovna instalacija u svim okruženjima bila bi opravdana samo da je korisnik eksplicitno to zatražio.",
+      "expectations": [
+        "Odgovor navodi da skripta treba da proveri $CLAUDE_CODE_REMOTE pre instalacije",
+        "Navodi da ako $CLAUDE_CODE_REMOTE nije 'true', skripta treba da izađe (exit 0) bez instalacije",
+        "Citira pravilo 'Write the hook only for the web unless user asks otherwise'",
+        "Prepoznaje da bi se ovo pravilo drugačije primenilo samo da je korisnik eksplicitno tražio da hook radi i lokalno"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Za Node.js projekat koji ima i package.json i package-lock.json, biraš komandu za instalaciju zavisnosti unutar session-start hook-a. Kolega predlaže npm ci jer garantuje čist, reproduktibilan install tačno prema lock fajlu. Da li je npm ci preporučen izbor po ovom skillu, ili postoji bolja opcija i zašto?",
+      "expected_output": "npm ci nije preporučen izbor. Skill eksplicitno kaže: 'The container state gets cached after the hook completes, prefer dependency install methods that take advantage of that (i.e. prefer npm install over npm ci).' Treba koristiti npm install, jer bolje iskorišćava keširano stanje kontejnera između sesija, dok npm ci po dizajnu briše postojeći node_modules i radi čistu instalaciju, poništavajući prednost keširanja.",
+      "expectations": [
+        "Odgovor eksplicitno preporučuje npm install umesto npm ci",
+        "Citira ili parafrazira pravilo o keširanju container stanja i preferenciji 'npm install over npm ci'",
+        "Objašnjava da je razlog keširanje stanja kontejnera nakon završetka hook-a, a ne generička preporuka o čistoći instalacije"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Deo session-start hook skripte izgleda ovako: pri svakom pokretanju, bez ikakve provere da li linija već postoji, skripta radi echo 'export PYTHONPATH=\".\"' >> \"$CLAUDE_ENV_FILE\". Skripta ne traži nikakav unos od korisnika tokom izvršavanja. Da li ovaj deo skripte zadovoljava OBA ključna principa dizajna hook-a iz ovog skilla — da bude idempotentna i da bude neinteraktivna?",
+      "expected_output": "Zadovoljava princip neinteraktivnosti ('Non-interactive (no user input)'), pošto ne traži nikakav unos. Ali NE zadovoljava princip idempotentnosti ('Be idempotent (safe to run multiple times)'): pošto se linija dodaje sa >> bez provere da li već postoji, svako ponovno pokretanje hook-a (npr. kod 'resume' ili 'compact' vrednosti polja source iz SessionStart inputa) dodaje još jednu identičnu 'export PYTHONPATH=\".\"' liniju u $CLAUDE_ENV_FILE, što nije bezbedno ponovno izvršavanje. Potrebna je provera (npr. grep pre append-a) da bi skripta zadovoljila i taj princip.",
+      "expectations": [
+        "Odgovor razdvaja ocenu za neinteraktivnost i za idempotentnost kao dva nezavisna kriterijuma",
+        "Zaključuje da je skripta neinteraktivna (taj princip je zadovoljen)",
+        "Zaključuje da skripta NIJE idempotentna jer ponovljeno pokretanje dodaje duplirane linije u $CLAUDE_ENV_FILE",
+        "Citira oba principa iz skilla: 'Be idempotent (safe to run multiple times)' i 'Non-interactive (no user input)'",
+        "Predlaže ili pominje da je potrebna provera postojanja linije pre dodavanja da bi skripta postala idempotentna"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Projekat ima 500+ testova i veliki broj fajlova za linting. Upravo si napravio i registrovao session-start hook, i sad si u fazama 'Validate Linter' i 'Validate Test' iz workflow-a ovog skilla. Da li treba da pokreneš linter na celom projektu i ceo test suite da bi potvrdio da hook radi ispravno?",
+      "expected_output": "Ne. Skill eksplicitno kaže za linter: 'Figure out what the right command is to run the linters and run it for an example file. No need to lint the whole project.' I za testove: 'Figure out what the right command is to run the tests and run it for one test. No need to run the whole test suite.' Dakle treba pokrenuti linter samo na jednom primer fajlu i samo jedan test, ne ceo projekat/suite. Ako se pojave problemi, hook skriptu treba ažurirati i ponovo testirati.",
+      "expectations": [
+        "Odgovor eksplicitno kaže da NE treba lintovati ceo projekat, samo jedan primer fajl",
+        "Odgovor eksplicitno kaže da NE treba pokretati ceo test suite, samo jedan test",
+        "Citira ili parafrazira 'No need to lint the whole project' i 'No need to run the whole test suite'",
+        "Pominje da se, ako validacija otkrije problem, startup skripta ažurira i ponovo testira"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Upravo si napravio .claude/hooks/session-start.sh (korak 3 workflow-a) i registrovao ga u .claude/settings.json (korak 4 workflow-a). Sledeći prirodan korak ti se čini da uradiš commit i push promena u remote granu. Da li je to u skladu sa redosledom koraka definisanim u workflow-u ovog skilla?",
+      "expected_output": "Ne. Prema definisanom workflow-u, koraci 5-7 ('Validate Hook', 'Validate Linter', 'Validate Test') moraju se izvršiti PRE koraka 8 ('Commit and push'). Konkretno: prvo pokrenuti hook direktno (CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh) i proveriti da su zavisnosti instalirane i da se skripta uspešno završava, zatim validirati linter na primer fajlu, zatim validirati test na jednom testu — i tek onda commit-ovati i push-ovati. Commit/push odmah nakon koraka 4 preskače obavezne validacione korake.",
+      "expectations": [
+        "Odgovor kaže da commit/push NE treba da se radi odmah nakon registracije u settings.json",
+        "Navodi da prvo mora doći validacija hook izvršavanja (korak 5)",
+        "Navodi da moraju doći validacija lintera (korak 6) i validacija testa (korak 7) pre commit-a",
+        "Prepoznaje da je 'Commit and push' korak 8, poslednji pre 'Wrap up' sekcije, i da dolazi posle validacionih koraka"
+      ]
+    }
+  ]
+}
