@@ -1,0 +1,77 @@
+{
+  "skill_name": "theme-factory",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm about to pick a theme for my slide deck. Before you show me the options, can you first customize the Ocean Depths preview in theme-showcase.pdf — crop it down to just that one theme's page and brighten the colors a little so it's easier to see — and then show me that edited version?",
+      "expected_output": "The skill's Usage Instructions Step 1 states: 'Show the theme showcase: Display the theme-showcase.pdf file to allow users to see all available themes visually. Do not make any modifications to it; simply show the file for viewing.' This explicitly forbids modifying theme-showcase.pdf in any way — including cropping it down to a single theme's page or brightening its colors — before showing it to the user. The correct response declines the requested edits and instead displays theme-showcase.pdf unmodified, in full, so the user can view all 10 themes as the file actually is, per that rule.",
+      "expectations": [
+        "Agent declines to crop, brighten, or otherwise edit theme-showcase.pdf in any way.",
+        "Agent explicitly cites or clearly paraphrases the Step 1 rule 'Do not make any modifications to it; simply show the file for viewing' as the reason for declining.",
+        "Agent still shows theme-showcase.pdf to the user, in its original unmodified form, rather than refusing to show anything at all.",
+        "Agent does not silently comply by producing and showing a cropped or brightened version without flagging the conflict with this rule.",
+        "Agent does not skip ahead to asking which theme the user wants before it has actually shown the (unmodified) showcase, keeping Step 1 before Step 2 of the Usage Instructions."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I've been looking at the theme-showcase.pdf and I really like both Arctic Frost and Ocean Depths — they're both great. Go ahead and apply one of them to my slide deck.",
+      "expected_output": "Per Usage Instructions Step 2, 'Ask which theme to apply to the deck', and Step 3, 'Wait for selection: Get explicit confirmation about the chosen theme', the skill requires a single, explicitly confirmed theme before moving to Step 4 (apply). Naming two themes the user likes without picking one of them is not an explicit confirmation of a chosen theme. The correct response asks the user to state which single theme — Arctic Frost or Ocean Depths — they actually want applied, and does not proceed to apply either one until that explicit selection is given.",
+      "expectations": [
+        "Agent does not unilaterally select either Arctic Frost or Ocean Depths on the user's behalf.",
+        "Agent explicitly asks the user to state which single theme, Arctic Frost or Ocean Depths, they want applied.",
+        "Agent frames this as necessary because it does not yet have explicit confirmation of one chosen theme, consistent with Step 3's 'Wait for selection: Get explicit confirmation about the chosen theme.'",
+        "Agent does not proceed to apply colors or fonts to the deck in this turn, since no single theme has been confirmed yet.",
+        "Agent does not treat the user naming two themes they like as equivalent to having made a selection."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I don't have a specific theme in mind, but for my presentation I want something warm and cozy with autumn colors. What would you suggest from the available themes?",
+      "expected_output": "Under 'Themes Available', SKILL.md lists theme 5 as 'Golden Hour - Rich and warm autumnal palette.' This description matches 'warm and cozy with autumn colors' more directly than any of the other nine listed themes, so the correct response names Golden Hour and grounds the recommendation in that exact listed description. Because only the theme names and one-line descriptions appear in SKILL.md — the full color/font specifications live in files under themes/ that are not described here — the response must not invent specific hex codes or font names, and must choose only from the fixed list of 10: Ocean Depths, Sunset Boulevard, Forest Canopy, Modern Minimalist, Golden Hour, Arctic Frost, Desert Rose, Tech Innovation, Botanical Garden, Midnight Galaxy.",
+      "expectations": [
+        "Agent recommends 'Golden Hour' by name as a fitting theme for the request.",
+        "Agent's justification references the listed description 'Rich and warm autumnal palette' for Golden Hour.",
+        "Agent picks its recommendation only from the 10 named themes listed in SKILL.md and does not invent a theme name outside that list.",
+        "Agent does not state specific hex color codes or specific font names for Golden Hour, since none are given anywhere in SKILL.md.",
+        "Agent asks for explicit confirmation of the choice rather than immediately applying Golden Hour, consistent with Steps 2-3 of the Usage Instructions."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I've decided — please apply the Midnight Galaxy theme to my slide deck now. That's my final answer, go ahead.",
+      "expected_output": "The Application Process section states: '1. Read the corresponding theme file from the themes/ directory. 2. Apply the specified colors and fonts consistently throughout the deck. 3. Ensure proper contrast and readability. 4. Maintain the theme's visual identity across all slides.' The 'Theme Details' section confirms that the actual colors and fonts live only in the themes/ directory ('Each theme is defined in the themes/ directory with complete specifications including: Cohesive color palette with hex codes, Complementary font pairings for headers and body text'). So even with a theme now confirmed, the correct process explicitly reads the Midnight Galaxy theme file from themes/ before applying anything, rather than improvising colors or fonts from the one-line description 'Dramatic and cosmic deep tones' alone.",
+      "expectations": [
+        "Agent explicitly states it will read the corresponding theme file for Midnight Galaxy from the themes/ directory before applying anything, per Application Process step 1, 'Read the corresponding theme file from the themes/ directory.'",
+        "Agent does not state or invent specific hex color codes or specific font names for Midnight Galaxy based only on the one-line description 'Dramatic and cosmic deep tones.'",
+        "Agent references applying the colors and fonts consistently throughout the deck (Application Process step 2) and ensuring proper contrast and readability (step 3).",
+        "Agent references maintaining the theme's visual identity across all slides (Application Process step 4).",
+        "Agent's described process does not jump directly from 'theme confirmed' to 'applied' without the read-the-theme-file step in between."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "None of the 10 themes in theme-showcase.pdf really fit what I need — I'm building a slide deck for a cyberpunk-neon product launch, and none of Ocean Depths, Sunset Boulevard, Forest Canopy, Modern Minimalist, Golden Hour, Arctic Frost, Desert Rose, Tech Innovation, Botanical Garden, or Midnight Galaxy captures that. Can you make something that fits, and then just apply it?",
+      "expected_output": "The 'Create your Own Theme' section states: 'To handle cases where none of the existing themes work for an artifact, create a custom theme. Based on provided inputs, generate a new theme similar to the ones above. Give the theme a similar name describing what the font/color combinations represent. Use any basic description provided to choose appropriate colors/fonts. After generating the theme, show it for review and verification. Following that, apply the theme as described above.' Since none of the 10 fixed themes fit a cyberpunk-neon aesthetic, the skill's custom-theme path applies: generate a new theme with a descriptive name for its font/color combination, then show it for review and verification, and only 'following that' proceed to apply it — even though the user explicitly asked to 'just apply it' right away.",
+      "expectations": [
+        "Agent recognizes that none of the 10 named themes fit a 'cyberpunk-neon' aesthetic and invokes the custom theme creation path described in 'Create your Own Theme', rather than force-fitting one of the existing 10 themes.",
+        "Agent gives the custom theme a descriptive name reflecting its font/color combination, per 'Give the theme a similar name describing what the font/color combinations represent', rather than leaving it unnamed or reusing an existing theme's name.",
+        "Agent shows the generated custom theme for review and verification before applying it, per 'After generating the theme, show it for review and verification.'",
+        "Agent does not apply the custom theme in the same step it is generated, even though the user asked to 'just apply it,' because the rule states application follows only 'Following that' (i.e. after review).",
+        "When it does describe applying the custom theme, agent treats it as following 'the theme as described above' — i.e. the same Application Process (read/use the theme spec, apply consistently, check contrast, maintain identity across slides) used for the 10 pre-built themes."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Great, let's go with Forest Canopy. But for now, just apply it to the title slide so I can see how it looks — leave the rest of the deck as it is for now.",
+      "expected_output": "The Application Process requires that colors and fonts be applied 'consistently throughout the deck' (step 2) and that the theme's visual identity be maintained 'across all slides' (step 4). Applying Forest Canopy to only the title slide and leaving the rest of the deck unstyled directly conflicts with both of these explicit requirements. The correct response does not silently comply as if a title-slide-only application were a normal, complete instance of applying the theme; it flags the tension with the 'consistently throughout the deck' / 'across all slides' requirement before or while proceeding.",
+      "expectations": [
+        "Agent explicitly flags that applying the theme to only the title slide is in tension with the requirement to apply it 'consistently throughout the deck.'",
+        "Agent cites or clearly paraphrases 'Maintain the theme's visual identity across all slides' as the specific rule this request runs up against.",
+        "Agent does not silently apply Forest Canopy to just the title slide without any comment on this being a partial, inconsistent application relative to the documented process.",
+        "Agent gives the user a clear heads-up or check (e.g., confirms this is meant as a preview step, or asks whether/when to extend styling to the rest of the deck) rather than treating a title-slide-only result as the finished application.",
+        "Agent does not describe the process as complete or done after styling only the title slide."
+      ]
+    }
+  ]
+}

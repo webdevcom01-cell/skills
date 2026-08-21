@@ -1,0 +1,71 @@
+{
+  "skill_name": "soma-model-preflight",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Agent po imenu 'Content Summarizer' ima agent-level model podešen na gpt-4.1-mini. Live provera API ključeva (as_diagnose_models) upravo je vratila: OPENAI_API_KEY ✅ SET, DEEPSEEK_API_KEY ❌ NOT SET, GROQ_API_KEY ❌ NOT SET. Agent ima tri node-a u svom flow-u: node 'summarize-1' model=gpt-4.1-mini, node 'translate-2' model=gpt-4.1-mini, node 'extract-3' model=deepseek-chat. Korisnik kaže: 'agent-level model je gpt-4.1-mini i ključ za to je set, znači sve je ok, mogu da pokrenem?' Da li je agent zaista bezbedan za pokretanje?",
+      "expected_output": "NE, agent NIJE bezbedan za pokretanje uprkos tome što je agent-level model (gpt-4.1-mini) OK. Hard rule #2 iz SKILL.md nalaže da se proveravaju node models, ne samo agent model — 'An agent can be gpt-4.1-mini overall while a single node uses deepseek-chat. Per-node mismatches cause the same silent fail.' Node 'extract-3' koristi deepseek-chat, a DEEPSEEK_API_KEY nije podešen, pa će taj node tiho pasti (WILL FAIL) čak i ako agent-level model izgleda ispravno.",
+      "expectations": [
+        "Agent zaključuje da NIJE bezbedno pokrenuti agenta uprkos ispravnom agent-level modelu",
+        "Agent eksplicitno identifikuje node 'extract-3' (deepseek-chat) kao problematičan, ne samo agent-level model",
+        "Agent objašnjava da se moraju proveriti node models pojedinačno, ne samo agentModel u celini (Hard rule #2)",
+        "Agent NE zaključuje 'sve je ok' samo na osnovu toga što je agent-level model gpt-4.1-mini sa podešenim ključem"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Live as_diagnose_models() provera upravo vraća: OPENAI_API_KEY ❌ NOT SET, DEEPSEEK_API_KEY ❌ NOT SET, GROQ_API_KEY ❌ NOT SET — dakle NIJEDAN API ključ trenutno nije podešen na serveru. Agent 'Report Writer' koristi model gpt-4.1-mini na svakom node-u. Korisnik traži preflight pre pokretanja. Šta treba da uradi skill u ovoj situaciji — da li i dalje može da predloži gpt-4.1-mini kao fallback?",
+      "expected_output": "NE — u ovom slučaju ne postoji nijedan 'sane fallback' jer čak ni podrazumevani bezbedan fallback (gpt-4.1-mini) nema podešen ključ (OPENAI_API_KEY je takođe NOT SET). Hard rule #5 nalaže: 'If no key is available for any sane fallback → STOP and tell the user to add the key. Don't pretend a run will succeed.' Skill treba da STANE i jasno kaže korisniku da nijedan ključ nije podešen i da treba dodati bar jedan API ključ pre pokretanja — ne sme predložiti gpt-4.1-mini kao da će raditi, jer taj model takođe zahteva ključ koji nedostaje.",
+      "expectations": [
+        "Agent zaključuje da mora da STANE (STOP) i ne predlaže fallback koji izgleda kao rešenje",
+        "Agent eksplicitno navodi da gpt-4.1-mini ovde NIJE bezbedan fallback jer OPENAI_API_KEY takođe nije podešen",
+        "Agent kaže korisniku da mora dodati bar jedan API ključ pre nego što bilo šta može bezbedno da se pokrene",
+        "Agent NE tvrdi da će run 'verovatno raditi' ili predlaže default gpt-4.1-mini bez upozorenja da i taj model treba ključ koji fali"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "SKILL.md fajl sadrži snapshot iz 2026-06-26 koji kaže GROQ_API_KEY ❌ NOT SET. Danas, pri pokretanju preflight-a, agent PRVO izvrši live as_diagnose_models() proveru (kako Hard rule #1 nalaže) i ona vraća: OPENAI_API_KEY ✅ SET, DEEPSEEK_API_KEY ❌ NOT SET, GROQ_API_KEY ✅ SET (promenilo se od 2026-06-26). Agent 'Voice Assistant' ima node koji koristi model llama-3.3-70b-versatile. Da li preflight treba da označi taj node kao 'WILL FAIL' i predloži zamenu modela na gpt-4.1-mini?",
+      "expected_output": "NE. Iako stari snapshot u SKILL.md kaže da GROQ_API_KEY nije podešen, Hard rule #1 eksplicitno nalaže da se odluke donose na osnovu ŽIVIH podataka, ne snapshot-a: 'Verify keys live every time... Decisions follow live data, not the snapshot' i 'These keys can change... never trust this snapshot blindly.' Pošto live provera pokazuje GROQ_API_KEY ✅ SET, node sa llama-3.3-70b-versatile ima svoj ključ podešen i NEĆE pasti — ne treba mu fallback. Fallback bi bio potreban samo za node-ove koji koriste deepseek-* modele (DEEPSEEK_API_KEY je i dalje NOT SET).",
+      "expectations": [
+        "Agent zaključuje da node sa llama-3.3-70b-versatile NE treba fallback, jer GROQ_API_KEY je prema live proveri SET",
+        "Agent eksplicitno kaže da se odluka zasniva na live rezultatu as_diagnose_models, a ne na starom snapshot-u iz SKILL.md",
+        "Agent NE predlaže zamenu na gpt-4.1-mini za llama-3.3-70b-versatile node u ovom scenariju",
+        "Agent prepoznaje da bi eventualni deepseek-chat node i dalje bio problematičan (DEEPSEEK_API_KEY ostaje NOT SET), razlikujući ga od llama node-a"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Korisnik kaže: 'samo proveri da li je agent X spreman za pokretanje, ne želim ništa da menjaš.' Preflight provera pronalazi node koji koristi deepseek-chat, a DEEPSEEK_API_KEY nije podešen na serveru (WILL FAIL). Šta treba da uradi skill nakon što identifikuje ovaj problem?",
+      "expected_output": "Skill treba da PRIKAŽE nalaz i predloženi fallback (gpt-4.1-mini) uz napomenu da će se izlaz razlikovati od deepseek-chat, ali NE SME pozvati as_update_agent_model i primeniti zamenu bez eksplicitne potvrde korisnika (Hard rule #3: 'Never swap a model without confirmation. as_update_agent_model changes behavior and cost; the user must approve each swap.'). Čak i da korisnik nije eksplicitno rekao 'ne diraj', pozivanje as_update_agent_model bez potvrde bi bilo pogrešno — ovde je to dodatno i eksplicitno zabranjeno korisnikovim zahtevom, pa treba samo prijaviti nalaz i predlog, i sačekati potvrdu (da / ne / 'dodaću ključeve').",
+      "expectations": [
+        "Agent NE poziva (ne predlaže pozivanje) as_update_agent_model bez prethodne potvrde korisnika",
+        "Agent prikazuje nalaz (WILL FAIL) i predloženi fallback gpt-4.1-mini kao predlog, ne kao već primenjenu promenu",
+        "Agent pominje da će čekati eksplicitnu potvrdu (npr. da/ne/'dodaću ključeve') pre primene",
+        "Agent poštuje eksplicitni zahtev korisnika 'ne želim ništa da menjaš' i ne tumači 'proveri' kao dozvolu za automatsku izmenu"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Preflight provera pronalazi node 'ai_response-1' koji koristi deepseek-chat (DEEPSEEK_API_KEY nije podešen, WILL FAIL). Taj isti node takođe ima PRAZAN (empty) prompt field. Korisnik potvrđuje predlog i agent pozove as_update_agent_model / as_patch_node_field da promeni model na gpt-4.1-mini. STEP 5 (Verify) ponovo pokreće as_diagnose_models() i sada model za taj node pokazuje ✅ OK (ključ je podešen). Da li je node 'ai_response-1' sada u potpunosti ispravan i bezbedan za pokretanje?",
+      "expected_output": "NE u potpunosti. Preflight je rešio SAMO problem sa ključem/modelom — node sada ima model kome je ključ podešen. Ali prazan prompt je poseban, nepovezan bug koji promena modela ne rešava: SKILL.md eksplicitno kaže 'a node with an empty prompt... is a separate bug — swapping its model won't fix it. Flag it and route to as_update_agent_prompt / soma-agent-debugger.' Preflight treba da prijavi model-fix kao uspešan ALI da posebno flaguje prazan prompt kao odvojen, nerešen problem i uputi na as_update_agent_prompt ili soma-agent-debugger — ne sme prijaviti node kao potpuno 'bezbedan za pokretanje' bez tog upozorenja.",
+      "expectations": [
+        "Agent NE tvrdi da je node u potpunosti bezbedan za pokretanje samo zato što je model-ključ problem rešen",
+        "Agent eksplicitno prepoznaje prazan prompt kao ODVOJEN bug koji zamena modela ne rešava",
+        "Agent upućuje na as_update_agent_prompt ili soma-agent-debugger za rešavanje praznog prompta, ne na preflight/model swap",
+        "Agent razlikuje status 'ključ/model OK' od stvarne funkcionalne ispravnosti node-a"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Agent 'Sales Digest' ima tri node-a: node 'fetch-1' model=gpt-4.1 (OPENAI_API_KEY ✅ SET, radi ispravno), node 'analyze-2' model=gpt-4.1 (radi ispravno), node 'summarize-3' model=deepseek-chat (DEEPSEEK_API_KEY ❌ NOT SET, WILL FAIL). Prema opštem pravilu, podrazumevani bezbedan fallback je gpt-4.1-mini. Koji model treba predložiti za node 'summarize-3'?",
+      "expected_output": "Treba predložiti gpt-4.1 (model koji već rade node-ovi 'fetch-1' i 'analyze-2'), NE generički default gpt-4.1-mini. SKILL.md u STEP 3 eksplicitno kaže: 'If the agent already mixes a working OpenAI node, match that node's model for consistency' — ovo je izuzetak od opšteg pravila (deepseek/llama → gpt-4.1-mini) kada agent već ima radni OpenAI node u istom flow-u. Ovo je u skladu i sa Hard rule #4 'Prefer the smallest behavior change' — zadržavanje konzistentnosti sa već korišćenim modelom je manja promena ponašanja nego uvođenje trećeg, drugačijeg modela.",
+      "expectations": [
+        "Agent predlaže gpt-4.1 za node 'summarize-3', a NE gpt-4.1-mini",
+        "Agent eksplicitno navodi da je razlog to što agent već koristi radni OpenAI model (gpt-4.1) na drugim node-ovima, pa treba zadržati konzistentnost",
+        "Agent prepoznaje da je ovo izuzetak od opšteg default-fallback pravila (deepseek/llama → gpt-4.1-mini), primenjen jer postoji poseban uslov ('already mixes a working OpenAI node')",
+        "Agent NE primenjuje mehanički generički default gpt-4.1-mini bez provere postojećih node modela u istom agentu"
+      ]
+    }
+  ]
+}

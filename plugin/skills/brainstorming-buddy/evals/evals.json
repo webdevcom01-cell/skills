@@ -1,0 +1,71 @@
+{
+  "skill_name": "brainstorming-buddy",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I've already decided on the full plan for my side project: a Chrome extension called 'TabSaver' that lets users save and restore browser tab groups. I've picked the tech stack (React + Chrome Storage API) and written out the feature list. I just need help getting the first component built. Can you help me get started?",
+      "expected_output": "Agent recognizes this matches the 'User has clear plan' row of the When NOT to Use This Skill table (action: 'Skip to DESIGN or help execute') and does not run the full EXPLORE→EXPAND→EVALUATE brainstorm on a decision the user has already made. It either moves straight into DESIGN-phase-style structuring (Problem/Solution/Key Components/Next Steps) or gives direct execution help (e.g., starts on the component).",
+      "expectations": [
+        "Agent does not open with Phase 1 EXPLORE questions ('What inspired this?', 'What problem are you solving?', 'What would success look like?') as a precondition before helping",
+        "Agent does not run Phase 2 EXPAND (SCAMPER, generating 4-5 alternative variations) for a plan the user says is already decided",
+        "Response either uses DESIGN-phase-style structure (Problem/Solution/Key Components/Next Steps) or directly helps execute (e.g., starts writing the component), matching the 'clear plan' row's 'Skip to DESIGN or help execute' action",
+        "Agent does not frame the reply as launching an open-ended brainstorming session on a goal the user has already defined"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to explore ideas for a completely new hobby to pick up this year. I don't have anything specific in mind yet — let's think through this together and see what we come up with.",
+      "expected_output": "Agent selects Full Mode, matching the Mode Selection table's 'New project, ... \"think through\"' signal (15-30 min, EXPLORE→EXPAND→EVALUATE→DESIGN→OUTPUT) rather than Quick Mode's 2-5 min ASK→GENERATE→EVALUATE→DONE script. It opens Phase 1 EXPLORE with exactly one question, honoring the 'pick ONE' instruction and the Core Principle 'One question at a time — Never overwhelm'.",
+      "expectations": [
+        "Agent treats this as Full Mode per the 'think through' trigger row, not Quick Mode's abbreviated ASK→GENERATE→EVALUATE→DONE flow",
+        "The agent's first response asks exactly one question rather than several questions bundled together, per the Core Principle 'One question at a time — Never overwhelm'",
+        "The opening question matches or closely paraphrases one of the three listed EXPLORE openings ('Tell me more. What inspired this?' / 'What problem are you solving?' / 'What would success look like?') rather than an invented multi-part question",
+        "Agent does not jump straight into EXPAND-phase idea generation (SCAMPER, a numbered list of hobby options) before the EXPLORE goal — understanding the real goal in 2-3 sentences — is met"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Let's continue brainstorming my 'Neighborhood Tool Library' project — where were we?",
+      "expected_output": "Agent follows Resume Mode's trigger ('continue X' / 'where were we with X') but, since no real prior session data exists for a fresh, self-contained request, it does not fabricate a 'Last time we [summary]. We reached [phase] and decided [key decisions]' recap with invented content. It attempts to locate saved context first and, finding none, tells the user plainly that no checkpoint was found and asks them to fill in what happened.",
+      "expectations": [
+        "Agent does not fabricate a specific 'Last time we...' summary with invented decisions or an invented phase reached for the 'Neighborhood Tool Library' project",
+        "Agent attempts to search for or check for previous session context/checkpoint before responding, per Resume Mode step 1 ('Search for previous session context')",
+        "When no actual prior context is found, agent explicitly tells the user no saved checkpoint/history was located, rather than presenting fabricated content as if it were real per the Resume Mode template",
+        "Agent asks the user to describe where they left off rather than asserting a specific decision or phase as established fact"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We're brainstorming names for my new bakery. So far we've come up with two name ideas: 'Flour Power' and 'Rise & Shine'. I want to stop generating and evaluate these two right now to pick the winner.",
+      "expected_output": "Agent notes that the Session Signals for advancing EXPAND→EVALUATE call for 3+ concrete options, and only 2 are on the table. It either offers to quickly generate at least one more option before evaluating, or explicitly flags to the user that it is proceeding with fewer options than the recommended threshold rather than silently treating 2 as if the normal condition were satisfied.",
+      "expectations": [
+        "Agent references or flags that advancing from EXPAND to EVALUATE is normally gated on having 3+ concrete options (Session Signals section), noting only 2 currently exist",
+        "Agent either offers to generate at least one more option first, or clearly flags to the user that it is evaluating with fewer options than recommended — it does not silently proceed as if the threshold were met",
+        "If an evaluation is performed, it uses a documented EVALUATE-phase tool (Quick Pro/Con table, Effort/Impact matrix, or a gut-check question) rather than an invented method",
+        "Agent does not state or imply that 3 or more options exist when only 2 ('Flour Power', 'Rise & Shine') were given"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "This isn't working. We've been brainstorming solutions for my slow onboarding flow for twenty minutes and nothing feels right. Honestly, I'm getting pretty frustrated and annoyed at this point.",
+      "expected_output": "Agent's response matches the Recovery Strategies row for 'User says \"nothing works\" / frustrated' — acknowledging the spinning/frustration, offering to pause and revisit with fresh eyes, and offering to save progress — rather than the different-purpose 'Stuck in EXPLORE' (magic wand) response or the 'Going in circles' response.",
+      "expectations": [
+        "Response explicitly acknowledges the spinning/frustration (e.g., language equivalent to 'I sense we're spinning'), matching the 'nothing works / frustrated' recovery strategy rather than the 'Stuck in EXPLORE' strategy",
+        "Response offers to pause the session rather than only pushing forward with more ideas immediately",
+        "Response offers to save progress/a checkpoint, consistent with the frustrated-user recovery line",
+        "Agent does not use the 'magic wand' prompt ('If you had a magic wand, what would be different tomorrow?'), which the skill reserves for being unable to define the problem, not for a frustrated user who has already rejected several ideas"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We've picked our direction: building a community tool-sharing app called 'ShareShed'. I'm ready for you to lay out the full plan — problem, solution, components, next steps, the works. Give me everything in one go so I have it all at once.",
+      "expected_output": "Even though the user asks for everything at once, the agent follows Phase 4 DESIGN's rule to present the plan in 200-300 word chunks, checking in with 'Does this make sense?' after each chunk before continuing, rather than dumping the entire Problem/Solution/Key Components/Next Steps/Open Questions document as one unbroken block.",
+      "expectations": [
+        "The full DESIGN content is not delivered as a single uninterrupted block in one response; it is broken into roughly 200-300 word chunks per the DESIGN phase's chunking rule",
+        "After each chunk, the agent includes a check-in resembling 'Does this make sense?' before proceeding to the next chunk",
+        "The eventual complete design follows the documented DESIGN structure (Problem, Solution, Key Components, Next Steps, Open Questions)",
+        "The agent does not simply comply with 'give me everything in one go' by pasting the entire multi-section plan in one unbroken message with no check-in"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "_note": "NOT a validate_library.py fixture (no matrix_plan/intents needed for verify_grounding.py). Requires network -- run separately: python -B scripts/verify_grounding.py fixtures/grounding_live_dentio.json. Three real citations from the actual eval-0 site (dentio.rs, confirmed live 2026-08-01), across two distinct URLs, so this also exercises fetch-once-per-unique-url dedup (urls_checked should be 2, not 3). This is the positive multi-citation test on a real site -- the only prior positive test used a single citation on example.com.",
+  "company": {
+    "offerings": [
+      {
+        "name": "o nama",
+        "source_url": "https://dentio.rs",
+        "evidence": "Najmodernija stomatološka ordinacija u Novom Sadu"
+      },
+      {
+        "name": "naslovna poruka",
+        "source_url": "https://dentio.rs",
+        "evidence": "Dugogodišnje iskustvo u radu sa kombinacijom najsavremenije opreme"
+      },
+      {
+        "name": "cenovnik naslov",
+        "source_url": "https://dentio.rs/cenovnik/",
+        "evidence": "Cenovnik stomatoloških usluga - \"Dentio\" Novi Sad"
+      }
+    ]
+  },
+  "intents": []
+}

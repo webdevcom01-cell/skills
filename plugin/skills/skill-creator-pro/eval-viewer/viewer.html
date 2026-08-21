@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<!-- Modified from anthropics/skills@b29e7cf6 (skills/skill-creator) by
+     buky <webdevcom01@gmail.com>, 2026-07-30. Apache-2.0; see LICENSE.txt. Changes: CHANGELOG.md. -->
+<html lang="en">
+<head>
+  <!-- CSP (T-26). ISKRENO O DOMETU: podatak se ubacuje UNUTAR inline skripte
+       (/*__EMBEDDED_DATA__*/), pa se sadrzaj skripte menja po generisanju i
+       staticki sha256- hash ne radi. Zato 'unsafe-inline'.
+       To znaci da ova polisa NE zaustavlja klasu XSS-a zbog koje je N-02
+       postojao. Sta stvarno daje: blokira SPOLJNE skripte osim imenovanih
+       origina, zabranjuje <object>/<embed>, zakljucava base-uri (otimanje
+       relativnih putanja) i form-action (exfiltracija kroz podmetnutu formu).
+       Slabija odbrana, ne odsustvo odbrane - i ne sme se citati kao "viewer je
+       zasticen CSP-om". -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.sheetjs.com; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      /* Granica mora da se VIDI: na #e8e6dc odnos prema beloj je 1,25:1,
+         pa se ivice polja prakticno ne razaznaju (N-16, WCAG 1.4.11 trazi
+         3:1 za granice kontrola). Ton je odabran nisko zasicen namerno —
+         algoritamsko tamnjenje uz zadrzan topao ton daje maslinasto zeleno. */
+      --border: #969590;
+      /* Isti svetli ton i dalje treba, ali kao POVRSINA a ne kao granica:
+         trake zaglavlja i hover podloge. Kao pozadina nista ne krsi — dark
+         tekst na njoj ima 14,7:1. */
+      --surface-alt: #e8e6dc;
+      --text: #141413;
+      --text-muted: #716e63;
+      --accent: #c0502c;
+      --accent-hover: #bb5a39;
+      --green: #63734d;
+      --green-bg: #eef2e8;
+      --red: #c73636;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1874ce;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #b65908;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--surface-alt);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    /*__EMBEDDED_DATA__*/
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+    // Set once the human clicks "Submit All Reviews". After that, no automatic
+    // path is allowed to downgrade the recorded status back to in_progress —
+    // only an explicit human action could, and there is none in this UI (N-06).
+    let submittedComplete = false;
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            // Every save now carries every run, including the ones with no
+            // comment, so skip the empties instead of filling the map with "".
+            for (const r of data.reviews) {
+              if (r.feedback) feedbackMap[r.run_id] = r.feedback;
+            }
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs; the button then reports what is about to be signed
+      visitedRuns.add(index);
+      updateDoneButton();
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    //
+    // The table is BUILT, not parsed from a string. This used to be
+    // `wrapper.innerHTML = XLSX.utils.sheet_to_html(ws)` — the last dynamic
+    // innerHTML in this viewer — and that was an executable injection point,
+    // reproduced in Chromium (N-43):
+    //
+    //   sheet_to_html escapes < and > in the cell's TEXT, which is why the
+    //   defect read as "not reproducible" for a long time. But it puts the same
+    //   value into the data-v="..." ATTRIBUTE without escaping the double quote.
+    //   A cell containing
+    //       y" autofocus onfocus="doSomething()" tabindex="0
+    //   closes data-v early and lands autofocus/onfocus/tabindex on the <td> as
+    //   real attributes — arbitrary script, no user interaction. Injected
+    //   style="position:fixed;width:100vw;height:100vh" gives a full-screen
+    //   overlay on top of that.
+    //
+    // The CSP on this page does NOT stop it: script-src 'unsafe-inline' permits
+    // inline event handlers. Defence had to move into the code.
+    //
+    // The .xlsx being rendered is produced by the skill under test, and a script
+    // running here can write feedback.json, which SKILL.md instructs Claude to
+    // read and rewrite the skill from. Same chain as the other viewer XSS.
+    //
+    // sheet_to_json returns values, not markup, and textContent cannot create an
+    // element or an attribute — so correctness no longer depends on a third
+    // party's escaping, on any SheetJS version. Merges are carried over from
+    // '!merges' by hand; measured against the old path, rows, colspan and visible
+    // text are identical, and the payload stays VISIBLE as text (silently
+    // dropping it would be its own kind of false report).
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#716e63; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const rows = XLSX.utils.sheet_to_json(
+            ws, { header: 1, raw: false, defval: "" });
+
+          // Merged ranges: the top-left cell carries the span, the cells it
+          // covers are skipped, exactly as sheet_to_html did.
+          const merges = (ws && ws["!merges"]) || [];
+          const covered = new Set();
+          const spans = new Map();
+          for (const m of merges) {
+            spans.set(m.s.r + ":" + m.s.c,
+                      { cs: m.e.c - m.s.c + 1, rs: m.e.r - m.s.r + 1 });
+            for (let r = m.s.r; r <= m.e.r; r++) {
+              for (let c = m.s.c; c <= m.e.c; c++) {
+                if (r !== m.s.r || c !== m.s.c) covered.add(r + ":" + c);
+              }
+            }
+          }
+
+          const table = document.createElement("table");
+          rows.forEach((row, r) => {
+            const tr = document.createElement("tr");
+            (row || []).forEach((val, c) => {
+              if (covered.has(r + ":" + c)) return;
+              const td = document.createElement("td");
+              const span = spans.get(r + ":" + c);
+              if (span) {
+                if (span.cs > 1) td.colSpan = span.cs;
+                if (span.rs > 1) td.rowSpan = span.rs;
+              }
+              td.textContent = (val === null || val === undefined) ? "" : String(val);
+              tr.appendChild(td);
+            });
+            table.appendChild(tr);
+          });
+
+          const wrapper = document.createElement("div");
+          wrapper.appendChild(table);
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+
+      // `summary.passed` / `.failed` / `.total` come from grading.json, which is
+      // written by the grader agent \u2014 i.e. by a model, from the tested skill's own
+      // output. They were interpolated into innerHTML with no escaping at all on
+      // the assumption that they are numbers; a string value there executed
+      // arbitrary JS in the page that also hosts the same-origin feedback endpoint
+      // (N-02f). textContent removes the assumption entirely.
+      const summaryRow = el("div", { className: "grades-summary" }, [
+        el("span", { className: ("grade-badge " + badgeClass).trim(), text: passRate }),
+        el("span", { text: (summary.passed || 0) + " passed, " + (summary.failed || 0)
+                           + " failed of " + (summary.total || 0) }),
+      ]);
+
+      // Assertions list
+      const list = el("ul", { className: "assertion-list" });
+      for (const exp of expectations) {
+        const item = el("li", { className: "assertion-item" }, [
+          el("span", { className: "assertion-status " + (exp.passed ? "pass" : "fail"),
+                       text: exp.passed ? "\u2713" : "\u2717" }),
+          el("span", { text: exp.text }),
+        ]);
+        if (exp.evidence) {
+          item.appendChild(el("div", { className: "assertion-evidence", text: exp.evidence }));
+        }
+        list.appendChild(item);
+      }
+
+      content.replaceChildren(el("div", { style: "padding: 1rem;" }, [summaryRow, list]));
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+
+    // The button is the only place the human sees what their click will assert.
+    // "Submit All Reviews" alone said nothing about how much had been looked at.
+    function updateDoneButton() {
+      const doneBtn = document.getElementById("done-btn");
+      const total = EMBEDDED_DATA.runs.length;
+      const seen = visitedRuns.size;
+      doneBtn.textContent = `Submit All Reviews (${seen} of ${total} reviewed)`;
+      doneBtn.classList.toggle("ready", seen >= total);
+    }
+
+    // Move whatever is in the textarea into the map. Shared by every save path
+    // so they cannot drift apart.
+    function captureCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+    }
+
+    // One payload shape for every write. `viewed` is the whole point: without it
+    // a Submit clicked one second after load is byte-identical to a careful read
+    // of every run, and SKILL.md reads empty feedback as approval (N-05).
+    function buildFeedbackPayload(status) {
+      const ts = new Date().toISOString();
+      const reviews = EMBEDDED_DATA.runs.map((r, i) => ({
+        run_id: r.id,
+        feedback: feedbackMap[r.id] || "",
+        viewed: visitedRuns.has(i),
+        timestamp: ts,
+      }));
+      return {
+        reviews,
+        reviewed_count: reviews.filter(r => r.viewed).length,
+        total_count: reviews.length,
+        status,
+      };
+    }
+
+    function saveCurrentFeedback() {
+      captureCurrentFeedback();
+
+      // Auto-save used to send ONLY the non-empty entries with a hardcoded
+      // status of in_progress. After a completed submit that made the next
+      // keystroke destructive — the finished review collapsed to
+      // {"reviews": [], "status": "in_progress"} 800 ms later. Same shape every
+      // time now, and the status never walks back from complete (N-06).
+      const payload = buildFeedbackPayload(
+        submittedComplete ? "complete" : "in_progress");
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: feedbackHeaders(),
+        body: JSON.stringify(payload, null, 2),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      captureCurrentFeedback();
+
+      // POST once with status: complete — all runs, each carrying whether the
+      // human actually opened it, so the model can tell "no feedback" (looks
+      // good) from "never reviewed". The old payload said only the first of
+      // those two things, and the comment claimed both (N-05).
+      submittedComplete = true;
+      const payload = JSON.stringify(buildFeedbackPayload("complete"), null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: feedbackHeaders(),
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // This used to call saveCurrentFeedback(), whose reduced payload reset the
+      // status to in_progress AND dropped every run — so the single OK button in
+      // a dialog reading "Your feedback has been saved" destroyed the review it
+      // had just confirmed (N-06). Keep the original intent (pick up anything
+      // typed between Submit and OK) but re-send the SAME complete payload.
+      captureCurrentFeedback();
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: feedbackHeaders(),
+        body: JSON.stringify(buildFeedbackPayload("complete"), null, 2),
+      }).catch(() => { /* static mode — the file was already downloaded */ });
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    // Headers for every write to /api/feedback. The token is embedded by the
+    // server into the page it serves, so only a document loaded from this origin
+    // can send it; the JSON content type additionally forces a preflight on any
+    // cross-origin attempt, which the server does not answer (N-03).
+    function feedbackHeaders() {
+      const h = { "Content-Type": "application/json" };
+      if (EMBEDDED_DATA.csrf_token) h["X-CSRF-Token"] = EMBEDDED_DATA.csrf_token;
+      return h;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      // textContent -> innerHTML escapes & < >, but NOT quotes. That is safe in a
+      // text position and unsafe the moment the result lands inside an attribute
+      // value, where a single `"` closes the attribute and the rest becomes new
+      // attributes (N-02a). Escape both quote characters so this helper is safe in
+      // either position.
+      return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    // ---- DOM construction helpers ----
+    // Values are placed with textContent or property assignment, never parsed as
+    // HTML. That makes the views below structurally immune to the N-02 family
+    // instead of dependent on remembering to call escapeHtml at every single sink
+    // — which is exactly what went wrong: of the interpolation sites in the
+    // benchmark and grades views, most called no escaping at all.
+    function el(tag, opts, children) {
+      const node = document.createElement(tag);
+      if (opts) {
+        if (opts.text != null) node.textContent = String(opts.text);
+        if (opts.className) node.className = opts.className;
+        if (opts.title != null) node.title = String(opts.title);
+        if (opts.style) node.setAttribute("style", opts.style);
+      }
+      for (const child of (children || [])) {
+        if (child == null) continue;
+        node.appendChild(typeof child === "string"
+          ? document.createTextNode(child) : child);
+      }
+      return node;
+    }
+
+    function txt(value) {
+      return document.createTextNode(String(value));
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      const frag = document.createDocumentFragment();
+
+      // Header
+      frag.appendChild(el("h2", {
+        style: "font-family: Poppins, sans-serif; margin-bottom: 0.5rem;",
+        text: "Benchmark Results" }));
+
+      const headerP = el("p", {
+        style: "color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;" });
+      if (metadata.skill_name) {
+        headerP.appendChild(el("strong", { text: metadata.skill_name }));
+        headerP.appendChild(txt(" — "));
+      }
+      if (metadata.timestamp) headerP.appendChild(txt(metadata.timestamp + " — "));
+      if (metadata.evals_run) {
+        // eval_id reaches this list from eval_metadata.json without coercion, so it
+        // is not necessarily an array of numbers — `.join` on a non-array used to
+        // throw and blank the whole tab, and the joined text was interpolated with
+        // no escaping (N-02b).
+        const evals = Array.isArray(metadata.evals_run)
+          ? metadata.evals_run.join(", ") : metadata.evals_run;
+        headerP.appendChild(txt("Evals: " + evals + " — "));
+      }
+      headerP.appendChild(txt((metadata.runs_per_configuration || "?") + " runs per configuration"));
+      frag.appendChild(headerP);
+
+      function fmtStat(stat, pct) {
+        if (!stat || typeof stat.mean !== "number") return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        // At n=1 the sample stddev is undefined, not zero: "± 0" reads as perfect
+        // reproducibility when nothing was measured twice. `n` is carried by
+        // calculate_stats for exactly this (see the benchmark.md formatting).
+        if (stat.n === 1) return m + suffix + " (n=1)";
+        const s = typeof stat.stddev === "number"
+          ? (pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1)) : null;
+        const nPart = typeof stat.n === "number" ? " (n=" + stat.n + ")" : "";
+        return s === null ? m + suffix + nPart
+                          : m + suffix + " ± " + s + suffix + nPart;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      const summaryHead = el("thead", null, [el("tr", null, [
+        el("th", { text: "Metric" }),
+        el("th", { text: labelA }),
+        el("th", { text: labelB }),
+        el("th", { text: "Delta" }),
+      ])]);
+      const summaryBody = el("tbody");
+
+      // `delta.*` is a preformatted string straight out of benchmark.json, which
+      // SKILL.md explicitly allows a human or agent to write by hand — and it went
+      // into innerHTML unescaped (N-02e).
+      function metricRow(label, statA, statB, deltaValue, pct, deltaSuffix) {
+        return el("tr", null, [
+          el("td", null, [el("strong", { text: label })]),
+          el("td", { text: fmtStat(statA, pct) }),
+          el("td", { text: fmtStat(statB, pct) }),
+          el("td", { className: deltaClass(deltaValue),
+                     text: deltaValue ? deltaValue + (deltaSuffix || "") : "—" }),
+        ]);
+      }
+
+      summaryBody.appendChild(metricRow("Pass Rate", a.pass_rate, b.pass_rate,
+                                        delta.pass_rate, true, ""));
+      // Time / Tokens rows only when there is data for them
+      if (a.time_seconds || b.time_seconds) {
+        summaryBody.appendChild(metricRow("Time (s)", a.time_seconds, b.time_seconds,
+                                          delta.time_seconds, false, "s"));
+      }
+      if (a.tokens || b.tokens) {
+        summaryBody.appendChild(metricRow("Tokens", a.tokens, b.tokens,
+                                          delta.tokens, false, ""));
+      }
+
+      frag.appendChild(el("table", { className: "benchmark-table" },
+                          [summaryHead, summaryBody]));
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        frag.appendChild(el("h3", {
+          style: "font-family: Poppins, sans-serif; margin-bottom: 0.75rem;",
+          text: "Per-Eval Breakdown" }));
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          frag.appendChild(el("h4", {
+            style: "font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);",
+            text: evalName }));
+
+          const runHead = el("tr", null, [
+            el("th", { text: "Config" }),
+            el("th", { text: "Run" }),
+            el("th", { text: "Pass Rate" }),
+            hasTime ? el("th", { text: "Time (s)" }) : null,
+            hasErrors ? el("th", { text: "Crashes During Execution" }) : null,
+          ]);
+          const runBody = el("tbody");
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              // `configLabel` is derived from a directory name on disk (N-02c) and
+              // `run.run_number` comes from benchmark.json (N-02d); both were
+              // interpolated with no escaping whatsoever.
+              runBody.appendChild(el("tr", { className: rowClass }, [
+                el("td", { text: configLabel }),
+                el("td", { text: run.run_number }),
+                el("td", { className: prClass,
+                           text: ((r.pass_rate || 0) * 100).toFixed(0) + "% ("
+                                 + (r.passed || 0) + "/" + (r.total || 0) + ")" }),
+                hasTime ? el("td", { text: typeof r.time_seconds === "number"
+                                           ? r.time_seconds.toFixed(1) : "—" }) : null,
+                hasErrors ? el("td", { text: r.errors || 0 }) : null,
+              ]));
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((x, y) => x + y, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            const avgCells = [
+              el("td", { text: configLabel }),
+              el("td", { text: "Avg" }),
+              el("td", { className: avgPrClass, text: (avgRate * 100).toFixed(0) + "%" }),
+            ];
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds)
+                                      .filter(t => typeof t === "number");
+              avgCells.push(el("td", { text: times.length
+                ? (times.reduce((x, y) => x + y, 0) / times.length).toFixed(1) : "—" }));
+            }
+            if (hasErrors) avgCells.push(el("td"));
+            runBody.appendChild(el("tr", { className: "benchmark-row-avg " + rowClass },
+                                   avgCells));
+          }
+          frag.appendChild(el("table", { className: "benchmark-table" },
+                              [el("thead", null, [runHead]), runBody]));
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            const assertHead = el("tr", null, [el("th", { text: "Assertion" })]);
+            for (const config of configGroups) {
+              assertHead.appendChild(el("th", {
+                text: config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }));
+            }
+            const assertBody = el("tbody");
+
+            for (const assertionText of allAssertions) {
+              const row = el("tr", null, [el("td", { text: assertionText })]);
+
+              for (const config of configGroups) {
+                const cell = el("td");
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    // `evidence` is the grader quoting the tested skill's own output.
+                    // It used to be escaped by a helper that left quotes intact and
+                    // then dropped inside a `title="\u2026"` attribute, so a single
+                    // `"` closed the attribute and the rest became live attributes
+                    // such as onmouseover (N-02a). Assigning `.title` as a property
+                    // never goes through an HTML parser: the value stays a value,
+                    // and stays fully visible as data.
+                    cell.appendChild(el("span", {
+                      className: exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative",
+                      title: "Run " + run.run_number + ": " + (exp.evidence || ""),
+                      text: exp.passed ? "\u2713" : "\u2717" }));
+                    cell.appendChild(txt(" "));
+                  } else {
+                    cell.appendChild(txt("\u2014 "));
+                  }
+                }
+                row.appendChild(cell);
+              }
+              assertBody.appendChild(row);
+            }
+            frag.appendChild(el("table", {
+              className: "benchmark-table", style: "margin-top: 0.5rem;" },
+              [el("thead", null, [assertHead]), assertBody]));
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        const noteList = el("ul");
+        for (const note of notes) noteList.appendChild(el("li", { text: note }));
+        frag.appendChild(el("div", { className: "benchmark-notes" }, [
+          el("h3", { text: "Analysis Notes" }),
+          noteList,
+        ]));
+      }
+
+      container.replaceChildren(frag);
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

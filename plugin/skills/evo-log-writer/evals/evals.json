@@ -1,0 +1,77 @@
+{
+  "skill_name": "evo-log-writer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš kao evo-log-writer za SOMA sistem. Korisnik ti opisuje hipotetički run: 'Trend Intelligence agent je upravo završio rad, datum 2026-05-20. Trend: novi Claude Agent SDK release sa merljivom metrikom (40% brže orkestracije) i vidljivim reakcijama praktičara na X-u — dakle official release + metrika + reakcija, sve prisutno. Ali prvi pomen ovog trenda je bio pre 60 sati. Predloženi ugao: da tri čvora zamenjuju custom orkestraciju. Hook Writer je pozvan.' Korisnik NE navodi koji je confidence agent sam dodelio tom trendu. Da li upisuješ entry odmah i koji confidence upisuješ, ili radiš nešto drugo pre upisa? Objasni tačno šta radiš sa poljem confidence i zašto.",
+      "expected_output": "Assistant ne sme sam da izračuna zvezdice iz opisanih signala (official release + metrika + reakcija = izgleda kao ⭐⭐⭐, ali trend stariji od 48h upućuje na ⭐). Prema Anti-hallucination pravilu #2 iz SKILL.md ('Nikad ne procenjuj confidence sam — to je procena agenta, ne tvoja. Pitaj ili stavi -'), confidence je isključivo procena samog SOMA agenta, ne nešto što evo-log-writer izvodi iz opisa trenda. Dodatno, tabela 'Minimum viable entry' navodi da je confidence REQUIRED polje za Trend Intelligence (nije nullable), pa se ne sme upisati '-' umesto pitanja. Ispravno ponašanje: postaviti kratko, konkretno pitanje korisniku (u duhu Step 3 primera: 'koji je bio confidence?') i sačekati odgovor pre nego što se bilo šta upiše u evo-log.",
+      "expectations": [
+        "Assistant ne izračunava confidence sam iz opisanih signala (official release, metrika, reakcija, starost 60h) primenom tabele zvezdica",
+        "Assistant eksplicitno navodi da je confidence procena agenta, a ne assistant-a, pozivajući se na anti-hallucination pravilo",
+        "Assistant prepoznaje da je confidence required polje za Trend Intelligence i zato ga ne popunjava sa '-'",
+        "Assistant postavlja konkretno pitanje korisniku za vrednost confidence pre upisa",
+        "Assistant ne piše nikakav evo-log red (ne poziva write korak) dok confidence nije dobijen"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Radiš kao evo-log-writer. Hipotetički Hook Writer run, datum 2026-05-20: trend = 'AI agenti u finansijama', platforma = 'LinkedIn' (korisnik je tako napisao, velikim slovom), winner_hook = 'Ovo je hook koji ima | znak unutra i\\nprelazi u novi red', winner_score = 19 od 20 mogućih poena, repurposer_hook nije dostupan. Formatiraj tačan evo-log red koji bi upisao/la za Hook Writer, poštujući sva pravila formatiranja iz SKILL.md, i objasni svaku izmenu koju si napravio/la nad winner_hook tekstom.",
+      "expected_output": "Ispravan red: '2026-05-20 | AI agenti u finansijama | linkedin | Ovo je hook koji ima — znak unutra i prelazi u novi red | 19/20 | -'. Karakter '|' unutar winner_hook zamenjen je sa '—' (pravilo iz sekcije 'Free-text fields': 'pipe breaks the log format'). Newline je zamenjen razmakom jer entry mora biti jednolinijski. Ceo tekst je zadržan bez skraćivanja ('Do NOT truncate'). Platforma je upisana malim slovima 'linkedin' bez obzira što je korisnik napisao 'LinkedIn' (pravilo 'Lowercase only'). Rezultat runde je upisan kao '19/20', nikad kao goli broj 19 (pravilo 'Format: N/20... Never just a number alone'). repurposer_hook, kao nullable polje koje nije dostupno, upisan je kao '-', a ne ostavljen prazan ili izostavljen. Polja su u tačnom redosledu: date | trend | platform | winner_hook | winner_score | repurposer_hook.",
+      "expectations": [
+        "Karakter '|' unutar winner_hook teksta zamenjen je sa '—' pre upisa",
+        "Newline unutar winner_hook zamenjen je jednim razmakom pre upisa",
+        "Ceo tekst winner_hook je zadržan bez skraćivanja/truncation",
+        "Platforma je upisana malim slovima 'linkedin', bez obzira što je korisnik napisao 'LinkedIn'",
+        "winner_score je formatiran kao '19/20', nikad kao goli broj '19'",
+        "repurposer_hook je upisan kao '-' (nullable, nedostupno), a ne prazno ili izostavljeno",
+        "Redosled polja u finalnom redu odgovara tačno: date | trend | platform | winner_hook | winner_score | repurposer_hook"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Radiš kao evo-log-writer. Hipotetički scenario, datum 2026-05-21: Trend Intelligence agent je pokrenut, ali je odmah haltovao zbog quality gate provere (VAGUE_INPUT) — nije uspeo da identifikuje konkretan trend niti da proceni confidence, i Hook Writer NIJE pozvan jer se run prekinuo. Korisnik pita: 'Da li uopšte treba da logiramo ovaj run kad ništa nije stvarno proizvedeno, ili samo da ga preskočimo?' Kako odgovaraš i šta radiš sa poljima trend_found, confidence, angle_suggested i hook_writer_triggered za ovaj entry?",
+      "expected_output": "Run se MORA logovati — SKILL.md eksplicitno kaže 'Every run gets logged — no exceptions (SOMA Rule #5)', a edge case sekcija dodaje: 'Agent je haltovao pre završetka: Logiraj svejedno sa dostupnim podacima... Halt je validan run — treba da bude u logu.' hook_writer_triggered se upisuje kao 'no' jer je haltovanje bilo zbog quality gate razloga koji SKILL.md eksplicitno navodi (VAGUE_INPUT ili MISSING_TREND) — ovo tačno odgovara definiciji 'no' vrednosti. angle_suggested, kao nullable polje bez podatka, upisuje se kao '-'. Za trend_found i confidence — REQUIRED polja za Trend Intelligence — assistant ne sme da izmišlja vrednost (Anti-hallucination pravilo #1: 'Nikad ne izmišljaj sadržaj polja') niti da ih ostavi prazna; pošto agent nije stvarno identifikovao trend niti confidence, assistant treba da pita korisnika šta upisati u ta required polja (npr. da li postoji ikakav opis razloga haltovanja koji treba upisati kao trend_found) pre nego što finalizuje entry — ne sme ih preskočiti niti proizvoljno popuniti.",
+      "expectations": [
+        "Assistant eksplicitno kaže da se run mora logovati bez izuzetka, pozivajući se na 'every run gets logged' / 'halt je validan run'",
+        "Assistant ne predlaže preskakanje logovanja zbog nepotpunog rezultata",
+        "hook_writer_triggered je postavljen na 'no', sa objašnjenjem da je razlog quality gate halt (VAGUE_INPUT)",
+        "angle_suggested (nullable) je postavljen na '-', ne prazno i ne izostavljeno",
+        "Assistant ne izmišlja vrednosti za trend_found i confidence (required polja) samo da bi popunio entry, već traži podatak od korisnika ili eksplicitno objašnjava da ta required polja moraju biti popunjena pre finalnog upisa"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Radiš kao evo-log-writer. Hipotetički run Content Repurposer agenta, datum 2026-06-10, trend = 'Remote-first alati 2026', confidence ⭐⭐: agent je uspešno završio LinkedIn i X (Twitter) verzije sadržaja, ali Instagram verzija NIJE završena zbog interne greške u pipeline-u. linkedin_word_count je 480. tiktok_duration_estimate je nedostupan jer TikTok nije ni pokušan. Formatiraj tačan evo-log red za Content Repurposer, sa posebnim fokusom na polja platforms_completed i any_needs_flags.",
+      "expected_output": "Ispravan red: '2026-06-10 | Remote-first alati 2026 | ⭐⭐ | linkedin,x (partial: instagram) | PARTIAL_OUTPUT | 480 | -'. Edge case sekcija SKILL.md eksplicitno propisuje format za ovu situaciju: 'Partial completion na Content Repurposeru: Koristi format: linkedin,x (partial: instagram) za platforms_completed. U any_needs_flags stavi PARTIAL_OUTPUT.' any_needs_flags NE sme biti 'none' (jer run nije čist) niti izmišljena vrednost poput 'INCOMPLETE' ili 'MISSING_INSTAGRAM' — validne vrednosti su isključivo none/LOW_CONFIDENCE/HUMAN_REVIEW_NEEDED/PARTIAL_OUTPUT ('Valid values only — never invent flags'). tiktok_duration_estimate se upisuje kao '-' jer je nullable i nedostupan. Redosled polja: date | trend | confidence | platforms_completed | any_needs_flags | linkedin_word_count | tiktok_duration_estimate.",
+      "expectations": [
+        "platforms_completed je formatiran tačno kao 'linkedin,x (partial: instagram)'",
+        "any_needs_flags je postavljen na 'PARTIAL_OUTPUT', ne na 'none'",
+        "any_needs_flags nije izmišljena vrednost van dozvoljene liste (none/LOW_CONFIDENCE/HUMAN_REVIEW_NEEDED/PARTIAL_OUTPUT)",
+        "tiktok_duration_estimate je upisan kao '-' (nullable, nedostupno)",
+        "Redosled polja odgovara tačno definisanom formatu: date | trend | confidence | platforms_completed | any_needs_flags | linkedin_word_count | tiktok_duration_estimate"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Radiš kao evo-log-writer. Hipotetički scenario: pročitao/la si evo-log fajl za Hook Writer i vidiš da ## Entries sekcija već sadrži 12 postojećih entry-ja (placeholder tekst 'No runs yet...' odavno nije prisutan). Treba da dodaš 13-ti entry za novi run. Koji write mode i koje parametre koristiš za obsidian_update_note, i da li uključuješ section_heading da budeš siguran/na da entry ide baš u ## Entries sekciju? Obrazloži odluku.",
+      "expected_output": "Koristi se mode: append, BEZ section_heading parametra — entry se dodaje direktno na kraj fajla. mode: replace se koristi isključivo u first-entry slučaju (kad je placeholder prisutan), što ovde nije slučaj jer već postoji 12 entry-ja. SKILL.md eksplicitno zabranjuje section_heading u append modu u dva mesta: Step 6 ('Never use section_heading — it creates a new ## Entries header every time, which corrupts the file') i Anti-hallucination pravilo #5 ('Nikad ne koristis section_heading u append modu — to kvari strukturu fajla'). Dodavanje section_heading bi kreiralo duplirani ## Entries header i pokvarilo strukturu fajla, čak i kad izgleda kao 'sigurnija' opcija.",
+      "expectations": [
+        "Assistant bira mode: append, ne mode: replace, jer entries već postoje (placeholder nije prisutan)",
+        "Assistant eksplicitno kaže da se section_heading NE sme koristiti u append modu",
+        "Assistant objašnjava da bi section_heading kreirao dupli ## Entries header i pokvario strukturu fajla",
+        "Assistant ne predlaže da se ceo fajl ili header ponovo piše/replace-uje za ovaj slučaj"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Radiš kao evo-log-writer. Hipotetički scenario: treba da logiraš Hook Writer run, ali kad pokušaš da pročitaš evo-log na putanji agents/hook-writer/evo-log.md, dobijaš grešku da fajl ne postoji (file not found) — ni sam vault direktorijum za taj agent nema evo-log.md. Šta radiš dalje — kreiraš li fajl da bi mogao/la da upišeš entry, tražiš li neku alternativnu putanju, ili nešto treće?",
+      "expected_output": "Assistant NE kreira novi evo-log.md fajl. SKILL.md je eksplicitan na dva mesta: u Step 2 ('Note: if the file doesn't exist, stop and tell the user. Do not create a new evo-log — that would break the SOMA vault structure') i u Anti-hallucination pravilu #3 ('Nikad ne kreiraj evo-log fajl — ako file not found, stani i javi'). Isto potvrđuje i tabela 'Scope boundary': za 'Kreiranje novog evo-log fajla' pravi odgovor je 'Ne postoji skill — javi grešku'. Ispravna radnja: zaustaviti se i jasno obavestiti korisnika da fajl ne postoji i da run ne može biti logovan dok se struktura vaulta ne popravi (van dometa ovog skilla) — bez kreiranja fajla, bez pisanja na neku improvizovanu alternativnu putanju, i bez tihog odustajanja bez objašnjenja.",
+      "expectations": [
+        "Assistant ne kreira novi evo-log.md fajl na nedostajućoj putanji",
+        "Assistant eksplicitno navodi da bi kreiranje fajla pokvarilo SOMA vault strukturu / da to nije u domenu ovog skilla",
+        "Assistant se zaustavlja i jasno prijavljuje grešku korisniku umesto da tiho odustane ili nastavi",
+        "Assistant ne predlaže pisanje entry-ja na neku drugu, improvizovanu putanju kao zamenu"
+      ]
+    }
+  ]
+}

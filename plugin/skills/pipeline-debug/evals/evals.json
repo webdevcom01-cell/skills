@@ -1,0 +1,72 @@
+{
+  "skill_name": "pipeline-debug",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Za agenta Hook Writer, najnovija izvršena instanca (dobijena preko as_get_recent_executions) ima status RUNNING, sa proteklim trajanjem od tačno 5 minuta i 0 sekundi od trenutka pokretanja do sada. Da li ovo zadovoljava uslov za RULE M1 (TIMEOUT) po pipeline-debug pravilima, i treba li ovo prijaviti kao MAJOR nalaz TIMEOUT u izveštaju?",
+      "expected_output": "NE — RULE M1 / TIMEOUT ANOMALY THRESHOLD zahteva 'IF {agent}_has_running == true AND any RUNNING execution duration > 5 min', odnosno striktno veće od 5 minuta. Trajanje od tačno 5:00 ne prelazi prag, pa M1 formalno ne puca u ovom trenutku — ne prijavljuje se kao MAJOR TIMEOUT nalaz (iako vredi ponovo proveriti malo kasnije).",
+      "expectations": [
+        "Agent zaključuje da RULE M1 NE puca jer trajanje (5:00) nije striktno veće od 5 minuta",
+        "Agent eksplicitno navodi da je prag '> 5 minuta', a ne '≥ 5 minuta'",
+        "Agent proverava OBA uslova iz M1 (has_running I duration > 5 min), ne samo prvi (RUNNING status)",
+        "Agent NE prijavljuje MAJOR TIMEOUT nalaz za ovaj slučaj na osnovu datih podataka"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Poslednjih 5 unosa u evo-logu Hook Writer agenta (format polja: date | trend | platforms | scores | winner | winner_score | flags) imaju polje [6] flags redom (od najnovijeg ka najstarijem): OK, OK, OK, OK, OK — nijedan UNSCORED. Poslednjih 5 unosa u evo-logu Content Repurposer agenta (format polja: date | trend | platforms_completed | scores | flag | notes) imaju polje [4] flag redom (od najnovijeg ka najstarijem): QUALITY_VIOLATIONS, OK, QUALITY_VIOLATIONS, OK, OK. Da li se aktivira QUALITY_DEGRADATION nalaz, za koji agent i po kom pravilu, i da li HW deo praga sprečava ovu detekciju?",
+      "expected_output": "DA — aktivira se RULE W5 (CR grana): tačno 2 od poslednjih 5 CR unosa imaju flag koji sadrži 'QUALITY_VIOLATIONS', što zadovoljava 'cr_flag = QUALITY_VIOLATIONS in 2 of last 5 CR entries'. Ovaj uslov NE zahteva da unosi budu uzastopni — 'consecutive' zahtev važi samo za HW granu. RULE W4 (HW) se NE aktivira jer je hw_unscored_count = 0 (nema nijednog UNSCORED unosa). QUALITY DEGRADATION THRESHOLD je OR sa dve nezavisne grane — jedna može da puca bez druge.",
+      "expectations": [
+        "Agent zaključuje da se RULE W5 (CR, QUALITY_DEGRADATION) aktivira jer 2 od poslednjih 5 CR unosa sadrže QUALITY_VIOLATIONS",
+        "Agent eksplicitno kaže da CR grana NE zahteva uzastopnost (consecutive), za razliku od HW grane",
+        "Agent zaključuje da se RULE W4 (HW) NE aktivira jer nema nijednog UNSCORED unosa u poslednjih 5",
+        "Agent tretira HW-consecutive-UNSCORED i CR-2-od-5 kao dve nezavisne OR grane istog praga, ne kao jedan zajednički uslov",
+        "Agent koristi ispravan indeks polja za svaki evo-log (flags je polje [6] kod HW, flag je polje [4] kod CR) i ne meša ih"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "D5 provera (as_inspect_flow) za Content Repurposer otkriva jedan kb_search node čije je polje knowledgeBaseId = null (nepovezano). D6 provera (as_list_knowledge_bases za Content Repurposer) vraća 2 knowledge base zapisa, oba sa kb_embedding_status = 'ready'. Kada se korisniku predloži ova popravka, on eksplicitno odgovara 'da, primeni'. Da li pipeline-debug treba da pozove as_patch_node_field da poveže knowledgeBaseId na jednu od te dve KB?",
+      "expected_output": "NE. RULE C7 (KB_UNWIRED) zahteva 'AND {agent}_kb_count == 1 (exactly one KB exists)' — ovde je kb_count = 2, pa uslov nije zadovoljen i C7 se formalno ne aktivira kao trivial-eligible popravka. Ovo je tačno slučaj eksplicitno naveden u Step 10 pod Non-trivial listom: 'Ambiguous KB (2+ KBs — same rule as soma-memory-fix)', i potvrđeno u 10c: 'Only if {agent}_kb_count == 1. If 0 or 2+ → skip, report as manual.' Fix ide u manual listu bez obzira na korisnikovu potvrdu — as_patch_node_field se ne poziva.",
+      "expectations": [
+        "Agent zaključuje da se as_patch_node_field NE poziva uprkos korisnikovoj potvrdi 'da, primeni'",
+        "Agent eksplicitno navodi da C7 zahteva kb_count == 1, a ne 2 ili više",
+        "Agent klasifikuje slučaj kao 'Ambiguous KB (2+ KBs)' — non-trivial, ide u manual fix",
+        "Agent NE tretira korisnikovu potvrdu kao dovoljnu za auto-apply kad broj povezanih KB-ova nije tačno 1"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "as_find_broken_flows() vraća nalaz za Hook Writer agenta: ai_response node sa praznim prompt poljem, severity različit od WARN (dakle po RULE C2 klasifikuje se kao FLOW_BROKEN, CRITICAL). Korisnik je eksplicitno potvrdio: 'da, primeni sve predložene popravke.' Treba li pipeline-debug da pozove as_patch_node_field da popravi ovaj konkretan nalaz (prazan prompt)?",
+      "expected_output": "NE. Iako je nalaz CRITICAL preko RULE C2, Step 10 sekcija 'Non-trivial = NEVER applied by this skill... These override the C2/C3 eligibility above: if a D4 issue is one of these, it is manual regardless of severity' eksplicitno navodi 'Empty prompt (needs human content)' kao stavku te liste. Prazan prompt ide u manual instrukcije čak i uz CRITICAL severity i eksplicitnu korisničku potvrdu — non-trivial lista nadjačava C2/C3 eligibility, a potvrda ne može to zaobići jer skill uopšte ne generiše konkretan patch (field_value) za ovaj slučaj.",
+      "expectations": [
+        "Agent zaključuje da se as_patch_node_field NE poziva za prazan prompt, uprkos korisnikovoj potvrdi",
+        "Agent eksplicitno navodi da Non-trivial lista nadjačava C2/C3 trivial-eligibility bez obzira na severity",
+        "Agent prepoznaje 'Empty prompt (needs human content)' kao stavku sa te liste",
+        "Agent NE zaključuje generalno pravilo 'CRITICAL nalaz + korisnička potvrda = auto-apply'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Korisnikova poruka glasi: 'pipeline se srušio, proveri SOMA.' Ovo sadrži crash trigger keyword ('srušio'), pa je symptom_type = CRASH. STANDARD dubina provere (D0–D6; D7 je preskočen jer poruka ne sadrži nijednu quality trigger reč) je završena i pronašla tačno jedan nalaz: RULE W6 NEVER_RAN za Score Analyzer (WARN severity) — ništa drugo, nema nijednog CRITICAL ni MAJOR nalaza. Treba li dijagnostika da ostane na STANDARD dubini i izveštaj se generiše sa tim jednim WARN nalazom, ili treba da eskalira na DEEP? Ako eskalira, koji dodatni koraci se tada pokreću?",
+      "expected_output": "Mora da eskalira na DEEP. Step 8 uslov (b) glasi: 'issues_found > 0 AND all findings are WARN only AND symptom_type == \"CRASH\"' — ovde je issues_found = 1 (>0), svi nalazi su WARN, a symptom_type je CRASH: sva tri uslova zadovoljena. Pri DEEP eskalaciji, prema tekstu Step 8: pokreće se D7 (sva 3 evo-loga) iako original poruka nije sadržala quality trigger reči — jer 'Run D7 if not already run' važi bezuslovno pri DEEP eskalaciji; zatim as_get_agent_call_log (limit 10) za TI, HW i CR; i as_inspect_flow za sva 4 SOMA agenta, ne samo za anomalne.",
+      "expectations": [
+        "Agent zaključuje da se dijagnostika MORA eskalirati na DEEP (uslov 8b), ne ostati na STANDARD",
+        "Agent NE meša uslov (a) [issues_found==0] sa uslovom (b) [issues_found>0 ALI samo WARN nalazi + CRASH] — ovde je relevantan uslov (b)",
+        "Agent eksplicitno navodi da se D7 mora pokrenuti pri DEEP eskalaciji iako originalna poruka nije sadržala quality trigger reči",
+        "Agent pominje da se pri DEEP pokreću i as_get_agent_call_log i pun as_inspect_flow za sva 4 agenta, ne samo za anomalne"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Nalaz RULE C7 (KB_UNWIRED) za Content Repurposer je trivial-eligible: postoji tačno 1 povezana KB (kb_count = 1), a kb_search node ima knowledgeBaseId = null. Korisnik je već eksplicitno odgovorio 'da, primeni' na predloženi patch (10a.5 potvrda je data). Međutim, neposredno pre samog patch poziva, sveži D1 podaci pokazuju da Content Repurposer trenutno ima izvršenje sa statusom RUNNING (cr_has_running = true). Treba li pipeline-debug da pozove as_patch_node_field za ovaj agent?",
+      "expected_output": "NE — agent se preskače (SKIP). Step 10a 'Active execution guard' nalaže: 'Check {agent}_has_running. If true → SKIP this agent. Log: \"⚠️ {agent} is currently RUNNING — skipping auto-fix to avoid race condition.\"' Ovaj safety-check se primenjuje po agentu neposredno pre patch poziva, nezavisno od toga što je korisnik već dao 10a.5 potvrdu. Eksplicitna korisnička potvrda ne poništava safety guard; fix se beleži kao skipped (auto_fixes_skipped), ne kao applied.",
+      "expectations": [
+        "Agent zaključuje da se as_patch_node_field NE poziva jer je agent trenutno RUNNING",
+        "Agent eksplicitno navodi da active execution guard važi bez obzira na to što je korisnik već potvrdio patch",
+        "Agent klasifikuje ishod kao 'skipped' (auto_fixes_skipped), ne kao 'applied' i ne kao 'čeka se nova potvrda'",
+        "Agent NE zaključuje da treba samo tražiti dodatnu potvrdu — problem je RUNNING status agenta, ne nedostatak potvrde"
+      ]
+    }
+  ]
+}

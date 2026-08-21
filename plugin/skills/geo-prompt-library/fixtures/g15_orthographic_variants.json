@@ -1,0 +1,2277 @@
+{
+  "schema_version": "1.0.0",
+  "library_id": "cloudflow-crm-rs-2026-08",
+  "library_version": 1,
+  "frozen": true,
+  "content_hash": "sha256:963c7c52f27d3553a0fdfa6dd4b4d62d811e062b2dc0a47e1c633bcdb4127b19",
+  "generated_at": "2026-08-01T12:00:00Z",
+  "generator": {
+    "skill": "geo-prompt-library",
+    "skill_version": "0.1.0-draft"
+  },
+  "company": {
+    "name": "CloudFlow CRM d.o.o.",
+    "aliases": [
+      "CloudFlow",
+      "CloudFlow CRM",
+      "Klaudflou CRM"
+    ],
+    "url": "https://cloudflow.rs",
+    "vertical": "CRM softver za mala i srednja preduzeća",
+    "offerings": [
+      {
+        "name": "CRM za prodajni tim",
+        "source_url": "https://cloudflow.rs/proizvod",
+        "evidence": "CRM za prodajni tim — pratite lead-ove, ponude i zatvorene poslove na jednom mestu."
+      },
+      {
+        "name": "automatizacija marketinga",
+        "source_url": "https://cloudflow.rs/marketing",
+        "evidence": "Automatizacija marketinga — email kampanje i segmentacija kontakata bez ručnog rada."
+      },
+      {
+        "name": "integracija sa računovodstvenim softverom",
+        "source_url": "https://cloudflow.rs/integracije",
+        "evidence": "Integracija sa računovodstvenim softverom — sinhronizujte fakture i uplate automatski."
+      },
+      {
+        "name": "mobilna aplikacija za teren",
+        "source_url": "https://cloudflow.rs/mobilna-app",
+        "evidence": "Mobilna aplikacija za teren — unosite podatke sa terena i van kancelarije."
+      },
+      {
+        "name": "cenovnik",
+        "source_url": "https://cloudflow.rs/cenovnik",
+        "evidence": "Cenovnik — planovi od 19 EUR po korisniku mesečno, besplatna proba 14 dana."
+      }
+    ],
+    "locations": [
+      {
+        "city": "Beograd",
+        "country": "RS",
+        "source_url": "https://cloudflow.rs/kontakt"
+      }
+    ],
+    "site_language": "sr",
+    "confidence": "high"
+  },
+  "competitors": [
+    {
+      "name": "Pipedrive",
+      "url": "https://pipedrive.com",
+      "how_found": "websearch: najbolji CRM alati Srbija",
+      "confidence": "medium"
+    },
+    {
+      "name": "HubSpot",
+      "url": "https://hubspot.com",
+      "how_found": "websearch: CRM softver Srbija",
+      "confidence": "medium"
+    },
+    {
+      "name": "Bitrix24",
+      "url": "https://bitrix24.com",
+      "how_found": "websearch: CRM alternativa Bitrix24 Srbija",
+      "confidence": "medium"
+    },
+    {
+      "name": "Followup CRM",
+      "url": "https://followupcrm.com",
+      "how_found": "websearch: CloudFlow CRM alternativa",
+      "confidence": "low"
+    }
+  ],
+  "personas": [
+    {
+      "id": "p1",
+      "label": "vlasnik male firme koji prvi put uvodi CRM",
+      "derived_from": "site:/o-nama",
+      "confidence": "medium"
+    },
+    {
+      "id": "p2",
+      "label": "sales menadžer u rastućem timu",
+      "derived_from": "site:/proizvod",
+      "confidence": "medium"
+    },
+    {
+      "id": "p3",
+      "label": "IT osoba zadužena za integracije",
+      "derived_from": "site:/integracije",
+      "confidence": "low"
+    }
+  ],
+  "locale": {
+    "primary": "sr-RS",
+    "script_default": "latin",
+    "paired_language": "en"
+  },
+  "distribution": {
+    "target": {
+      "problem_aware": [
+        0.15,
+        0.22
+      ],
+      "category_shortlist": [
+        0.22,
+        0.3
+      ],
+      "use_case": [
+        0.15,
+        0.22
+      ],
+      "comparison": [
+        0.12,
+        0.2
+      ],
+      "pricing": [
+        0.08,
+        0.12
+      ],
+      "local": [
+        0.05,
+        0.15
+      ],
+      "trust_risk": [
+        0.05,
+        0.1
+      ],
+      "branded": [
+        0.08,
+        0.15
+      ]
+    },
+    "actual": {
+      "problem_aware": 0.15,
+      "category_shortlist": 0.25,
+      "use_case": 0.2,
+      "comparison": 0.125,
+      "pricing": 0.075,
+      "local": 0.075,
+      "trust_risk": 0.05,
+      "branded": 0.075
+    },
+    "n_intents": 40,
+    "n_queries": 80
+  },
+  "matrix_plan": {
+    "planned_total": 40,
+    "cells": [
+      {
+        "category": "branded",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "branded",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "branded",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "category_shortlist",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 4
+      },
+      {
+        "category": "category_shortlist",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 3
+      },
+      {
+        "category": "category_shortlist",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 3
+      },
+      {
+        "category": "comparison",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "comparison",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "comparison",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "local",
+        "persona_id": "p1",
+        "geo_city": "Beograd",
+        "planned": 1
+      },
+      {
+        "category": "local",
+        "persona_id": "p2",
+        "geo_city": "Beograd",
+        "planned": 1
+      },
+      {
+        "category": "local",
+        "persona_id": "p3",
+        "geo_city": "Beograd",
+        "planned": 1
+      },
+      {
+        "category": "pricing",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "pricing",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "pricing",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "problem_aware",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "problem_aware",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "problem_aware",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "trust_risk",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "trust_risk",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 1
+      },
+      {
+        "category": "use_case",
+        "persona_id": "p1",
+        "geo_city": null,
+        "planned": 2
+      },
+      {
+        "category": "use_case",
+        "persona_id": "p2",
+        "geo_city": null,
+        "planned": 3
+      },
+      {
+        "category": "use_case",
+        "persona_id": "p3",
+        "geo_city": null,
+        "planned": 3
+      }
+    ]
+  },
+  "intents": [
+    {
+      "intent_id": "int-001",
+      "category": "problem_aware",
+      "awareness_stage": "unaware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "awareness",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=unaware.",
+      "grounding": {
+        "type": null,
+        "url": null,
+        "quote": null
+      },
+      "inferred": true,
+      "queries": [
+        {
+          "query_id": "int-001-sr",
+          "lang": "sr",
+          "text": "gubim previše vremena na ručno praćenje kontakata i ponuda",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "gubim previse vremena na rucno pracenje kontakata i ponuda",
+            "cyrillic": "губим превише времена на ручно праћење контаката и понуда"
+          }
+        },
+        {
+          "query_id": "int-001-en",
+          "lang": "en",
+          "text": "I keep losing track of leads and follow-ups in spreadsheets",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 10,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-002",
+      "category": "problem_aware",
+      "awareness_stage": "problem_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "awareness",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=problem_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-002-sr",
+          "lang": "sr",
+          "text": "kako da prestanem da gubim lead-ove između prodavaca",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "kako da prestanem da gubim lead-ove izmedju prodavaca",
+            "cyrillic": "како да престанем да губим леад-ове између продаваца"
+          }
+        },
+        {
+          "query_id": "int-002-en",
+          "lang": "en",
+          "text": "how do I stop losing leads between sales reps",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-003",
+      "category": "problem_aware",
+      "awareness_stage": "problem_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "awareness",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=problem_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-003-sr",
+          "lang": "sr",
+          "text": "kako da automatizujem slanje ponuda klijentima",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "kako da automatizujem slanje ponuda klijentima",
+            "cyrillic": "како да аутоматизујем слање понуда клијентима"
+          }
+        },
+        {
+          "query_id": "int-003-en",
+          "lang": "en",
+          "text": "how to automate sending quotes to clients",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-004",
+      "category": "problem_aware",
+      "awareness_stage": "problem_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "awareness",
+      "persona_id": "p1",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=problem_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-004-sr",
+          "lang": "sr",
+          "text": "zašto mi se prodajni tim gubi u excel tabelama",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "zasto mi se prodajni tim gubi u excel tabelama",
+            "cyrillic": "зашто ми се продајни тим губи у еxцел табелама"
+          }
+        },
+        {
+          "query_id": "int-004-en",
+          "lang": "en",
+          "text": "why does my sales team get lost in spreadsheets",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-005",
+      "category": "problem_aware",
+      "awareness_stage": "problem_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "awareness",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=problem_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/integracije",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-005-sr",
+          "lang": "sr",
+          "text": "kako da imam uvid u prodaju u realnom vremenu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "kako da imam uvid u prodaju u realnom vremenu",
+            "cyrillic": "како да имам увид у продају у реалном времену"
+          }
+        },
+        {
+          "query_id": "int-005-en",
+          "lang": "en",
+          "text": "how can I track sales in real time",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-006",
+      "category": "problem_aware",
+      "awareness_stage": "problem_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "awareness",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji problem_aware, awareness_stage=problem_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-006-sr",
+          "lang": "sr",
+          "text": "šta da radim kada mi se ponude gube u imejlovima",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 10,
+          "variants": {
+            "ascii": "sta da radim kada mi se ponude gube u imejlovima",
+            "cyrillic": "шта да радим када ми се понуде губе у имејловима"
+          }
+        },
+        {
+          "query_id": "int-006-en",
+          "lang": "en",
+          "text": "what should I do when quotes get lost in email",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 10,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-007",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-007-sr",
+          "lang": "sr",
+          "text": "najbolji CRM za male firme",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 5,
+          "variants": {
+            "ascii": "pogresna vrednost koja ne odgovara mapiranju",
+            "cyrillic": "најбољи ЦРМ за мале фирме"
+          }
+        },
+        {
+          "query_id": "int-007-en",
+          "lang": "en",
+          "text": "best CRM software for small businesses",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 6,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-008",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-008-sr",
+          "lang": "sr",
+          "text": "koji CRM je najbolji za mala preduzeća",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "koji CRM je najbolji za mala preduzeca",
+            "cyrillic": "који ЦРМ је најбољи за мала предузећа"
+          }
+        },
+        {
+          "query_id": "int-008-en",
+          "lang": "en",
+          "text": "which CRM works best for small companies",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-009",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-009-sr",
+          "lang": "sr",
+          "text": "koji su najbolji CRM alati u Srbiji",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "koji su najbolji CRM alati u Srbiji",
+            "cyrillic": "који су најбољи ЦРМ алати у Србији"
+          }
+        },
+        {
+          "query_id": "int-009-en",
+          "lang": "en",
+          "text": "what are the top CRM tools in Serbia",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-010",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-010-sr",
+          "lang": "sr",
+          "text": "koji CRM softver ima najbolje ocene korisnika",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "koji CRM softver ima najbolje ocene korisnika",
+            "cyrillic": "који ЦРМ софтвер има најбоље оцене корисника"
+          }
+        },
+        {
+          "query_id": "int-010-en",
+          "lang": "en",
+          "text": "which CRM software has the best user ratings",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-011",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-011-sr",
+          "lang": "sr",
+          "text": "top CRM rešenja za srpsko tržište",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "top CRM resenja za srpsko trziste",
+            "cyrillic": "топ ЦРМ решења за српско тржиште"
+          }
+        },
+        {
+          "query_id": "int-011-en",
+          "lang": "en",
+          "text": "top CRM platforms built for the Serbian market",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-012",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-012-sr",
+          "lang": "sr",
+          "text": "koji CRM preporučujete za rastuću firmu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "koji CRM preporucujete za rastucu firmu",
+            "cyrillic": "који ЦРМ препоручујете за растућу фирму"
+          }
+        },
+        {
+          "query_id": "int-012-en",
+          "lang": "en",
+          "text": "which CRM would you recommend for a growing company",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-013",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-013-sr",
+          "lang": "sr",
+          "text": "lista najboljih CRM programa za preduzetnike",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "lista najboljih CRM programa za preduzetnike",
+            "cyrillic": "листа најбољих ЦРМ програма за предузетнике"
+          }
+        },
+        {
+          "query_id": "int-013-en",
+          "lang": "en",
+          "text": "list of the best CRM programs for entrepreneurs",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-014",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-014-sr",
+          "lang": "sr",
+          "text": "koji je najpopularniji CRM u regionu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "koji je najpopularniji CRM u regionu",
+            "cyrillic": "који је најпопуларнији ЦРМ у региону"
+          }
+        },
+        {
+          "query_id": "int-014-en",
+          "lang": "en",
+          "text": "what is the most popular CRM in the region",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-015",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-015-sr",
+          "lang": "sr",
+          "text": "najbolje ocenjeni CRM sistemi za timove do 20 ljudi",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "najbolje ocenjeni CRM sistemi za timove do 20 ljudi",
+            "cyrillic": "најбоље оцењени ЦРМ системи за тимове до 20 људи"
+          }
+        },
+        {
+          "query_id": "int-015-en",
+          "lang": "en",
+          "text": "highest rated CRM systems for teams under 20 people",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-016",
+      "category": "category_shortlist",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "list",
+      "rationale": "Intent u kategoriji category_shortlist, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-016-sr",
+          "lang": "sr",
+          "text": "koji CRM ima najbolju podršku na srpskom jeziku",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "koji CRM ima najbolju podrsku na srpskom jeziku",
+            "cyrillic": "који ЦРМ има најбољу подршку на српском језику"
+          }
+        },
+        {
+          "query_id": "int-016-en",
+          "lang": "en",
+          "text": "which CRM offers the best support in Serbian",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-017",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-017-sr",
+          "lang": "sr",
+          "text": "najbolji CRM za prodaju nekretnina",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 5,
+          "variants": {
+            "ascii": "najbolji CRM za prodaju nekretnina",
+            "cyrillic": "најбољи ЦРМ за продају некретнина"
+          }
+        },
+        {
+          "query_id": "int-017-en",
+          "lang": "en",
+          "text": "best CRM for real estate sales",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 6,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-018",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/mobilna-app",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-018-sr",
+          "lang": "sr",
+          "text": "koji CRM koristiti za timove koji rade na terenu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "koji CRM koristiti za timove koji rade na terenu",
+            "cyrillic": "који ЦРМ користити за тимове који раде на терену"
+          }
+        },
+        {
+          "query_id": "int-018-en",
+          "lang": "en",
+          "text": "what CRM works best for field sales teams",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-019",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-019-sr",
+          "lang": "sr",
+          "text": "CRM za praćenje ponuda i ugovora u građevini",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "CRM za pracenje ponuda i ugovora u gradjevini",
+            "cyrillic": "ЦРМ за праћење понуда и уговора у грађевини"
+          }
+        },
+        {
+          "query_id": "int-019-en",
+          "lang": "en",
+          "text": "CRM for tracking quotes and contracts in construction",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-020",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/marketing",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-020-sr",
+          "lang": "sr",
+          "text": "najbolji alat za automatizaciju email marketinga",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "najbolji alat za automatizaciju email marketinga",
+            "cyrillic": "најбољи алат за аутоматизацију емаил маркетинга"
+          }
+        },
+        {
+          "query_id": "int-020-en",
+          "lang": "en",
+          "text": "best tool for automating email marketing campaigns",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-021",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-021-sr",
+          "lang": "sr",
+          "text": "kako izabrati CRM za mali tim od 5 ljudi",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "kako izabrati CRM za mali tim od 5 ljudi",
+            "cyrillic": "како изабрати ЦРМ за мали тим од 5 људи"
+          }
+        },
+        {
+          "query_id": "int-021-en",
+          "lang": "en",
+          "text": "how to choose a CRM for a five person team",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 10,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-022",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/integracije",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-022-sr",
+          "lang": "sr",
+          "text": "CRM koji povezuje prodaju i računovodstvo",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "CRM koji povezuje prodaju i racunovodstvo",
+            "cyrillic": "ЦРМ који повезује продају и рачуноводство"
+          }
+        },
+        {
+          "query_id": "int-022-en",
+          "lang": "en",
+          "text": "CRM that connects sales and accounting",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 6,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-023",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/mobilna-app",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-023-sr",
+          "lang": "sr",
+          "text": "koji CRM ima mobilnu aplikaciju za rad na terenu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "koji CRM ima mobilnu aplikaciju za rad na terenu",
+            "cyrillic": "који ЦРМ има мобилну апликацију за рад на терену"
+          }
+        },
+        {
+          "query_id": "int-023-en",
+          "lang": "en",
+          "text": "which CRM has a mobile app for fieldwork",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-024",
+      "category": "use_case",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "single_recommendation",
+      "rationale": "Intent u kategoriji use_case, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-024-sr",
+          "lang": "sr",
+          "text": "najbolji CRM za agencije koje rade sa više klijenata",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "najbolji CRM za agencije koje rade sa vise klijenata",
+            "cyrillic": "најбољи ЦРМ за агенције које раде са више клијената"
+          }
+        },
+        {
+          "query_id": "int-024-en",
+          "lang": "en",
+          "text": "best CRM for agencies managing multiple clients",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-025",
+      "category": "comparison",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [
+        "Pipedrive"
+      ],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "comparison_table",
+      "rationale": "Intent u kategoriji comparison, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-025-sr",
+          "lang": "sr",
+          "text": "CloudFlow CRM ili Pipedrive, šta je bolje",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "CloudFlow CRM ili Pipedrive, sta je bolje",
+            "cyrillic": "ЦлоудФлоw ЦРМ или Пипедриве, шта је боље"
+          }
+        },
+        {
+          "query_id": "int-025-en",
+          "lang": "en",
+          "text": "CloudFlow CRM vs Pipedrive, which is better",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-026",
+      "category": "comparison",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [
+        "HubSpot"
+      ],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "comparison_table",
+      "rationale": "Intent u kategoriji comparison, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-026-sr",
+          "lang": "sr",
+          "text": "alternativa za HubSpot koja je jeftinija",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "alternativa za HubSpot koja je jeftinija",
+            "cyrillic": "алтернатива за ХубСпот која је јефтинија"
+          }
+        },
+        {
+          "query_id": "int-026-en",
+          "lang": "en",
+          "text": "cheaper alternative to HubSpot",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 4,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-027",
+      "category": "comparison",
+      "awareness_stage": "product_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [
+        "Bitrix24"
+      ],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "comparison_table",
+      "rationale": "Intent u kategoriji comparison, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-027-sr",
+          "lang": "sr",
+          "text": "koja je razlika između CloudFlow CRM i Bitrix24",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "koja je razlika izmedju CloudFlow CRM i Bitrix24",
+            "cyrillic": "која је разлика између ЦлоудФлоw ЦРМ и Битриx24"
+          }
+        },
+        {
+          "query_id": "int-027-en",
+          "lang": "en",
+          "text": "what is the difference between CloudFlow CRM and Bitrix24",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-028",
+      "category": "comparison",
+      "awareness_stage": "product_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [
+        "Followup CRM"
+      ],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "comparison_table",
+      "rationale": "Intent u kategoriji comparison, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-028-sr",
+          "lang": "sr",
+          "text": "da li je bolji Followup CRM ili CloudFlow",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "da li je bolji Followup CRM ili CloudFlow",
+            "cyrillic": "да ли је бољи Фоллоwуп ЦРМ или ЦлоудФлоw"
+          }
+        },
+        {
+          "query_id": "int-028-en",
+          "lang": "en",
+          "text": "is Followup CRM better than CloudFlow",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 6,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-029",
+      "category": "comparison",
+      "awareness_stage": "solution_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [
+        "Bitrix24"
+      ],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "comparison_table",
+      "rationale": "Intent u kategoriji comparison, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-029-sr",
+          "lang": "sr",
+          "text": "alternativa za Bitrix24 sa jednostavnijim interfejsom",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "alternativa za Bitrix24 sa jednostavnijim interfejsom",
+            "cyrillic": "алтернатива за Битриx24 са једноставнијим интерфејсом"
+          }
+        },
+        {
+          "query_id": "int-029-en",
+          "lang": "en",
+          "text": "simpler alternative to Bitrix24",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 4,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-030",
+      "category": "pricing",
+      "awareness_stage": "product_aware",
+      "intent_type": "transactional",
+      "micro_moment": "i_want_to_buy",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji pricing, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-030-sr",
+          "lang": "sr",
+          "text": "koliko košta CloudFlow CRM za mesec dana",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "koliko kosta CloudFlow CRM za mesec dana",
+            "cyrillic": "колико кошта ЦлоудФлоw ЦРМ за месец дана"
+          }
+        },
+        {
+          "query_id": "int-030-en",
+          "lang": "en",
+          "text": "how much does CloudFlow CRM cost per month",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-031",
+      "category": "pricing",
+      "awareness_stage": "product_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_buy",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji pricing, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-031-sr",
+          "lang": "sr",
+          "text": "da li se isplati platiti godišnju CloudFlow pretplatu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "da li se isplati platiti godisnju CloudFlow pretplatu",
+            "cyrillic": "да ли се исплати платити годишњу ЦлоудФлоw претплату"
+          }
+        },
+        {
+          "query_id": "int-031-en",
+          "lang": "en",
+          "text": "is it worth paying for an annual CloudFlow subscription",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-032",
+      "category": "pricing",
+      "awareness_stage": "product_aware",
+      "intent_type": "transactional",
+      "micro_moment": "i_want_to_buy",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji pricing, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-032-sr",
+          "lang": "sr",
+          "text": "cenovnik CloudFlow CRM za tim od 10 ljudi",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "cenovnik CloudFlow CRM za tim od 10 ljudi",
+            "cyrillic": "ценовник ЦлоудФлоw ЦРМ за тим од 10 људи"
+          }
+        },
+        {
+          "query_id": "int-032-en",
+          "lang": "en",
+          "text": "CloudFlow CRM pricing for a ten person team",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-033",
+      "category": "local",
+      "awareness_stage": "product_aware",
+      "intent_type": "navigational",
+      "micro_moment": "i_want_to_go",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": "Beograd",
+        "scope": "city"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji local, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/kontakt",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-033-sr",
+          "lang": "sr",
+          "text": "CloudFlow CRM podrška u Beogradu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 5,
+          "variants": {
+            "ascii": "CloudFlow CRM podrska u Beogradu",
+            "cyrillic": "ЦлоудФлоw ЦРМ подршка у Београду"
+          }
+        },
+        {
+          "query_id": "int-033-en",
+          "lang": "en",
+          "text": "CloudFlow CRM support office in Belgrade",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 6,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-034",
+      "category": "local",
+      "awareness_stage": "solution_aware",
+      "intent_type": "navigational",
+      "micro_moment": "i_want_to_go",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": "Beograd",
+        "scope": "city"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji local, awareness_stage=solution_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/kontakt",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-034-sr",
+          "lang": "sr",
+          "text": "gde se nalazi kancelarija CloudFlow CRM u Beogradu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "gde se nalazi kancelarija CloudFlow CRM u Beogradu",
+            "cyrillic": "где се налази канцеларија ЦлоудФлоw ЦРМ у Београду"
+          }
+        },
+        {
+          "query_id": "int-034-en",
+          "lang": "en",
+          "text": "where is the CloudFlow CRM office located in Belgrade",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 9,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-035",
+      "category": "local",
+      "awareness_stage": "product_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": "Beograd",
+        "scope": "city"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji local, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/kontakt",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-035-sr",
+          "lang": "sr",
+          "text": "da li CloudFlow CRM ima predstavnika u Beogradu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 8,
+          "variants": {
+            "ascii": "da li CloudFlow CRM ima predstavnika u Beogradu",
+            "cyrillic": "да ли ЦлоудФлоw ЦРМ има представника у Београду"
+          }
+        },
+        {
+          "query_id": "int-035-en",
+          "lang": "en",
+          "text": "does CloudFlow CRM have a representative in Belgrade",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-036",
+      "category": "trust_risk",
+      "awareness_stage": "product_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier2",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji trust_risk, awareness_stage=product_aware.",
+      "grounding": {
+        "type": null,
+        "url": null,
+        "quote": null
+      },
+      "inferred": true,
+      "queries": [
+        {
+          "query_id": "int-036-sr",
+          "lang": "sr",
+          "text": "kakva su iskustva korisnika sa CloudFlow CRM",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "kakva su iskustva korisnika sa CloudFlow CRM",
+            "cyrillic": "каква су искуства корисника са ЦлоудФлоw ЦРМ"
+          }
+        },
+        {
+          "query_id": "int-036-en",
+          "lang": "en",
+          "text": "what are user experiences with CloudFlow CRM",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-037",
+      "category": "trust_risk",
+      "awareness_stage": "product_aware",
+      "intent_type": "commercial_investigation",
+      "micro_moment": "i_want_to_know",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier1",
+      "branded": false,
+      "brand_mentioned": null,
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji trust_risk, awareness_stage=product_aware.",
+      "grounding": {
+        "type": null,
+        "url": null,
+        "quote": null
+      },
+      "inferred": true,
+      "queries": [
+        {
+          "query_id": "int-037-sr",
+          "lang": "sr",
+          "text": "da li je CloudFlow CRM pouzdan za veće timove",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 9,
+          "variants": {
+            "ascii": "da li je CloudFlow CRM pouzdan za vece timove",
+            "cyrillic": "да ли је ЦлоудФлоw ЦРМ поуздан за веће тимове"
+          }
+        },
+        {
+          "query_id": "int-037-en",
+          "lang": "en",
+          "text": "is CloudFlow CRM reliable for larger teams",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-038",
+      "category": "branded",
+      "awareness_stage": "most_aware",
+      "intent_type": "navigational",
+      "micro_moment": "i_want_to_go",
+      "buying_stage": "decision",
+      "persona_id": "p2",
+      "priority": "tier1",
+      "branded": true,
+      "brand_mentioned": "CloudFlow",
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji branded, awareness_stage=most_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/proizvod",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-038-sr",
+          "lang": "sr",
+          "text": "CloudFlow CRM prijava na nalog",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 5,
+          "variants": {
+            "ascii": "CloudFlow CRM prijava na nalog",
+            "cyrillic": "ЦлоудФлоw ЦРМ пријава на налог"
+          }
+        },
+        {
+          "query_id": "int-038-en",
+          "lang": "en",
+          "text": "CloudFlow CRM account login page",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 5,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-039",
+      "category": "branded",
+      "awareness_stage": "product_aware",
+      "intent_type": "informational",
+      "micro_moment": "i_want_to_do",
+      "buying_stage": "consideration",
+      "persona_id": "p3",
+      "priority": "tier1",
+      "branded": true,
+      "brand_mentioned": "CloudFlow",
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "explanation",
+      "rationale": "Intent u kategoriji branded, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-039-sr",
+          "lang": "sr",
+          "text": "kako da otkažem CloudFlow CRM pretplatu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 6,
+          "variants": {
+            "ascii": "kako da otkazem CloudFlow CRM pretplatu",
+            "cyrillic": "како да откажем ЦлоудФлоw ЦРМ претплату"
+          }
+        },
+        {
+          "query_id": "int-039-en",
+          "lang": "en",
+          "text": "how do I cancel my CloudFlow CRM subscription",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 8,
+          "variants": {}
+        }
+      ]
+    },
+    {
+      "intent_id": "int-040",
+      "category": "branded",
+      "awareness_stage": "product_aware",
+      "intent_type": "transactional",
+      "micro_moment": "i_want_to_buy",
+      "buying_stage": "consideration",
+      "persona_id": "p1",
+      "priority": "tier2",
+      "branded": true,
+      "brand_mentioned": "CloudFlow",
+      "competitors_mentioned": [],
+      "geo": {
+        "country": "RS",
+        "city": null,
+        "scope": "national"
+      },
+      "expected_answer_type": "fact",
+      "rationale": "Intent u kategoriji branded, awareness_stage=product_aware.",
+      "grounding": {
+        "type": "site_page",
+        "url": "https://cloudflow.rs/cenovnik",
+        "quote": "vidi source_url"
+      },
+      "inferred": false,
+      "queries": [
+        {
+          "query_id": "int-040-sr",
+          "lang": "sr",
+          "text": "da li CloudFlow CRM nudi besplatnu probu",
+          "script": "latin",
+          "orthography": "diacritic",
+          "word_count": 7,
+          "variants": {
+            "ascii": "da li CloudFlow CRM nudi besplatnu probu",
+            "cyrillic": "да ли ЦлоудФлоw ЦРМ нуди бесплатну пробу"
+          }
+        },
+        {
+          "query_id": "int-040-en",
+          "lang": "en",
+          "text": "does CloudFlow CRM offer a free trial",
+          "script": "latin",
+          "orthography": "n/a",
+          "word_count": 7,
+          "variants": {}
+        }
+      ]
+    }
+  ],
+  "notes_for_downstream": {
+    "freeze_policy": "Ne menjati set unutar mernog perioda.",
+    "reporting": "Izveštavati n kao broj prompt-run-ova, ne broj upita.",
+    "recommended_runs": "3 izvršavanja po upitu po engine-u po periodu."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "skill_name": "team-enablement-program",
+  "evals": [
+    {
+      "id": 0,
+      "name": "full-intake-sales-team",
+      "prompt": "Imam klijenta, firma se zove Vektor Logistika, srednje velika špediterska firma iz Beograda. Sponzor je Milena Đurić, COO. Program je za sales tim od 6 ljudi — troje njih koristi ChatGPT povremeno, ostali nikad. Rade u Pipedrive CRM-u, Microsoft 365 (Outlook + Teams + Excel), i imaju neki stari interni portal za praćenje pošiljki. Imaju Claude Team plan koji su kupili pre 2 meseca i skoro niko ga ne koristi. Zadaci koji im se ponavljaju: pisanje ponuda za transport na osnovu upita, follow-up mejlovi posle ponude, nedeljni izveštaj o pipeline-u za Milenu, i unos podataka o novim klijentima u Pipedrive. Napravi mi kompletan program obuke koji mogu da im pošaljem.",
+      "expected_output": "Four deliverables: 14-week markdown program naming Pipedrive/M365/Teams/Claude Team and the four stated repeated tasks, a Week 0 baseline xlsx, a governance one-pager, and an HTML dashboard. No invented tools. Week 0, Week 6 and Week 13 present.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "sparse-intake-invention-test",
+      "prompt": "Treba mi 12-nedeljni AI enablement program za klijenta. Marketing tim. Napravi ga.",
+      "expected_output": "Should NOT invent a tool stack, participant names, task list or baseline hours. Should either ask for the intake fields or produce output with clearly marked placeholders and an explicit list of what must be filled before sending.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "regulated-no-build-clinic",
+      "prompt": "Klijent je privatna poliklinika Sanitas, 4 osobe u administraciji (zakazivanje, fakturisanje, komunikacija sa osiguranjem). Sponzor je dr Nenad Vasić, direktor. Koriste Google Workspace i neki medicinski softver koji se zove MediSoft za kartone pacijenata, plus WhatsApp za komunikaciju sa pacijentima. Ponavljajući poslovi: zakazivanje i pomeranje termina, priprema faktura za osiguravajuće kuće, odgovaranje na ista pitanja pacijenata, mesečni izveštaj o naplati. Bitno: nikad neće praviti sopstvene aplikacije, nemaju nikog tehnički, i rade sa zdravstvenim podacima pacijenata. Napravi program obuke.",
+      "expected_output": "Month 3 converted to evaluate-and-buy rather than silently dropped. Governance card must name patient records and MediSoft as red tier. Week 12 measurement retained. No invented tools.",
+      "files": []
+    }
+  ]
+}

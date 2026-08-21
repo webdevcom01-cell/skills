@@ -1,0 +1,72 @@
+{
+  "skill_name": "deep-research",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need deep research on 'Mercury' — give me a report on the most significant recent developments from the past 12 months.",
+      "expected_output": "Per Step 1 ('Scope, Then Clarify If Needed'), the agent runs one broad exploratory search first rather than immediately asking the user which 'Mercury' they mean (the planet, the element, the Roman god, the car brand, the insurance company, Freddie Mercury, etc.). Only if the topic is still genuinely ambiguous after that first pass does it ask exactly one clarifying question. Its overall search plan spans distinct angles rather than repeating similar queries.",
+      "expectations": [
+        "Agent's very first action is not a clarifying question to the user; it runs (or explicitly states it is running) one broad exploratory search before asking anything, per Step 1's 'run one broad exploratory search first' instruction",
+        "If, after that initial search, the topic remains genuinely ambiguous (as 'Mercury' plausibly does, spanning planet/element/car brand/insurance company/person), the agent asks exactly one clarifying question — not zero, and not several bundled together",
+        "The overall search plan spans distinct angles (e.g., a broad landscape query, a query for concrete data/statistics, a query for counter-arguments or skeptical takes, and a query for the most recent developments) rather than repeating near-identical queries, roughly in the 3-6 query range",
+        "The agent does not treat topic ambiguity as a reason to interrogate the user before doing any search work at all"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "You're finishing Step 2 of a deep-research report on a new industrial safety regulation. Your candidate source list has 9 items: a government regulatory filing, the company's own press release announcing compliance, a direct transcript of the regulator's public briefing, and six separate articles that all turn out to be from the same single blog ('IndustryPulse') that mostly restates that press release without adding anything new. Decide how to finalize your source list and label each kept source's tier, per the skill's Source Tiers and Step 2 rules.",
+      "expected_output": "The agent keeps the three genuinely distinct Tier 1 sources (regulatory filing, company press release, briefing transcript) and recognizes that six near-duplicate posts from one blog fail the 'span more than one or two publishers/domains' requirement. It either searches out further distinct-domain sources to reach the 5-10 source range, or explicitly flags the diversity shortfall rather than padding the list with the duplicate blog posts. Any Tier 2 source added is labeled as corroboration, not treated as equivalent to Tier 1.",
+      "expectations": [
+        "Regulatory filing, company press release, and briefing transcript are labeled Tier 1 (matching the SKILL.md Tier 1 list: official/government data, company filings/press releases, direct transcripts)",
+        "Agent does not pad the source count by keeping most or all of the six near-duplicate single-blog posts just to hit a source-count target; it recognizes clustering on one publisher fails the 'span more than one or two publishers/domains' rule",
+        "Agent either seeks out additional distinct-domain sources (e.g., a wire service or analyst report) to reach the 5-10 source range, or explicitly tells the user that source diversity fell short — it does not silently ship a report that clusters on one domain",
+        "Any Tier 2 source included (e.g., Reuters, Bloomberg, an analyst report) is described as corroboration/context rather than presented as equivalent evidence to the Tier 1 filing or transcript"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "While researching a deep-research report on a company's new product recall, one key source — a Wall Street Journal article containing a specific recall unit count — returns a paywall block when you try to open it. You then try one alternate search query and a cached/snippet version, and both attempts still fail to surface the article's content. Per the skill's Step 2 rules, how do you handle this source in the final report?",
+      "expected_output": "Since the agent already tried an alternate query and a cached/snippet version (satisfying the unreachable-source protocol) and the source is still unreachable, it says so explicitly in the report rather than silently dropping the source or fabricating the recall unit count from memory or inference.",
+      "expectations": [
+        "Agent does not fabricate or estimate the specific recall unit count and present it as sourced fact from the unreachable WSJ article",
+        "Agent does not silently drop the WSJ source from the report as if it had never been found, since an alternate query and a cached/snippet version were already tried per the protocol",
+        "The final report explicitly states that this particular source was unreachable (e.g., noting the WSJ article could not be accessed despite an alternate query and cached-version attempt), matching the rule to 'say so in the report' instead of silently omitting it",
+        "If the recall unit count is genuinely needed and unavailable elsewhere, the agent flags it as an unconfirmed/missing data point rather than leaving an unexplained gap"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "You're drafting Step 3 of a report on a tech company's earnings call. A search snippet reads: '...executives called the quarter a turning point, with strong growth across segments...' — you have not yet opened the actual transcript to confirm this exact phrasing appears there. Separately, in a press article you did fetch, the sentence reads: 'This changes everything for our customers,' said Maria Chen, the company's VP of Product. Elsewhere in the same article, David Lee, the CFO, is quoted giving a revenue figure. Your current draft attributes the 'This changes everything for our customers' quote to David Lee. What must you do before either of these goes into the final report, per Step 3?",
+      "expected_output": "The agent flags two separate Step 3 verification failures: (1) the 'turning point' phrase came from a search snippet, not a confirmed read of the transcript itself, so it must be verified against the actual source text before being quoted; and (2) the quote is attributed to the wrong person in the draft (David Lee instead of Maria Chen) — even though the quote's content is accurate, this is still a citation failure and must be corrected to match the exact name adjacent to the quote in the source.",
+      "expectations": [
+        "Agent identifies that the 'turning point' line must be confirmed as actually present in the fetched transcript text itself, not accepted on the strength of the search snippet alone",
+        "Agent identifies the David Lee / Maria Chen mixup as an error requiring correction, since the exact name adjacent to the quote in the source is Maria Chen, not David Lee",
+        "Agent treats the misattribution as a citation failure in its own right, not something excused because the quote's content and underlying fact are otherwise accurate",
+        "If the agent cannot confirm the 'turning point' phrase is verbatim in the transcript, it revises the wording, paraphrases without a direct quote, or omits it — rather than publishing it as a direct quote on snippet-only evidence"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "You've finished drafting the Detailed Breakdown section of a deep-research report. It has 8 sources, each with its own citation in the summary table, and the Detailed Breakdown text currently runs to about 2,400 words. Per Step 4's finalization check, what should you do before delivering the report?",
+      "expected_output": "The agent recognizes 2,400 words is significantly past the ~800-1500 word target for the Detailed Breakdown, triggering the Step 4 finalization check. It either trims the least-essential source discussion in the prose — while keeping all 8 source citations and the full summary table intact — or explicitly tells the user the report is running oversized rather than silently shipping it unchanged.",
+      "expectations": [
+        "Agent explicitly recognizes 2,400 words is significantly past the ~800-1500 word target, triggering the Step 4 finalization check rather than treating the length as fine",
+        "If trimming, agent trims discussion of the least-essential sources' prose, not the summary table rows or any of the 8 source citations",
+        "Agent does not drop one or more of the 8 sources entirely (removing their citation) purely to hit the word count",
+        "If the agent decides not to trim, it explicitly tells the user the report exceeds the target length rather than silently delivering the oversized version without comment"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Consider two separate deep-research report runs using this skill. Run A: every source was reachable on the first try, every quote and name attribution checked out cleanly, and the user's only reply after receiving the report was 'Great, thanks!' Run B: two source URLs were dead links that needed an alternate query to resolve, and after seeing the first draft the user said 'This is way too shallow — I need at least twice the source depth.' For each run, say whether you run the Self-Improvement Loop, and if you do, how you actually deliver any proposed change to the skill.",
+      "expected_output": "For Run A, the agent skips the Self-Improvement Loop entirely and silently — no reflection is appended, since the run was clean with no friction or correction. For Run B, the loop is triggered (the dead-link workaround and the user's correction about insufficient depth are exactly its triggers), and any proposed change is not claimed as directly saved to the on-disk SKILL.md — instead the agent prepares the complete revised SKILL.md content and offers to deliver it as a file for the user to save or re-upload.",
+      "expectations": [
+        "For Run A, agent states it does not run/append the Self-Improvement Loop reflection, since the run had no friction and no user correction — a clean run is skipped silently, not narrated with an empty reflection",
+        "For Run B, agent identifies that both the dead-link workaround and the user's correction about insufficient depth are exactly the triggers the loop is meant to catch, and runs it",
+        "Agent does not claim it can directly save or apply the proposed change to the user's saved SKILL.md file; it states or implies most environments treat the on-disk skill file as a read-only cache",
+        "For Run B, the agent's proposed handling matches preparing the complete revised SKILL.md content and offering to deliver it as a file, phrased as an offer/question to the user rather than an unprompted attachment",
+        "Agent does not propose a Self-Improvement Loop change for Run A, consistent with only proposing changes that are a substantial improvement — not appending a reflection to a run with no real friction"
+      ]
+    }
+  ]
+}

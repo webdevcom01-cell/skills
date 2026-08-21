@@ -1,0 +1,72 @@
+{
+  "skill_name": "kb-sync",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš True-Sync za agenta 'Hook Writer'. Change detection je identifikovao 3 fajla koja treba ADD-ovati (novi, ne postoje u KB) i 2 fajla za UPDATE (sadržaj promenjen, pa stari izvori treba da budu zamenjeni). Pre prvog DELETE-a u ovom run-u pitaš korisnika da odobri brisanje ta 2 stara KB izvora. Korisnik odgovori: 'Hajde prvo završi sync, o brisanju ćemo posle.' — što se ne računa kao eksplicitno odobrenje (nije 'da' / 'obriši' / 'yes'). Kako nastavljaš sa preostalim koracima sinhronizacije za ovog agenta?",
+      "expected_output": "DELETE approval gate (Step 5.0) je fail-closed: ADD operacije nisu gejtovane i moraju se izvršiti za svih 5 fajlova (3 nova + 2 nove verzije za update), uključujući poll do READY. DELETE za 2 stara izvora se PRESKAČE u ovom run-u jer odobrenje nije eksplicitno dato — stari izvori ostaju kao duplikati i prijavljuju se pod WARNINGS (npr. 'PENDING-DELETE: {kb_title} — awaiting approval'), ne kao ERROR i ne kao tiho izostavljanje. Sync se ne prekida u potpunosti.",
+      "expectations": [
+        "Agent kaže da sve ADD operacije (uključujući nove verzije za 2 update-ovana fajla) treba da se izvrše normalno, jer su adds nedestruktivni",
+        "Agent kaže da se DELETE za oba stara izvora preskače u ovom run-u zato što odobrenje nije eksplicitno ('da'/'obriši'/'yes')",
+        "Agent kaže da se preskočeni delete-ovi loguju pod WARNINGS (ili kao PENDING-DELETE), a ne tiho ignorišu",
+        "Agent NE kaže da ceo sync run treba da se zaustavi ili otkaže zbog nedostatka odobrenja",
+        "Agent NE briše stare izvore na osnovu 'posle ćemo' kao da je to prihvatljivo odobrenje"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Tokom Step 4 (fetch existing KB sources preko HTTP GET), za fajl čiji je KB title 'score-analyzer/evo-log' pronađen je postojeći KB source sa status='READY', ali polje contentHash je null (legacy dokument, ingestovan pre nego što je contentHash implementiran u ingest pipeline-u). Lokalno izračunat SHA-256 hash trenutnog Obsidian sadržaja postoji i nije prazan. Da li ovaj fajl treba tretirati kao SKIPPED (već u sync-u) ili proslediti dalje na UPDATE korak, i zašto?",
+      "expected_output": "Fajl se NE sme tretirati kao SKIPPED. Pravilo u Step 5d (Case B) eksplicitno kaže: ako je source.contentHash == null, tretiraj kao CHANGED i prosledi na UPDATE (Step 5f) — 'Do NOT skip null-hash docs.' Poređenje hash-eva je nemoguće kada je jedna strana null, pa se dokument po difoltu smatra zastarelim i mora se ponovo ingestovati (ADD nove verzije → wait READY → DELETE stare, uz DELETE approval gate).",
+      "expectations": [
+        "Agent zaključuje da fajl ide na UPDATE (Case B, promenjen), a ne na SKIPPED",
+        "Agent eksplicitno navodi da null contentHash onemogućava poređenje hash-eva pa se dokument po difoltu smatra zastarelim/promenjenim",
+        "Agent ne tretira null kao 'match' ili kao razlog da se fajl preskoči",
+        "Agent pominje da je ovo Case B (izvor pronađen po imenu), za razliku od name-mismatch (Case A) scenarija"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Za agenta 'Content Repurposer', u kb_sources_index postoji KB source za 'content-repurposer/instincts' sa status='PROCESSING' (embedding je još u toku od ranije operacije, nije READY). Lokalni Obsidian fajl je u međuvremenu izmenjen. U trenutnom sync run-u, šta radiš sa ovim fajlom — ADD novu verziju, DELETE staru, oboje, ili ništa? Obrazloži.",
+      "expected_output": "Ovo je Case C (Step 5d): KB source postoji ALI status != READY (PENDING/PROCESSING/FAILED). Pravilo nalaže da se loguje WARNING 'SKIPPED {kb_title} (status=PROCESSING, manual check needed)' i da se NE pokušava ni ADD ni DELETE za taj fajl — nastavlja se na sledeći fajl. Hash comparison (Case B logika) se uopšte ne primenjuje jer status nije READY.",
+      "expectations": [
+        "Agent kaže da se za ovaj fajl ne izvršava ni ADD ni DELETE u trenutnom run-u",
+        "Agent kaže da se loguje WARNING sa napomenom da je potrebna ručna provera (manual check needed)",
+        "Agent ne prelazi na Case B (poređenje hash-eva) jer status nije READY",
+        "Agent ne tretira ovo kao ERROR koji zaustavlja ceo sync agenta ili run"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Prilikom sinhronizacije agenta 'Trend Intelligence', Obsidian fajl agents/trend-intelligence/evo-log.md prema konvenciji treba KB title 'trend-intelligence/evo-log'. U kb_sources_index (dobijenom iz Step 4 HTTP GET) ne postoji izvor sa tim tačnim imenom, ali postoji stariji izvor sa imenom 'TI Evo Log' (legacy naming konvencija, pre migracije) čiji je sadržaj suštinski isti. Da li ovaj slučaj tretiraš kao UPDATE postojećeg izvora 'TI Evo Log' (ADD nova verzija + DELETE 'TI Evo Log'), ili drugačije? Da li se 'TI Evo Log' automatski briše u ovom run-u?",
+      "expected_output": "Pošto lookup po tačnom imenu (kb_title == source.name) ne pronalazi 'trend-intelligence/evo-log', ovo je Case A (izvor ne postoji po imenu), NE Case B/update. Prema Step 4 napomeni o legacy naming mismatch-u: samo se izvršava ADD za 'trend-intelligence/evo-log'; nema DELETE koraka u Case A. Legacy izvor 'TI Evo Log' se NE briše automatski — ostaje kao duplikat u KB-u i zahteva ručno čišćenje (curl DELETE po ID-u) nakon što se potvrdi da je novi izvor READY.",
+      "expectations": [
+        "Agent klasifikuje slučaj kao Case A (izvor nije pronađen po imenu), ne kao Case B/update",
+        "Agent kaže da se u ovom run-u izvršava samo ADD za 'trend-intelligence/evo-log', bez ikakvog DELETE-a",
+        "Agent eksplicitno kaže da 'TI Evo Log' ostaje kao duplikat i zahteva ručno brisanje (manual cleanup) kasnije, van ovog automatskog run-a",
+        "Agent ne tvrdi da se izvori automatski spajaju/matchuju zato što im je sadržaj sličan"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Da bi se ubrzao sync agenta 'Hook Writer', predlažeš da za fajl 'hook-writer/instincts' (čiji je sadržaj promenjen u odnosu na postojeći KB izvor) prvo obrišeš stari KB source, a tek onda dodaš novu verziju — argument je da se time izbegava privremeno postojanje dva izvora sa istim title-om u KB-u. Da li je ovaj redosled u skladu sa pravilima sinhronizacije ovog skilla? Ako nije, koji je ispravan redosled i zašto?",
+      "expected_output": "Redosled DELETE→ADD je eksplicitno zabranjen. Pravilo (Step 5f i Constraint #2) nalaže isključivo ADD nove verzije → wait za READY status → tek onda DELETE stare verzije, nikad obrnuto. Razlog: ako ADD operacija ne uspe (npr. embedding FAILED, mrežna greška), a stari izvor je već obrisan, nastaje trajna praznina (gap) u znanju agenta — sadržaj privremeno ne postoji nigde u KB-u.",
+      "expectations": [
+        "Agent kaže da je predloženi redosled (DELETE pa ADD) u suprotnosti sa pravilima skilla",
+        "Agent navodi ispravan redosled: ADD nove verzije → čekanje na READY status → DELETE stare verzije",
+        "Agent objašnjava da svrha ovog redosleda jeste sprečavanje gap-a u KB-u ako ADD ne uspe",
+        "Agent ne prihvata argument o 'privremenom duplikatu title-a' kao dovoljan razlog da se redosled obrne"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Neko predlaže sledeći metod za change detection fajla 'score-analyzer/instincts': pozvati as_search_knowledge_base sa query-jem jednakim naslovu fajla, uzeti vraćene chunk-ove teksta, spojiti ih u jedan string, izračunati SHA-256 tog spojenog stringa, i uporediti ga sa lokalno izračunatim SHA-256 hash-om Obsidian sadržaja fajla. Da li je ovo validan način da se odredi da li je fajl promenjen u kontekstu ovog skilla?",
+      "expected_output": "Ovaj metod nije validan i eksplicitno je zabranjen (Constraint #3, sekcija 'Tools NOT to use'). as_search_knowledge_base vraća semantic search chunk-ove, ne pun dokument — chunk-ovi su fragmenti/reorganizacija originalnog teksta (moguće preklapanje, drugačiji redosled ili izostavljeni delovi), pa SHA-256 spojenih chunk-ova neće biti jednak document-level contentHash-u čak i kada je sadržaj suštinski nepromenjen. Ispravan metod je HTTP GET na /api/agents/{agentId}/knowledge/sources radi dobijanja contentHash polja, poređenog sa lokalnim SHA-256 hash-om celog raw teksta fajla.",
+      "expectations": [
+        "Agent kaže da predloženi metod nije validan / da je u suprotnosti sa eksplicitnim pravilom skilla",
+        "Agent navodi da as_search_knowledge_base vraća chunk-ove, ne pun/originalni dokument",
+        "Agent navodi ispravan metod: HTTP GET KB sources endpoint radi contentHash, poređen sa lokalnim SHA-256 celog fajla",
+        "Agent napominje da chunk-based hash neće pouzdano biti jednak document-level contentHash-u čak i bez stvarne promene sadržaja"
+      ]
+    }
+  ]
+}

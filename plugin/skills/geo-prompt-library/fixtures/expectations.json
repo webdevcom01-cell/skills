@@ -1,0 +1,147 @@
+{
+  "_readme": "Source of truth for what each fixture SHOULD do when run through scripts/validate_library.py. Do NOT infer expected pass/fail from the filename prefix (g=fail, p=pass) -- p03_branded_over.json is the one deliberate exception, a 'p'-prefixed fixture that MUST fail. fixtures/verify_fixtures.py reads this file, not filenames. Regenerate the 'failing_rules'/'derived_rules' values with fixtures/verify_fixtures.py --capture if generate_fixtures.py or validate_library.py changes; do not hand-edit them without re-running the gate to confirm.",
+  "valid_library.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "The baseline: 40 intents, sr-RS, CloudFlow CRM. Must pass all 16 rules with zero failures."
+  },
+  "g01_bad_schema.json": {
+    "expect": "fail",
+    "failing_rules": ["G1_schema"],
+    "derived_rules": [],
+    "note": "frozen set to a string instead of boolean."
+  },
+  "g02_n_intents.json": {
+    "expect": "fail",
+    "failing_rules": ["G2_n_intents", "G4_category_quotas", "G16_matrix_consistency"],
+    "derived_rules": ["G16_matrix_consistency"],
+    "note": "Truncated to 25 intents. G4/G16 co-failure is a REAL cascade (truncating intents necessarily breaks category quotas and the matrix_plan reconciliation) -- not a bug in fixture isolation."
+  },
+  "g03_unpaired.json": {
+    "expect": "fail",
+    "failing_rules": ["G3_pairing"],
+    "derived_rules": [],
+    "note": "Both queries end up lang='sr' (realistic bug: model wrote the SR query, then wrote a second SR paraphrase into the EN slot instead of translating). Deliberately does NOT trip G1 -- 2 valid query objects, schema minItems/maxItems:2 satisfied -- so this proves G3 catches something G1 does not."
+  },
+  "g04_bad_quota.json": {
+    "expect": "fail",
+    "failing_rules": ["G4_category_quotas", "G16_matrix_consistency"],
+    "derived_rules": ["G16_matrix_consistency"],
+    "note": "All `local` intents reassigned to `pricing` category. G16 co-failure is real: geo.city is part of the matrix_plan cell key, so recategorizing without updating the plan is exactly the drift G16 exists to catch."
+  },
+  "g05_branded_cap.json": {
+    "expect": "fail",
+    "failing_rules": ["G4_category_quotas", "G5_branded_cap", "G16_matrix_consistency"],
+    "derived_rules": ["G16_matrix_consistency"],
+    "note": "4 category_shortlist intents reassigned to branded (7 total, cap is floor(0.15*40)=6). G4 and G5 both fail because they share the same _branded_max() bound -- expected, not double-counting a bug."
+  },
+  "g06_placeholder.json": {
+    "expect": "fail",
+    "failing_rules": ["G6_placeholder", "G15_orthographic_variants"],
+    "derived_rules": ["G15_orthographic_variants"],
+    "note": "Query text corrupted to include '[grad]'; variants.ascii was NOT regenerated, so it still holds the ascii fold of the OLD text. Verified directly (see CHANGELOG.md round 3): to_ascii() on bracket text works fine, brackets pass through untouched -- the G15 failure here is stale cache, not a bracket-handling bug."
+  },
+  "g07_near_duplicate.json": {
+    "expect": "fail",
+    "failing_rules": ["G7_near_duplicate"],
+    "derived_rules": [],
+    "note": "int-012 (category_shortlist, same category as int-007) overwritten with int-007's text + ' u Srbiji'. G7a fires (same category, overlap coefficient 1.00 > 0.85). Companion to p04_cross_cat.json, which proves the cross-category version of this same lexical pattern does NOT fire."
+  },
+  "g08_wrong_language.json": {
+    "expect": "fail",
+    "failing_rules": ["G8_language_per_row"],
+    "derived_rules": [],
+    "note": "int-007's sr-labeled query replaced with pure English text, lang left as 'sr'."
+  },
+  "g09_length.json": {
+    "expect": "fail",
+    "failing_rules": ["G9_length"],
+    "derived_rules": [],
+    "note": "int-030 sr text shortened to 'da li CRM' (3 words, below min 4). Chosen specifically to keep >=1 SR function word (avoids tripping G8) and to not be a trigram-substring of any other query (avoids tripping G7) -- isolates G9 alone."
+  },
+  "g10_comparison_integrity.json": {
+    "expect": "fail",
+    "failing_rules": ["G10_comparison_integrity"],
+    "derived_rules": [],
+    "note": "int-027 (comparison) rewritten to drop the competitor name and the 'alternativa za' pattern."
+  },
+  "g11_geo_consistency.json": {
+    "expect": "fail",
+    "failing_rules": ["G11_geo_consistency", "G16_matrix_consistency"],
+    "derived_rules": ["G16_matrix_consistency"],
+    "note": "int-033's geo.city changed to 'Nis' (not in company.locations). G16 co-failure is real: geo.city is part of the matrix_plan cell key."
+  },
+  "g12_grounding.json": {
+    "expect": "fail",
+    "failing_rules": ["G12_grounding_coverage"],
+    "derived_rules": [],
+    "note": "11/40 = 27.5% intents flagged inferred:true, over the 25% cap."
+  },
+  "g13_persona_balance.json": {
+    "expect": "fail",
+    "failing_rules": ["G13_persona_balance", "G16_matrix_consistency"],
+    "derived_rules": ["G16_matrix_consistency"],
+    "note": "First 20 intents forced to persona_id='p1' (50% > 40% cap). G16 co-failure is real: persona_id is part of the matrix_plan cell key."
+  },
+  "g14_locale_purity.json": {
+    "expect": "fail",
+    "failing_rules": ["G14_locale_purity"],
+    "derived_rules": [],
+    "note": "locale.primary set to hr-HR AND all query lang tags relabeled sr->hr (keeps G3/G8/G15 self-consistent under the new primary), text left unchanged -- surfaces the SR markers (ekavica, 'da li') that G14 exists to catch."
+  },
+  "g15_orthographic_variants.json": {
+    "expect": "fail",
+    "failing_rules": ["G15_orthographic_variants"],
+    "derived_rules": [],
+    "note": "int-007's variants.ascii directly corrupted to a wrong string, text left untouched. Genuinely independent finding -- compare to g06 above, where G15 fails as a SIDE EFFECT of a text edit."
+  },
+  "g16_matrix_consistency.json": {
+    "expect": "fail",
+    "failing_rules": ["G16_matrix_consistency"],
+    "derived_rules": [],
+    "note": "matrix_plan.cells[0].planned incremented by 2 directly, no intent data touched. Genuinely independent finding -- the plan itself is wrong, not a reflection of a category/geo/persona edit elsewhere."
+  },
+  "g17_diacritic_collapse.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "int-002 text carries both c-caron and c-acute in the same query ('pracenje' + 'kljucne'). Both fold to plain 'c' under to_ascii() (not invertible, O2) -- this proves the forward map is computed correctly even with both letters present, with no attempted round-trip. Must PASS."
+  },
+  "g18_cyrillic_variant.json": {
+    "expect": "fail",
+    "failing_rules": ["G15_orthographic_variants"],
+    "derived_rules": [],
+    "note": "int-007's variants.cyrillic corrupted, variants.ascii left correct. Only means something because G15 was extended (round 3) to check cyrillic too -- before that extension this fixture would have passed unnoticed."
+  },
+  "g19_digraph_transliteration.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "int-020 text carries the unadapted English loanword 'chat' (SR mixed code, locale-sr.md section 4). Regression guard for the ch/sh/th/ph digraph bug: to_cyrillic() used to map 'c' and 'h' letter by letter instead of treating 'ch' as one sound, so e.g. 'charter' produced wrong 'цхартер' instead of correct 'чартер'. Must PASS: proves the digraph pass in orthographic_variants.py now produces the correct cyrillic variant ('chat' -> 'чат')."
+  },
+  "p01_mixed_code.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "int-020 text is 'najbolji project management alat za male timove' -- more English content words than Serbian ones, but a single SR function word ('za') makes it a grammatical Serbian sentence. Must PASS G8 (proves function-word detection doesn't false-positive on legitimate mixed code, unlike statistical language ID)."
+  },
+  "p02_branded_floor.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "N=30 (not the default 40), branded=4 = exactly floor(0.15*30) = the cap. Must PASS -- proves the boundary is inclusive and correct at a non-default N."
+  },
+  "p03_branded_over.json": {
+    "expect": "fail",
+    "failing_rules": ["G4_category_quotas", "G5_branded_cap"],
+    "derived_rules": [],
+    "note": "*** THE ONE 'p'-PREFIXED FIXTURE THAT MUST FAIL. DO NOT 'FIX' THIS TO PASS. *** N=30, branded=5 -> 16.7%, one over floor(0.15*30)=4. Demonstrates the floor/ceil quantization bug is invisible at the default N=40 (where floor and ceil both give 6) and only visible at N where 0.15*N is not an integer. If this fixture ever passes, the G4/G5 branded-cap fix has regressed."
+  },
+  "p04_cross_cat.json": {
+    "expect": "pass",
+    "failing_rules": [],
+    "derived_rules": [],
+    "note": "int-033 (local) text set to int-007's (category_shortlist) text + ' u Beogradu'. Same lexical pattern as g07_near_duplicate.json but across categories -- the city is the reason it's a different matrix cell, not a duplicate. Must PASS G7b (token set differs by the city). Companion negative case to g07_near_duplicate.json."
+  }
+}

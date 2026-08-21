@@ -1,0 +1,9 @@
+{
+  "name": "soma-skills",
+  "version": "0.1.0",
+  "description": "53 Claude Skills kroz 8-fazni ideja → projekat → rešenje pipeline.",
+  "author": {
+    "name": "buky"
+  },
+  "repository": "https://github.com/webdevcom01-cell/skills"
+}

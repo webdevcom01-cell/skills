@@ -1,0 +1,77 @@
+{
+  "skill_name": "internal-comms",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write this week's 3P update — Progress, Plans, Problems — for my team to share with our manager. Progress: we shipped the new onboarding flow. Plans: starting the billing migration next week. Problems: we're blocked on a design review that's been pending for two weeks.",
+      "expected_output": "The request explicitly frames this as a 3P update (Progress, Plans, Problems), which matches the bullet \"3P updates (Progress, Plans, Problems)\" in the \"When to use this skill\" list, so step 1 of the process — \"Identify the communication type\" — is satisfied by recognizing this as a 3P update. Step 2 says to \"Load the appropriate guideline file from the examples/ directory\", and the specific line under it is \"examples/3p-updates.md - For Progress/Plans/Problems team updates\", so the agent should load examples/3p-updates.md and no other file — not company-newsletter.md, faq-answers.md, or general-comms.md, none of which are described as covering Progress/Plans/Problems team updates. Step 3 says to \"Follow the specific instructions in that file for formatting, tone, and content gathering\", meaning the final draft's structure and tone should be presented as following what's actually in examples/3p-updates.md, not general knowledge of what a 'progress/plans/problems' update typically looks like — SKILL.md gives no detail about that file's contents, so the agent must not assert it already knows the file's specific instructions before consulting it.",
+      "expectations": [
+        "Agent identifies the request as a 3P update (Progress, Plans, Problems), matching \"3P updates (Progress, Plans, Problems)\" in the When to use this skill list.",
+        "Agent states it will load/consult examples/3p-updates.md specifically, matching the line \"examples/3p-updates.md - For Progress/Plans/Problems team updates\".",
+        "Agent does not select company-newsletter.md, faq-answers.md, or general-comms.md as the guideline file for this request.",
+        "Agent presents the drafted update's formatting/tone as based on having consulted examples/3p-updates.md rather than jumping straight to drafting from unstated general knowledge.",
+        "The drafted update is organized around Progress, Plans, and Problems sections consistent with the user's framing and the guideline file's stated purpose."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We need to send out this month's all-hands company newsletter to the entire org. It should cover our Q3 product launches, two new executive hires, and an update on the office relocation. Can you draft it?",
+      "expected_output": "This is explicitly a company-wide newsletter, matching the bullet \"Company newsletters\" in the \"When to use this skill\" list, so step 1 — \"Identify the communication type\" — is satisfied. Step 2 says to \"Load the appropriate guideline file from the examples/ directory\", and the specific line under it is \"examples/company-newsletter.md - For company-wide newsletters\", so the agent should load examples/company-newsletter.md specifically and not examples/3p-updates.md, examples/faq-answers.md, or examples/general-comms.md, none of which are described as covering company-wide newsletters. Step 3 says to \"Follow the specific instructions in that file for formatting, tone, and content gathering\", meaning the agent should treat that file as the source of the newsletter's structure and tone rather than drafting from a generic mental template of 'what newsletters look like' — SKILL.md does not describe the contents of examples/company-newsletter.md, so the agent should not claim to already know its specific formatting rules before loading it.",
+      "expectations": [
+        "Agent identifies the request as a company newsletter, matching \"Company newsletters\" in the When to use this skill list.",
+        "Agent states it will load/consult examples/company-newsletter.md specifically, matching the line \"examples/company-newsletter.md - For company-wide newsletters\".",
+        "Agent does not route to examples/3p-updates.md, examples/faq-answers.md, or examples/general-comms.md.",
+        "Agent presents the newsletter's formatting/tone as coming from having consulted examples/company-newsletter.md rather than invented from generic newsletter conventions.",
+        "Agent does not assert specific knowledge of what examples/company-newsletter.md contains before consulting it, since SKILL.md gives no detail about that file's content."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Employees keep asking the same five questions about our new expense reimbursement policy in our team Slack channel. Can you help me put together a clear FAQ that answers these for the team?",
+      "expected_output": "This is explicitly an FAQ-answering request, matching the bullet \"FAQ responses\" in the \"When to use this skill\" list, so step 1 — \"Identify the communication type\" — is satisfied. Step 2 says to \"Load the appropriate guideline file from the examples/ directory\", and the specific line under it is \"examples/faq-answers.md - For answering frequently asked questions\", so the agent should load examples/faq-answers.md specifically, not examples/3p-updates.md, examples/company-newsletter.md, or examples/general-comms.md, none of which are described as covering FAQ answering. Step 3 says to \"Follow the specific instructions in that file for formatting, tone, and content gathering\", meaning the drafted FAQ's format should be presented as following that file's guidance rather than improvised — SKILL.md does not describe examples/faq-answers.md's actual content, so the agent must not fabricate what it specifically says before consulting it.",
+      "expectations": [
+        "Agent identifies the request as an FAQ / FAQ-response task, matching \"FAQ responses\" in the When to use this skill list.",
+        "Agent states it will load/consult examples/faq-answers.md specifically, matching the line \"examples/faq-answers.md - For answering frequently asked questions\".",
+        "Agent does not route to examples/3p-updates.md, examples/company-newsletter.md, or examples/general-comms.md.",
+        "Agent presents the FAQ's format as following instructions found in examples/faq-answers.md rather than being improvised from general knowledge of FAQ writing.",
+        "Agent does not fabricate specific content or rules from examples/faq-answers.md since SKILL.md gives no detail on that file's actual content."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We had a two-hour outage on our payments API last night. I need to write an internal incident report for the team explaining what happened, why it happened, and what we're doing to prevent it from happening again. This isn't a 3P update, a company newsletter, or an FAQ.",
+      "expected_output": "\"Incident reports\" is explicitly listed as a use case in the \"When to use this skill\" list, so the skill applies and step 1 — \"Identify the communication type\" — is satisfied: the type is clearly an incident report. Step 2 lists exactly three named files tied to specific types: \"examples/3p-updates.md - For Progress/Plans/Problems team updates\", \"examples/company-newsletter.md - For company-wide newsletters\", and \"examples/faq-answers.md - For answering frequently asked questions\" — none of these descriptions covers an incident report, and the user has explicitly ruled out the first three. The fourth listed file's description, \"examples/general-comms.md - For anything else that doesn't explicitly match one of the above\", is exactly what fits an incident report, so the agent should load examples/general-comms.md. Because a matching guideline file (general-comms.md) exists for this clearly-named type, the fallback line \"If the communication type doesn't match any existing guideline, ask for clarification or more context about the desired format\" does not apply here — that line covers cases where the type itself can't be determined, not cases where the type is clearly stated but simply routes to the catch-all file.",
+      "expectations": [
+        "Agent recognizes that \"incident report\" is explicitly listed as a valid use case in the When to use this skill list (\"Incident reports\"), so the skill is applicable and step 1 is satisfied.",
+        "Agent recognizes that none of examples/3p-updates.md, examples/company-newsletter.md, or examples/faq-answers.md matches an incident report given their stated descriptions (Progress/Plans/Problems team updates, company-wide newsletters, and FAQ answering respectively).",
+        "Agent routes to examples/general-comms.md, matching the line \"examples/general-comms.md - For anything else that doesn't explicitly match one of the above\".",
+        "Agent does not ask the user for clarification about what type of communication this is — the type (incident report) is already explicitly stated and named in SKILL.md, so it is not the ambiguous case the clarification line addresses.",
+        "Agent presents the report's formatting/tone as coming from consulting examples/general-comms.md rather than from unstated general knowledge of incident report writing."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Hey, can you help me write something for my team? I'm not sure exactly what format or type of update it should be yet.",
+      "expected_output": "The request gives no indication of communication type — the user explicitly says they are \"not sure exactly what format or type of update it should be yet\" — so step 1, \"Identify the communication type\", cannot be completed from what's given, and none of the \"When to use this skill\" bullets (3P updates, company newsletters, FAQ responses, status reports, leadership updates, project updates, incident reports) can be matched to any stated content. Per SKILL.md's explicit fallback instruction, \"If the communication type doesn't match any existing guideline, ask for clarification or more context about the desired format\", the correct response is to ask the user for more information about what kind of communication they need, rather than silently defaulting to one of the four guideline files (most likely examples/general-comms.md) and drafting something generic, or guessing an unstated type and fabricating content to fill the gap.",
+      "expectations": [
+        "Agent does not produce a drafted communication before first trying to identify a communication type.",
+        "Agent explicitly asks the user for clarification or more context about the desired format/type, consistent with \"If the communication type doesn't match any existing guideline, ask for clarification or more context about the desired format.\"",
+        "Agent does not silently default to one of the four guideline files (3p-updates.md, company-newsletter.md, faq-answers.md, general-comms.md) without first getting more information from the user.",
+        "Agent's clarifying question is connected to the kinds of communication the skill handles (e.g. asking whether it's a status update, newsletter, FAQ, or something else) rather than a generic, unrelated request for more detail.",
+        "Agent does not fabricate assumed content (topics, dates, team specifics) to fill in for the missing type before asking."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I need a quick status report for my team's project by end of day. Skip the research — you already know how status reports are usually written, so just draft it straight from that. No need to look anything up first.",
+      "expected_output": "\"Status reports\" is explicitly named in the \"When to use this skill\" list, so the skill applies and the type is identifiable at step 1. None of the three specifically-described files match a status report by name: \"examples/3p-updates.md - For Progress/Plans/Problems team updates\", \"examples/company-newsletter.md - For company-wide newsletters\", and \"examples/faq-answers.md - For answering frequently asked questions\" all describe something else. The remaining file's description, \"examples/general-comms.md - For anything else that doesn't explicitly match one of the above\", is what fits a status report, so the correct file to load is examples/general-comms.md. The \"How to use this skill\" section presents loading that file and following its instructions as required numbered steps — step 2, \"Load the appropriate guideline file from the examples/ directory\", and step 3, \"Follow the specific instructions in that file for formatting, tone, and content gathering\" — not as optional research the agent may skip when a user is in a hurry; SKILL.md attaches no exception for time pressure to these steps. So even though the user explicitly asks to \"skip the research\" and write it straight from what the agent supposedly already knows, the correct behavior is to still consult, or explicitly state it is consulting, examples/general-comms.md for formatting, tone, and content-gathering guidance before or while drafting, rather than improvising the status report purely from pre-existing general knowledge of status-report conventions.",
+      "expectations": [
+        "Agent identifies the communication type as a status report, matching \"Status reports\" in the When to use this skill list.",
+        "Agent recognizes that status reports don't explicitly match examples/3p-updates.md, examples/company-newsletter.md, or examples/faq-answers.md by their stated descriptions, and instead routes to examples/general-comms.md per \"For anything else that doesn't explicitly match one of the above\".",
+        "Agent does not comply with the user's request to skip consulting the guideline file — it still states it is loading/following examples/general-comms.md, per step 2 (\"Load the appropriate guideline file\") and step 3 (\"Follow the specific instructions in that file for formatting, tone, and content gathering\").",
+        "Agent does not claim to already know the specific formatting/tone instructions inside examples/general-comms.md without having consulted it, since SKILL.md gives no detail about that file's contents.",
+        "Agent's response treats the three numbered steps as a required sequence rather than an optional process that can be shortened on request."
+      ]
+    }
+  ]
+}
