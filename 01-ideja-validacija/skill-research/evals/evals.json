@@ -1,0 +1,71 @@
+{
+  "skill_name": "skill-research",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Korisnik traži: 'Istraži da li je tačno da je AI startup Nimbus prikupio 50 miliona dolara u Series B rundi koju je predvodio poznati fond.' Pre nego što bilo šta uradiš, proveravaš koji alati su ti dostupni u ovoj sesiji i ustanoviš da NEMAŠ ni WebSearch ni WebFetch — nijedan alat za pretragu weba ili dohvatanje stranica nije dostupan, samo alati za rad sa lokalnim fajlovima. Šta radiš dalje?",
+      "expected_output": "Agent kaže korisniku direktno i jasno da istraživanje nije moguće jer ni WebSearch ni WebFetch nisu dostupni u sesiji, i STAJE — ne nastavlja dalje. SKILL.md eksplicitno nalaže: 'If neither is available, say so to the user plainly and stop rather than proceeding — do not fall back on training-data memory and present it as researched.' Odgovor iz memorije trening podataka predstavljen kao 'istraženo' je tačno ono što pravilo zabranjuje, bez obzira na to koliko agent bio uveren da zna odgovor. Agent sme da ponudi odgovor iz opšteg znanja samo ako korisnik to eksplicitno zatraži, i tada mora jasno označiti taj odgovor kao neverifikovan ('unverified'), ne kao istražen ('researched').",
+      "expectations": [
+        "Agent eksplicitno navodi da ni WebSearch ni WebFetch nisu dostupni i da zbog toga staje, umesto da nastavi sa odgovorom",
+        "Agent NE odgovara iz memorije trening podataka predstavljajući to kao rezultat istraživanja",
+        "Agent kaže da bi odgovor iz opšteg znanja ponudio samo ako korisnik to eksplicitno zatraži",
+        "Ako agent opisuje takav hipotetički odgovor, eksplicitno ga označava kao 'neverifikovan'/'unverified', ne kao istražen"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Istražuješ tvrdnju: 'Predsednik kompanije GreenBattery izjavio je prošle nedelje da kompanija u potpunosti prelazi na domaću proizvodnju baterijskih ćelija do kraja godine.' Pretražio si internet sa nekoliko različitih upita (ime kompanije + izjava, ime predsednika + citat, specijalizovani industrijski portali, novinski agregatori) i nisi pronašao NIŠTA — ni članak, ni saopštenje, ni pomen te izjave bilo gde. Isto tako nisi pronašao ništa što tu tvrdnju direktno demantuje. Koji verdikt dodeljuješ ovoj tvrdnji i zašto?",
+      "expected_output": "Verdikt je UNCONFIRMED, ne REFUTED. SKILL.md je eksplicitan: 'Not finding something is not evidence it doesn't exist — it is evidence it isn't in the index you searched. Before assigning REFUTED, name the specific disconfirming artifact or statement you found. If you cannot point to one, the verdict is UNCONFIRMED no matter how much the claim smells wrong. \"I searched hard and found nothing\" is UNCONFIRMED with a note on how thoroughly you looked.' Da bi se dodelio REFUTED, potrebno je pokazati konkretan dokaz protiv tvrdnje (demanti predsednika, stvarni dokument koji je protivreči, dokumentovani datumi koji je čine nemogućom) — ovde takav dokaz ne postoji, samo odsustvo rezultata pretrage.",
+      "expectations": [
+        "Agent dodeljuje verdikt UNCONFIRMED, a ne REFUTED",
+        "Agent eksplicitno objašnjava da odsustvo rezultata pretrage govori o pretraženom indeksu, a ne o tome da li je tvrdnja lažna",
+        "Agent navodi da REFUTED zahteva konkretan dokaz protiv tvrdnje (npr. demanti, protivrečeći dokument, nemogući datumi), koji ovde nije pronađen",
+        "Agent uz UNCONFIRMED navodi napomenu o tome koliko temeljno je pretraga sprovedena (koje uglove/upite je pokrila)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Tvoj kolega tvrdi: 'Acme Robotics je prošlog meseca otpustila 35% svog inženjerskog tima, odmah nakon promene generalnog direktora.' Pretragom si pronašao Reuters članak star 16 meseci koji izveštava da je Acme Robotics u sklopu restrukturiranja tada otpustila 9% svih zaposlenih (ne konkretno inženjerski tim) — članak ne pominje nikakvu promenu generalnog direktora niti se vremenski poklapa sa 'prošlim mesecom'. Nisi pronašao nijedan noviji izvor, niti bilo šta što povezuje taj stariji članak sa aktuelnom tvrdnjom o prošlom mesecu. Koji verdikt dodeljuješ tvrdnji '35% inženjerskog tima otpušteno prošlog meseca nakon promene CEO-a', i kako u izveštaju tretiraš Reuters članak?",
+      "expected_output": "Osnovna tvrdnja (35%, inženjerski tim, prošli mesec, uz promenu CEO-a) dobija verdikt UNCONFIRMED, ne MISLEADING i ne REFUTED. SKILL.md: 'This verdict [MISLEADING] requires a demonstrated link between the claim and the real thing — shared wording, a citation trail, dates in the right order, someone naming it. Finding something real on the same subject is not that link, and using it as one invents an origin story the evidence doesn't support. Without the link the verdict is UNCONFIRMED, with the real thing reported separately as context.' Reuters članak (9% otpuštanja, bez pomena inženjerskog tima ili CEO-a, pogrešan vremenski okvir) je samo nešto stvarno na sličnu temu — nema deljenu formulaciju, citatni trag niti se datumi poklapaju, pa ne predstavlja dokazanu vezu. Izveštaj treba da prijavi Reuters članak kao odvojeni kontekst, a ne kao 'stvarnu stvar koju tvrdnja iskrivljuje'.",
+      "expectations": [
+        "Agent dodeljuje UNCONFIRMED osnovnoj tvrdnji, ne MISLEADING i ne REFUTED",
+        "Agent eksplicitno navodi da pronalazak nečeg stvarnog na istu opštu temu nije sam po sebi dokazana veza (nema deljenu formulaciju/citatni trag/poklapanje datuma)",
+        "Agent prijavljuje Reuters članak (9% otpuštanja) kao odvojeni kontekst, ne kao poreklo tvrdnje o 35%",
+        "Agent ne dodeljuje REFUTED samo zato što se detalji (35%, prošli mesec, promena CEO-a) ne poklapaju sa starijim člankom"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Treba da proveriš tvrdnju: 'Viši inženjer u kompaniji Vertex AI objavio je prošle nedelje 12-stranični PDF koji pokazuje da modeli halucinišu 40% ređe kada se koristi tehnika X.' Kako, prema pravilima za dodeljivanje verdikta, treba da strukturiraš proces provere ove tvrdnje pre nego što napišeš konačan zaključak?",
+      "expected_output": "Tvrdnju treba razložiti na nezavisno proverljive elemente, ne oceniti je kao jednu celinu. SKILL.md: 'Verdict the propositions, not the sentence. \"A senior engineer at [Company] just released a 12-page PDF on X\" is five claims — the person, their employer at the time, the recency, the format and length, the subject — and they fail independently. Assign verdicts to the elements that matter and reserve one overall verdict for the claim's core assertion. Keep the two visibly apart in the write-up... The overall verdict tracks the core assertion, not the worst-scoring detail.' Konkretno, agent treba da identifikuje pet elemenata: (1) osoba je 'viši inženjer', (2) poslodavac je Vertex AI, (3) skorašnjost 'prošle nedelje', (4) format/dužina '12-stranični PDF', (5) suštinska tvrdnja/statistika '40% ređe halucinacije uz tehniku X' — svaki dobija sopstveni verdikt, a jedan ukupan verdikt prati suštinsku tvrdnju i mora ostati vidljivo odvojen od verdikta pojedinačnih elemenata.",
+      "expectations": [
+        "Agent eksplicitno razlaže tvrdnju na najmanje pet nezavisnih elemenata (osoba, poslodavac, skorašnjost, format/dužina, suštinska tvrdnja/statistika)",
+        "Agent navodi da se svaki element ocenjuje nezavisno, umesto da se cela rečenica oceni jednim verdiktom",
+        "Agent navodi da postoji jedan ukupan verdikt koji prati suštinsku tvrdnju (core assertion), odvojen od verdikta pojedinačnih elemenata",
+        "Agent naglašava da u pisanom izveštaju ukupan verdikt i verdikti elemenata moraju ostati vidljivo razdvojeni, tako da čitalac ne mora sam da rekonstruiše rezonovanje"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Proveravaš tvrdnju da je brazilska rudarska kompanija objavila saopštenje za štampu o novom nalazištu litijuma. Pronašao si link ka navodnom saopštenju, ali stranica vraća grešku 404 — ništa drugo nisi probao. Da li je 404 greška sama po sebi dovoljan dokaz da saopštenje nikad nije postojalo, pa tvrdnju možeš oceniti kao REFUTED? Šta treba da uradiš pre nego što doneseš bilo kakav zaključak, imajući u vidu da je izvor brazilski (portugalski jezik, regionalni domen)?",
+      "expected_output": "Ne, 404 greška NIJE dovoljan dokaz i ne sme dovesti do REFUTED. SKILL.md navodi mrtav link kao jednu od situacija u kojima je odsustvo dokaza posebno slabo: 'Deleted, deplatformed, or moved. A dead link is not a nonexistent artifact — try an archive snapshot before treating removal as evidence of fabrication.' Pre zaključka agent treba da proba arhivirani snapshot (npr. Wayback Machine/archive.org). Pošto je izvor i 'Non-English or region-specific' ('Search in the relevant language and on local domains first. A ministry PDF, a regional corporate release, or a court filing can be entirely real and entirely absent from an English query.'), agent takođe treba da pretraži na portugalskom i na lokalnim brazilskim domenima pre nego što bilo šta zaključi. Ako ni posle toga ništa ne pronađe, najviše što može da dodeli je UNCONFIRMED, nikako REFUTED.",
+      "expectations": [
+        "Agent eksplicitno kaže da mrtav link/404 nije dokaz da artefakt nikad nije postojao",
+        "Agent navodi da treba probati arhivirani snapshot (npr. Wayback Machine/archive.org) pre zaključka o nepostojanju",
+        "Agent navodi da je izvor regionalan/na drugom jeziku i da treba pretražiti na portugalskom i lokalnim domenima pre zaključivanja",
+        "Agent ne dodeljuje REFUTED samo na osnovu 404 greške; najviše što bi bilo opravdano (posle daljih provera) je UNCONFIRMED"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Korisnik piše izveštaj o sopstvenoj porodičnoj firmi i traži da proveriš tvrdnju koju je njegov rođak izneo: 'Naša porodična restoranska firma je prošle godine imala 2 miliona dolara prihoda.' Nemaš pristup nikakvim internim finansijskim dokumentima firme, niti bilo čemu javno objavljenom o njoj — pretraga ne vraća ništa ni u prilog ni protiv tvrdnje. (a) Koji verdikt smeš, a koji NE smeš da dodeliš ovoj tvrdnji? (b) U kom odeljku konačnog izveštaja ova tvrdnja treba da se pojavi?",
+      "expected_output": "(a) Verdikt NE sme biti REFUTED. SKILL.md eksplicitno izdvaja ovaj slučaj u listi slabosti 'absence of evidence': 'Inside the user's own world — their company, their client, their family. Never assign REFUTED here; say what you could and couldn't check externally.' Pošto pretraga nije vratila ni potvrdu ni protivrečnost, ispravan verdikt je UNCONFIRMED. (b) Prema strukturi izveštaja, tvrdnja sa verdiktom UNCONFIRMED ide u odeljak 'Claims checked' zajedno sa svojim verdiktom, NE u 'What could not be confirmed': 'A claim carrying an UNCONFIRMED verdict belongs in \"Claims checked\" with its verdict, not in \"What could not be confirmed\" as well. That last section is for gaps that were never framed as a specific claim, plus access failures — a site that blocked fetching, a paywall.' Agent treba jasno da napiše šta je mogao, a šta nije mogao da proveri spolja (izvan porodičnog/internog konteksta).",
+      "expectations": [
+        "Agent eksplicitno kaže da REFUTED nikad ne sme da se dodeli jer je tvrdnja unutar korisnikovog sopstvenog sveta (porodična firma) i agent nema pristup toj interno/porodičnoj indeksaciji",
+        "Agent dodeljuje UNCONFIRMED (pretraga nije donela ni potvrdu ni protivrečnost)",
+        "Agent smešta tvrdnju u odeljak 'Claims checked' zajedno sa njenim verdiktom",
+        "Agent eksplicitno objašnjava da tvrdnja NE ide (dodatno ili umesto toga) u 'What could not be confirmed', jer je taj odeljak rezervisan za praznine koje nikad nisu formulisane kao konkretna tvrdnja, plus greške pristupa (npr. blokiran sajt, paywall)"
+      ]
+    }
+  ]
+}
