@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
 """
 catalog_sync_check.py — checks that plugin/README.md's phase catalog and "Ukupno: N skillova."
-count match the real contents of the phase folders (01-* .. 08-*).
+count match the real contents of the distributable plugin (plugin/skills/), cross-referenced
+against the phase folders (01-* .. 08-*) only to know which phase each one belongs to.
 
 This is the automated version of the manual check that found finding #3 in the original
 forensic analysis: plugin-sync existed on disk but was missing from the README's phase catalog
 and from its total count. Reusable any time a skill is added, removed, or moved between phases.
 
+A skill can legitimately exist in a phase folder but be absent from plugin/skills/ — e.g. a
+skill kept for personal use whose LICENSE.txt doesn't permit redistribution (market-research-
+navigator, system-teardown as of 22.08.2026 — see license_compliance_guard.py). Such a skill is
+correctly absent from the README catalog, so ground truth for "what should be listed" is the
+plugin/skills/ mirror, not the phase folder alone — a phase-folder skill only counts if it is
+also mirrored in plugin/skills/.
+
 Method: parses each "### NN — Title" section in plugin/README.md and the backtick-quoted skill
 names on the line(s) immediately below it, up to the next blank line or heading. Compares that
-name set, per phase, against the real subfolders of NN-*/ that contain a SKILL.md. Also parses
-the "**Ukupno: N skillova.**" line and compares N against the real total across all phases.
+name set, per phase, against the real subfolders of NN-*/ that contain a SKILL.md AND are also
+present under plugin/skills/. Also parses the "**Ukupno: N skillova.**" line and compares N
+against the real total across all phases.
 
 Exit 0 if the catalog and count are exactly in sync. Exit 1 on any drift. Report-only.
 """
@@ -37,12 +46,17 @@ def discover_phase_dirs(root: Path):
 
 
 def actual_skills_by_phase(root: Path):
+    plugin_skills_dir = root / "plugin" / "skills"
     result = {}
     for num, phase_dir in discover_phase_dirs(root).items():
         names = set()
         for child in phase_dir.iterdir():
             if child.is_dir() and (child / "SKILL.md").is_file():
-                names.add(child.name)
+                # Only count it if it's also mirrored into plugin/skills/ — a skill can
+                # legitimately live in the phase folder only (e.g. excluded from the
+                # distributable plugin for licensing reasons) without being catalog drift.
+                if (plugin_skills_dir / child.name).is_dir():
+                    names.add(child.name)
         result[num] = names
     return result
 
