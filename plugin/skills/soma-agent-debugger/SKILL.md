@@ -162,30 +162,7 @@ Pre rada, **uvek pitaj korisnika koji mode** ako iz konteksta nije jasno.
    - Risk assessment (low/medium/high)
    - Rollback plan
 
-**Format prompt-a (template):**
-
-```markdown
-# Fix Prompt: <Title>
-
-## Hard Rules
-1. <rule 1>
-2. NE pretpostavljaj — uvek verifikuj pre menjanja
-3. Anti-hallucination: cite each MCP/file output
-
-### KORAK 1: Pre-flight verification
-[verify current state matches expectations]
-
-### KORAK 2: Apply Fix
-[step-by-step]
-
-### KORAK 3: Verify
-[post-fix verification]
-
-### STOP: <user decision needed>
-
-### Final Acceptance
-[checklist]
-```
+**Read `references/templates.md`** (Mode 2 section) for the exact fix-prompt template to fill in.
 
 ### Mode 3: Build Validator — "Treba mi quality gate"
 
@@ -216,25 +193,7 @@ Pre rada, **uvek pitaj korisnika koji mode** ako iz konteksta nije jasno.
    - Strukturisan error payload (status, reason, violations, timestamp)
    - Eksplicitan output format
 
-   Skelet za Node 1 (prilagodi pravila konkretnoj specifikaciji iz koraka 2):
-
-   ```javascript
-   const violations = [];
-   // match pool = sva relevantna polja, ne samo jedno
-   const pool = [input.title, input.body, input.hook].filter(Boolean).join(" ");
-
-   // hard fail primer: limit
-   if (pool.length > MAX_CHARS) {
-     violations.push({ rule: "max_chars", severity: "hard", detail: pool.length });
-   }
-   // hard fail primer: banned phrase (eksplicitna lista svih oblika)
-   for (const phrase of BANNED) {
-     if (new RegExp(phrase, "i").test(pool)) {
-       violations.push({ rule: "banned_phrase", severity: "hard", detail: phrase });
-     }
-   }
-   return { violations, hardFails: violations.filter(v => v.severity === "hard") };
-   ```
+   **Read `references/templates.md`** (Mode 3 section) for the Node 1 JS skeleton (violations array pattern, hard-fail examples) to adapt to the concrete spec from step 2.
 
 4. **Generiraj test cases:**
    - Happy path (5 PASS)
@@ -288,31 +247,7 @@ Pre rada, **uvek pitaj korisnika koji mode** ako iz konteksta nije jasno.
    - Mali FAIL → rollback candidate ⚠️
    - Veliki FAIL → urgent rollback + debug ❌
 
-**Template za verification report:**
-
-```
-Post-Deploy Verification — <datum>
-
-Korak A (deploy correctness): ✅ / ❌
-- Commit on main: <hash>
-- Railway active: <hash>
-- Match: ✅ / ❌
-
-Korak B (baseline): <count> records before test
-
-Korak C (pipeline run): ✅ / ❌
-- Trigger: <test trend>
-- Chain completed in: <ms>
-
-Korak D (DB verification):
-- New entry created: ✅ / ❌
-- Schema correct: ✅ / ❌
-- No duplicates: ✅ / ❌
-- All expected fields populated: ✅ / ❌
-
-OVERALL: ✅ PASS / ⚠️ WARN / ❌ FAIL
-Recommendation: <production-ready / rollback / debug>
-```
+**Read `references/templates.md`** (Mode 4 section) for the exact verification report template.
 
 ## Write Boundaries (NE krši)
 
@@ -354,3 +289,4 @@ Ove činjenice su provjerene na živim tool schema-ma. Kad se kose sa nečim št
 | Verzija | Datum | Šta |
 |---|---|---|
 | v0.1 | 2026-05-29 | Initial drop: 4 mode-a, hard rules, forensic protokol, validator pattern, post-deploy smoke test |
+| v0.1.1 | 2026-08-22 | Templates (fix-prompt, validator skelet, verification report) premešteni u references/templates.md — fajl se približavao repoovom limitu. Bez promene ponašanja. |

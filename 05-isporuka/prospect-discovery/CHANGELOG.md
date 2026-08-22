@@ -1,5 +1,13 @@
 # CHANGELOG — prospect-discovery
 
+## 1.1.0 — 2026-08-22 (D2: telo prebačeno delimično u references/)
+
+SKILL.md telo je prelazilo repoov 5000-token procenjeni limit (gusta proza, ne broj linija —
+204 linije ali ~5374 procenjenih tokena). Tri sekcije ("Adverse findings, and when to stop",
+"What not to research", "Handling the personal data you collect") premeštene verbatim u novi
+`references/scope-and-compliance.md`, telo zamenjeno kratkim pokazivačem. Bez promene
+ponašanja ili gubitka sadržaja — isti tekst, samo učitava se na zahtev.
+
 ## 1.0.0 — 2026-08-22 (formalizacija verzije, bez zabeleženog delta-a)
 
 `SKILL.md` do sada nije imao `version:` polje, iako ovaj CHANGELOG prati istoriju izmena — bio je

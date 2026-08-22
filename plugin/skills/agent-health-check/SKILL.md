@@ -28,7 +28,8 @@ allowed-tools:
 ---
 
 # Skill: agent-health-check
-*Version: 1.0 | Based on: agent-health-check-implementation-plan.md + agent-health-check-critical-review.md*
+*Version: 1.1 | Based on: agent-health-check-implementation-plan.md + agent-health-check-critical-review.md*
+*1.1 (2026-08-22): STEP 6 report format moved to references/report-format.md — file was approaching the repo's size limit. No behavior change.*
 
 ---
 
@@ -279,84 +280,7 @@ If no production agents could be checked (Phase 2 entirely failed): report score
 
 ## STEP 6 — Generate Report
 
-Format the report exactly as follows:
-
-```
-🏥 AGENT STUDIO HEALTH REPORT
-══════════════════════════════════════════
-Generated : <timestamp>
-Scope     : <production scope list>
-Agents scanned (D0) : <as_find_broken_flows().scanned>
-Agents deep-checked : <N production agents>
-══════════════════════════════════════════
-
-OVERALL HEALTH: <score>/100 <status emoji + label>
-
-══════════════════════════════════════════
-❌ CRITICAL — <N issues>
-══════════════════════════════════════════
-[list each CRITICAL issue]
-
-For each issue:
-  [Dimension tag] Agent name
-  Issue description
-  Fix: <exact command or "Manual: description of required action">
-
-══════════════════════════════════════════
-⚠️ WARNING — <N issues>
-══════════════════════════════════════════
-[list each WARNING issue]
-
-For each issue:
-  [Dimension tag] Agent name
-  Issue description
-  Fix: <exact command or suggested action>
-
-══════════════════════════════════════════
-✅ OK — <N checks passed>
-══════════════════════════════════════════
-[list passing checks briefly]
-
-══════════════════════════════════════════
-PRIORITIZED ACTION LIST
-══════════════════════════════════════════
-1. [CRITICAL] <most urgent fix>
-2. [CRITICAL] <second most urgent>
-...
-N. [WARNING]  <lowest priority>
-══════════════════════════════════════════
-```
-
-### Fix command format (exact — do not vary)
-
-For Memory Wiring fix where KB exists:
-```
-as_patch_node_field
-  agent_id:    <id>
-  node_id:     <node_id>
-  field_name:  knowledgeBaseId
-  field_value: "<kb_id>"
-```
-
-For model fix:
-```
-as_patch_node_field
-  agent_id:   <id>
-  node_id:    <node_id>
-  field_name: model
-  field_value: "gpt-4.1-mini"
-```
-
-For outputVariable fix (from D0):
-```
-as_patch_node_field
-  agent_id:   <id>
-  node_id:    <node_id>
-  field_name: outputVariable
-  field_value: "<suggest a name based on node purpose, e.g. 'format_result'>"
-```
-
----
+**Read `references/report-format.md`** for the exact report layout (header block, CRITICAL/WARNING/OK sections, prioritized action list) and the exact fix-command format for each of the three fix types (Memory Wiring, model, outputVariable). Follow it exactly — do not vary the format.
 
 ## Constraints and Rules
 

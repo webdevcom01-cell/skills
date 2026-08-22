@@ -190,28 +190,7 @@ If total entries across all logs < 3 → report: `⚪ INSUFFICIENT DATA — fewe
 
 ## 10 Deterministic recommendation rules
 
-Apply ALL rules that match. Do NOT generate recommendations outside this table. If no rule matches → write: `No recommendations — all metrics within normal parameters.`
-
-| # | Condition | Recommendation text |
-|---|---|---|
-| R1 | `ti_halt_rate > 30%` | `⚠️ TI halt rate is [N]% — above 30% threshold. Review VAGUE_INPUT criteria in Trend Intelligence instincts. Consider loosening the halt condition or providing richer input context.` |
-| R2 | `ti_halt_rate = 0% AND ti_runs ≥ 3` | `✅ TI halt rate is 0% — Trend Intelligence is accepting all inputs cleanly.` |
-| R3 | `hw_winner_rate = 0% AND hw_runs ≥ 5` | `🚨 Hook Writer has produced 0 winners in [N] runs. Critical quality issue — review HW scoring calibration and per-platform hook intelligence in instincts.` |
-| R4 | `hw_winner_rate ≥ 40%` | `✅ Hook Writer winner rate is [N]% — strong hook quality. Pipeline performing above expectations.` |
-| R5 | cross-log check: HW entry has `winner_score ≥ 17` AND no matching entry found in winners-log by same date AND same hook text (case-insensitive trim) | `📋 Found [N] HW run(s) with winner_score ≥ 17 not logged in winners-log. Use winners-log-logger to log them: [list date + trend + score].` |
-| R6 | `cr_flag_dist["PARTIAL_OUTPUT"] ≥ 50% of cr_runs` | `⚠️ Content Repurposer is producing PARTIAL_OUTPUT in [N]% of runs. Review format templates in CR instincts — one or more platform formats may be under-specified.` |
-| R7 | `cr_flag_dist["HUMAN_REVIEW_NEEDED"] ≥ 2` | `⚠️ HUMAN_REVIEW_NEEDED flagged [N] times by Content Repurposer. Review CR instincts for quality detection thresholds — may be set too strict or too loose.` |
-| R8 | `(ti_runs + hw_runs + cr_runs) ≥ 10 AND (no instinct updates detected in period — inferred from: all logs show entries but no reference to instinct changes in notes fields)` | `💡 10+ pipeline runs completed with no detected instinct updates. Consider running instincts-updater to consolidate learnings from this period.` |
-| R9 | TI entries in last 7 days: zero entries with `confidence = ⭐⭐⭐` | `⚠️ No high-confidence (⭐⭐⭐) TI signals in the last 7 days. Review source priority order in Trend Intelligence instincts — primary sources may be underperforming.` |
-| R10 | Step 3b was executed AND ≥1 instinct has `last_seen` older than 30 days from end of review period AND `confidence < 0.7` | `⚠️ [N] instinct(s) not seen in logs for ≥30 days with confidence < 0.7. Candidates for review: [list: agent — situation snippet (last_seen: YYYY-MM-DD, confidence: X.X, domain: tag)]. Consider running instincts-updater to verify they are still relevant.` |
-
-**R8 note**: "no instinct updates detected" is inferred heuristically — if `notes` fields in CR log contain no mention of "instinct" or "learned" → assume no updates. This is a suggestion, not an error.
-
-**R5 implementation**: after parsing both HW evo-log and winners-log, for each HW entry where `winner_score ≥ 17`, check if a winners-log entry exists with matching hook text (`.strip().lower()`). Collect all mismatches. If count > 0 → apply R5.
-
-**R10 note**: Only fires if Step 3b was executed (review period ≥ 30 days AND instincts files were readable). Staleness is measured from the end of the review period, not from today. Only instincts with `last_seen` metadata (written after Faza 1 upgrade) are checked — older instincts without this field are silently skipped. R10 does not fire if `instinct_records[]` is empty.
-
----
+**Read `references/recommendation-rules.md` at STEP 11** for the full R1-R10 if-then table (condition + exact recommendation text for each), plus the R8/R5/R10 implementation notes. Apply ALL rules that match. Do NOT generate recommendations outside this table. If no rule matches → write: `No recommendations — all metrics within normal parameters.`
 
 ## Workflow — 13 steps
 
@@ -323,96 +302,7 @@ Apply all applicable if-then rules (R1–R10). R10 fires only if `instinct_recor
 
 #### Report structure (exact)
 
-```
-# SOMA Performance Review — YYYY-MM-DD
-
-**Period:** [start] to [end] ([N] total entries across all logs)
-**Generated:** YYYY-MM-DD
-**Scope:** [all time / this month / last N days / custom range]
-
----
-
-## SOMA Health Score
-
-[color emoji] **[HEALTHY / WATCH / ACTION NEEDED]**
-
-| Condition | Value | Status |
-|---|---|---|
-| TI halt rate | [N]% | [🟢/🟡/🔴] |
-| HW winner rate | [N]% ([runs] runs) | [🟢/🟡/🔴] |
-| CR non-OK flag rate | [N]% | [🟢/🟡/🔴] |
-
----
-
-## Trend Intelligence
-
-- **Runs:** [N]
-- **Halt rate:** [N]% ([M] halted / [N] total)
-- **Confidence distribution:** ⭐ [N] · ⭐⭐ [N] · ⭐⭐⭐ [N]
-- **Last 3 angles (verbatim):**
-  1. [angle 1]
-  2. [angle 2]
-  3. [angle 3]
-
----
-
-## Hook Writer
-
-- **Runs:** [N]
-- **Score avg / min / max:** [X] / [X] / [X] (based on [M] scored entries; [K] excluded — no data)
-- **Winner rate:** [N]% ([M] winners / [N] runs)
-- **Platform distribution:** linkedin [N] · x [N] · youtube [N] · instagram [N] · tiktok [N]
-- **Repurposer triggered:** [N] times
-
----
-
-## Content Repurposer
-
-- **Runs:** [N]
-- **Flag distribution:** OK [N] · PARTIAL_OUTPUT [N] · HUMAN_REVIEW_NEEDED [N] · - [N]
-- **Avg LinkedIn word count:** [N] words (based on [M] entries; [K] excluded — no data)
-- **Avg TikTok duration:** [N]s (based on [M] entries; [K] excluded — no data)
-- **Platform completion rate:** [N]%
-
----
-
-## Winners Log
-
-- **Total winners (all time):** [N]
-- **Winners in review period:** [N]
-- **Score range:** [min]/20 – [max]/20
-- **Platform distribution:** [breakdown]
-- **Pattern distribution:** [breakdown]
-
----
-
-## Pipeline Flow
-
-| Stage | Rate | Count |
-|---|---|---|
-| TI → HW handoff | [N]% | [HW runs] / [TI runs] |
-| HW → CR handoff | [N]% | [CR runs] / [HW runs] |
-| End-to-end (TI → CR) | [N]% | [CR runs] / [TI runs] |
-
----
-
-## Recommendations
-
-[Numbered list of applicable recommendations from if-then table, or "No recommendations" fallback]
-
----
-
-## Instinct Health *(include this section only if R10 fired — omit entirely otherwise)*
-
-| Agent | Instinct | Last Seen | Confidence | Domain | Status |
-|---|---|---|---|---|---|
-| [agent] | [situation snippet…] | YYYY-MM-DD | X.X | [tag] | ⚠️ STALE |
-
-*Only instincts with `last_seen` metadata and `confidence < 0.7` not seen in ≥30 days are listed.*
-
----
-*Generated by soma-performance-review skill · SOMA v1*
-```
+**Read `references/report-template.md`** for the exact markdown structure to fill in and write — every section, in order, with placeholder syntax.
 
 #### Write the note
 Call `obsidian_create_note` at the planned path (Step 2) with the full report body.
