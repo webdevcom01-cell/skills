@@ -1,6 +1,6 @@
 # soma-skills
 
-Plugin verzija repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) — 50 Claude Skills organizovanih kroz 8-fazni razvojni pipeline, od prve ideje do gotovog, isporučenog rešenja (ideja → projekat → rešenje).
+Plugin verzija repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) — 52 Claude Skills organizovanih kroz 8-fazni razvojni pipeline, od prve ideje do gotovog, isporučenog rešenja (ideja → projekat → rešenje).
 
 Ovaj `plugin/` folder je **generisan** iz izvornih skillova u glavnim fazonim folderima repozitorijuma (`01-ideja-validacija/` do `08-drugi-projekti/`). Fazna organizacija je izvor istine za dokumentaciju i razvoj; ovaj folder samo pakuje kopije svih skillova u format koji Claude Cowork i Claude Code očekuju za instalaciju plugina (`skills/<ime>/SKILL.md`, ravno, bez faznih podfoldera). Kad se neki skill promeni u izvornom folderu, ovaj folder treba ponovo generisati pre sledeće instalacije.
 
