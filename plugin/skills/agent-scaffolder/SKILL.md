@@ -15,8 +15,11 @@ description: >
 ---
 
 # Skill: agent-scaffolder
-*Version: 2.1 | Based on: IMPLEMENTATION_PLAN_V2.md*
+*Version: 2.2 | Based on: IMPLEMENTATION_PLAN_V2.md*
 *2.1 (2026-07-29): STEP 5d now dry-runs `as_update_flow` before applying — the call has no undo.*
+*2.2 (2026-08-22): STEP 2/3/6/9 and their templates moved to `references/` — SKILL.md*
+*was 811 lines / ~7280 tokens, over the repo's own 500-line/5000-token limit (see*
+*`skill-creator-pro/references/skill-writing-guide.md`). No behavioural change.*
 
 ## Trigger
 Use this skill when the user wants to:
@@ -133,173 +136,27 @@ If downstream agent doesn't exist yet: set `downstream_agent_id = "TODO:{downstr
 
 ## STEP 2 — Generate System Prompts
 
-Generate BOTH prompts now, before any files are written. Output keys must be known before DESIGN_SPEC can be completed.
+Read `references/prompt-templates.md` now and generate BOTH prompts (processor +
+extractor) before writing any files. Output keys must be known before DESIGN_SPEC.md
+(STEP 3) can be completed.
 
-### Processor Prompt
-
-Decide the OUTPUT KEYS for this agent based on:
-- What the downstream agent needs (if pipeline)
-- What domain the agent operates in (inferred from name)
-- Standard pattern: always include CONFIDENCE and DATE at the end
-
-For a **research/trend agent**: TREND, CONFIDENCE_REASON, ANGLE, SOURCES_CHECKED
-For a **content agent**: primary content key (e.g., HOOK), platform-specific variants, SCORE
-For a **middleware agent**: transform the upstream keys into downstream keys
-For a **standalone agent**: whatever makes sense for the purpose
-
-Generate the processor prompt using the 6-section Anthropic structure:
-
-```
-You are {agent_name}, a specialized AI agent.
-Today's date is {{current_date}}.
-
-## Role
-{2–3 sentences: specific purpose, what domain, what value this produces}
-{If A2A: "Pipeline position: {upstream OR 'User'} → YOU → {downstream OR 'Final output'}"}
-
-## Memory
-{{kb_context}}
-These are your learned patterns, past run history, and quality rules. Apply them.
-If this context is empty: proceed with default behavior and note the absence.
-
-## Input Contract
-{If standalone:}
-You receive a free-form message from the user: {{user_message}}
-
-{If A2A receiving from upstream:}
-You receive a structured payload. Detection: look for "{FIRST_KEY}:" in {{user_message}}.
-If "{FIRST_KEY}:" is NOT found → immediately output: FORMAT_ERROR: Expected {FIRST_KEY} not found.
-
-Expected payload:
-{EXPECTED_KEY_1}: {what this contains}
-{EXPECTED_KEY_2}: {what this contains}
-(list all expected keys based on upstream output contract)
-
-## Processing Instructions
-1. {First concrete action — domain-specific}
-2. {Second action}
-3. {Third action — if research: search for data; if content: generate N variations}
-4. Apply quality gate:
-   - ✓ No fabricated data: all stats/metrics must come from input or web results
-   - ✓ No banned phrases: "change the game", "revolutionize", "groundbreaking", "game-changer"
-   - ✓ {Domain-specific rule 1}
-   - ✓ {Domain-specific rule 2}
-   If any check fails → QUALITY_GATE_FAIL: {describe what failed and why}
-5. Format output exactly per Output Contract.
-
-## Output Contract
-Output ONLY these KEY:VALUE pairs. Plain text. No preamble. No markdown. No code blocks.
-
-{OUTPUT_KEY_1}: {what to put here}
-{OUTPUT_KEY_2}: {what to put here}
-{...more keys...}
-CONFIDENCE: ⭐ (weak/single source) OR ⭐⭐ (credible, limited) OR ⭐⭐⭐ (strong, multiple sources)
-DATE: {{current_date}}
-
-## Failure Modes
-FORMAT_ERROR: Input missing expected detection key → output the error code, stop
-QUALITY_GATE_FAIL: Output violates quality rule → output code + describe violation
-GENERATION_ERROR: Output is empty or null → output error code
-```
-
-### Extractor Prompt (fixed — same for all agents)
-
-```
-You are an output extractor. Your only job is to return KEY:VALUE pairs verbatim.
-
-Rules:
-- Extract KEY: VALUE lines from the agent response below
-- Return them EXACTLY as written — do not reformat, summarize, reorder, or modify
-- If the response contains FORMAT_ERROR, QUALITY_GATE_FAIL, or GENERATION_ERROR — pass it through unchanged
-- Do not add any explanation or commentary
-
-Agent response:
-{{agent_response}}
-```
-
-Store both prompts in memory for use in STEP 5.
+Decide the OUTPUT KEYS for this agent based on: what the downstream agent needs (if
+pipeline), what domain the agent operates in (inferred from name), and the standard
+pattern of always including CONFIDENCE and DATE at the end. The reference file has the
+full 6-section Anthropic-structure processor prompt template (Role / Memory / Input
+Contract / Processing Instructions / Output Contract / Failure Modes) and the fixed
+extractor prompt used for every agent. Store both prompts in memory for use in STEP 5.
 
 ---
 
 ## STEP 3 — Write DESIGN_SPEC.md
 
-Now that output keys exist, write the spec to vault:
-Path: `agents/{agent_slug}/DESIGN_SPEC.md`
-
-```markdown
-# {agent_name} — Design Spec
-*Created: {today_date} | Version: 1.0 | Slug: {agent_slug}*
-
----
-
-## Purpose
-{Paragraph 1: what this agent does — its specific function in the pipeline or standalone}
-{Paragraph 2: why it exists — what problem it solves, why it can't be skipped}
-{Paragraph 3: what makes its output valuable — who or what consumes it and why}
-
-## Pipeline Position
-- **Receives from:** {upstream agent name OR "User trigger"}
-- **Sends to:** {downstream agent name OR "Final output — no handoff"}
-- **A2A format:** KEY:VALUE plain text (FORMAT C)
-- **Detection key:** {FIRST_KEY}
-
-## Use Cases
-
-### UC-1: Standard run — strong input
-**Input:** `{FIRST_KEY}: {realistic example value with good data}`
-**Expected output:**
-```
-{OUTPUT_KEY_1}: {realistic expected output}
-CONFIDENCE: ⭐⭐⭐
-DATE: {today_date}
-```
-
-### UC-2: Error case — missing or unstructured input
-**Input:** `{a message without the detection key, or completely unstructured}`
-**Expected output:** `FORMAT_ERROR: Expected {FIRST_KEY} not found`
-
-### UC-3: Edge case — valid input, borderline quality
-**Input:** `{FIRST_KEY}: {vague or ambiguous value}`
-**Expected output:**
-```
-{OUTPUT_KEY_1}: {minimal but valid output}
-CONFIDENCE: ⭐
-DATE: {today_date}
-```
-*Low confidence triggers review in evo-log — correct behavior.*
-
-## Tools & Resources
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| kb_search | Memory recall at runtime | KB created via UI; topK=5 (increase to 15 after 20+ evo-log entries) |
-| ai_response (processor) | Core reasoning + generation | Model: {model_id}, temp: {temperature} |
-| ai_response (extractor) | Normalize to KEY:VALUE | Model: claude-haiku-4-5-20251001, temp: 0.1 |
-{If has_web_search: "| web_search | Live web data retrieval | Required for real-time input |"}
-{If has_downstream: "| call_agent | A2A trigger to {downstream_name} | agentId: {downstream_agent_id} |"}
-
-## Constraints & Safety Rules
-- NEVER fabricate statistics, metrics, or data not present in input or web results
-- NEVER pass malformed output to downstream — use error codes
-- NEVER use: "change the game", "revolutionize", "groundbreaking", "game-changer"
-- If input detection fails → FORMAT_ERROR immediately, do not guess
-- Quality gate must pass before call_agent fires
-- {Domain-specific constraint 1 based on agent purpose}
-- {Domain-specific constraint 2}
-
-## Input Contract
-Detection signal: `{FIRST_KEY}:` present in message.
-Full expected payload:
-- `{INPUT_KEY_1}`: {description}
-- `{INPUT_KEY_2}`: {description}
-(all expected keys from the upstream agent's output contract)
-
-## Output Contract
-{List every OUTPUT_KEY with description, matching what was generated in STEP 2}
-- `CONFIDENCE`: ⭐ weak | ⭐⭐ credible | ⭐⭐⭐ strong
-- `DATE`: YYYY-MM-DD
-```
-
-Use `obsidian_create_note` to write this file.
+Now that output keys exist (STEP 2), read `references/design-spec-template.md` and
+write it to vault: `agents/{agent_slug}/DESIGN_SPEC.md`, via `obsidian_create_note`.
+The template covers Purpose, Pipeline Position, three Use Cases (UC-1 standard, UC-2
+error case, UC-3 edge case), Tools & Resources, Constraints & Safety Rules, and the
+Input/Output Contracts — fill every placeholder using the real output keys from STEP 2,
+not generic text.
 
 ---
 
@@ -475,144 +332,16 @@ If any check fails → STOP. Report exactly which node or edge is missing. Do no
 
 ## STEP 6 — Write Vault Files
 
-Create 3 files using `obsidian_create_note`.
+Read `references/vault-file-templates.md` now and create 3 files via
+`obsidian_create_note`:
 
-### agent-card.md — `agents/{agent_slug}/agent-card.md`
-```markdown
-# {agent_name} — Agent Card
-*Created: {today_date}*
-
-## Identity
-- Agent Name : {agent_name}
-- Agent ID   : {agentId}
-- Public URL : {publicUrl}
-- Model      : {model_id}
-- Slug       : {agent_slug}
-
-## Knowledge Base
-- KB ID      : PENDING_KB_CREATION  ← Updated in STEP 7
-- Documents  : DESIGN_SPEC, instincts, evo-log
-- topK       : 5  (increase to 15 after 20+ evo-log entries)
-
-## Pipeline
-- Receives from       : {upstream OR "User trigger"}
-- Sends to            : {downstream OR "Final output"}
-- Downstream Agent ID : {downstream_agent_id OR "N/A"}
-
-## Input
-- Detection key : {FIRST_KEY}
-- Full contract : See DESIGN_SPEC.md → Input Contract
-
-## Output
-{list output keys}
-- CONFIDENCE, DATE
-
-## How to Wire Another Agent to This One
-```
-as_patch_node_field(
-  agent_name="{upstream_agent_name}",
-  node_id="call_agent-{upstream_slug}-handoff",
-  field_name="agentId",
-  field_value="\"{agentId}\""
-)
-```
-```
-
-### instincts.md — `agents/{agent_slug}/instincts.md`
-
-Generate with DOMAIN-SPECIFIC STARTER CONTENT (do not leave blank):
-
-```markdown
-# {agent_name} — Instincts
-*Path: /agents/{agent_slug}/instincts*
-*Last updated: {today_date}*
-
----
-
-## Quality Gate Rules
-- NEVER fabricate data not present in input or search results
-- NEVER output partial KEY:VALUE — all output keys must be present, or use error code
-- Banned phrases: "change the game", "revolutionize", "groundbreaking", "game-changer"
-- If CONFIDENCE is ⭐ → note the reason in your output summary
-
-## Input Validation
-- Detection key: `{FIRST_KEY}:`
-- If detection fails → FORMAT_ERROR immediately, do not attempt to process anyway
-- If secondary key is missing but FIRST_KEY is present → process, treat missing key as empty
-
-## Output Format Rules
-- All outputs: KEY:VALUE, one pair per line, plain text, no markdown, no preamble
-- CONFIDENCE uses stars only: ⭐ ⭐⭐ ⭐⭐⭐ — never write "high" or "medium"
-- DATE format: YYYY-MM-DD — use {{current_date}} variable, do not hardcode
-
----
-
-{INJECT domain-specific starter block based on inferred agent type:}
-
-[RESEARCH / TREND DETECTION AGENTS — use when has_web_search=Yes or "intelligence/monitor/scout" in name]
-## Signal Quality Rules
-- Signals with version numbers or specific benchmarks outperform vague category descriptions by 3x
-- Official source + measurable metric + practitioner reaction = ⭐⭐⭐
-- Single source, no reactions, or content older than 48h = ⭐
-- NEVER report "X is transforming Y industry" — too generic, downstream will reject
-- When 2+ signals compete: pick the most specific name (tool name > category name)
-- Angle suggestion must tie to what developers/users can DO — not just what it IS
-
-[CONTENT CREATION / HOOK WRITING AGENTS — use when "writer/creator/hook/composer" in name]
-## Content Quality Rules
-- Each generated piece must contain: specific number OR named tool/person OR direct challenge
-- Avoid passive voice in the opening 2 lines of any piece
-- Each variation must use a different rhetorical pattern — never repeat patterns in one run
-- If all variations feel similar → regenerate with explicit diversity instruction
-- Confidence ⭐⭐⭐ = hook passes pattern interrupt + specificity + platform fit
-
-[CLASSIFICATION / SCORING AGENTS — use when "score/rank/rate/classify/analyze" in name]
-## Scoring Rules
-- Score must be derived from explicit criteria, not gut feel
-- If scoring criteria are partially met → score the met percentage, do not round up
-- Document which criteria drove the score in the output field
-- Confidence ⭐⭐⭐ = all scoring criteria could be evaluated; ⭐ = criteria were missing
-
-[PIPELINE MIDDLEWARE AGENTS — use when "transform/convert/extract/parse/repurpose" in name]
-## Transformation Rules
-- Never drop keys from the input payload — pass unmodified keys through if not transforming them
-- Only transform keys defined in your Output Contract — do not invent new keys
-- If a key value is unusable → transform to empty string, do not omit the key entirely
-- Chain integrity: downstream agent depends on exact key names — never rename keys mid-chain
-
-[GENERAL PURPOSE — fallback]
-## General Quality Rules
-- Prefer specificity over generality in all output fields
-- When uncertain about a value → use ⭐ confidence, do not omit
-- Never guess at data you don't have — use error codes instead
-
----
-
-## Common Mistakes to Avoid
-*(Add after first runs — use evo-log-writer skill)*
-
-## Quality Gate Failures
-*(Add after first failed runs — use evo-log-writer skill)*
-```
-
-### evo-log.md — `agents/{agent_slug}/evo-log.md`
-```markdown
-# {agent_name} — Evolution Log
-*Path: /agents/{agent_slug}/evo-log*
-
----
-
-## Log Format
-```
-date | {primary_output_key} | confidence | summary | downstream_triggered
-```
-
----
-
-## Entries
-
-*No entries yet. Agent created {today_date}.*
-```
+- `agents/{agent_slug}/agent-card.md` — identity, KB, pipeline, input/output summary,
+  and the exact `as_patch_node_field` call needed to wire another agent to this one
+- `agents/{agent_slug}/instincts.md` — quality gate rules, input validation, output
+  format rules, PLUS one domain-specific starter block (pick ONE based on the agent
+  type inferred in STEP 1: research/trend, content creation, classification/scoring,
+  pipeline middleware, or general purpose — never leave it blank)
+- `agents/{agent_slug}/evo-log.md` — log format header, empty entries section
 
 ---
 
@@ -714,98 +443,17 @@ Do NOT mark scaffold complete if smoke test fails unless user explicitly overrid
 
 ---
 
-## STEP 9 — Scaffold Report
+## STEP 9 — Scaffold Report, Error Handling, Rollback, Quality Bar
 
-```
-✅ SCAFFOLD COMPLETE: {agent_name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Read `references/report-and-checklists.md` now. It has:
 
-AGENTSTACK
-  Agent ID  : {agentId}
-  Model     : {model_id}
-  Flow      : {node_count} nodes, {edge_count} edges
-  KB ID     : {kb_id}
-  KB status : ready (3 documents: DESIGN_SPEC, instincts, evo-log)
-  Smoke test: ✅ PASSED  (or ⚠️ SKIPPED if user overrode)
+- the STEP 9 scaffold report template (AgentStack summary, vault file checklist,
+  pipeline wiring status, variable-binding integrity check, next steps) — fill it in
+  from everything gathered in STEPs 1–8
+- **Error Handling Reference** — likely cause and fix for each failure point in
+  STEPs 1–8
+- **Rollback Guide** — what exists and how to recover, keyed by which step failed
+- **Quality Bar (14 checks)** — AgentStack / Vault / Smoke Test checklist to
+  self-verify against before reporting the scaffold complete
 
-VAULT  [agents/{agent_slug}/]
-  DESIGN_SPEC.md   ✅
-  agent-card.md    ✅  ← Use this to wire other agents to/from {agent_name}
-  instincts.md     ✅  ← Domain starter content loaded
-  evo-log.md       ✅
-
-PIPELINE
-  Receives from : {upstream OR "User trigger"}
-  Sends to      : {downstream OR "Final output"}
-  {If TODO agent ID:}
-  ⚠️  Downstream agent ID not resolved — wire it when {downstream_name} is created:
-      as_patch_node_field(agent_name="{agent_name}", node_id="call_agent-{agent_slug}-handoff", field_name="agentId", field_value='"{id}"')
-
-VARIABLE BINDING (A2A integrity)
-  extractor outputVariable : structured_output
-  call_agent inputVariable : structured_output
-  Status : ✅ MATCH
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NEXT STEPS
-  1. Run a real trigger via AgentStack UI
-  2. After first run → evo-log-writer skill to log result
-  3. After 3+ runs → instincts.md grows with real patterns
-  4. When evo-log exceeds 20 entries, increase topK from 5 → 15:
-     as_patch_node_field(agent_name="{agent_name}", node_id="kb_search-{agent_slug}-memory", field_name="topK", field_value='15')
-  5. Use kb-sync skill to keep KB documents updated after instincts.md changes
-```
-
----
-
-## Error Handling Reference
-
-| Error | Step | Action |
-|-------|------|--------|
-| Name not found in trigger | 1 | Ask user in plain text before AskUserQuestion |
-| Downstream agent not in list | 1B | Set `TODO:{name}`, document in report |
-| `as_create_agent` name conflict | 4 | Ask user: overwrite flow OR rename |
-| `as_get_agent` shows wrong model | 4 | `as_update_agent_model` to fix |
-| `as_update_flow` fails | 5 | Inspect current flow, rebuild and retry |
-| Dry run shows unexpected node/edge count | 5d | Stop — do NOT apply. Rebuild 5a-5c and dry-run again |
-| Flow verify fails (missing node/edge) | 5e | Stop, report exact mismatch, do not continue |
-| `as_list_knowledge_bases` returns empty | 7b | KB not created — re-prompt manual UI step |
-| Embedding status `"failed"` | 7f | Delete failed doc, re-add with `as_add_kb_text` |
-| Smoke test fails | 8 | Report cause, fix, re-run test before reporting complete |
-| Vault create fails (note exists) | 6 | Use `obsidian_update_note` instead — never silently overwrite |
-
----
-
-## Rollback Guide
-
-| Scaffold failed at... | What exists | Recovery |
-|----------------------|-------------|---------|
-| Before STEP 4 | Nothing in AgentStack | Retry from STEP 1 |
-| STEP 4 succeeded, STEP 5 failed | Agent with empty flow | Use stored `agentId`, retry STEP 5 only |
-| STEP 5 succeeded, STEP 6 failed | Agent + flow, no vault | Retry STEP 6 only |
-| STEP 6 succeeded, STEP 7 failed | Agent + flow + vault, no KB | Retry STEP 7 only (KB docs are additive) |
-| STEP 8 smoke test failed | Everything built, agent not working | Debug per STEP 8e failure table |
-
----
-
-## Quality Bar (v2 — 14 checks)
-
-**AgentStack:**
-- [ ] `as_list_agents` shows agent with correct name
-- [ ] `as_get_agent` shows correct model (not gpt-4.1-mini default)
-- [ ] `as_inspect_flow` returns correct node count with correct IDs
-- [ ] `kb_search` node has real KB ID (not "PENDING_KB_CREATION")
-- [ ] If call_agent: `inputVariable` = `extractor outputVariable` = `"structured_output"`
-- [ ] KB `embeddingStatus: "ready"` with exactly 3 documents
-
-**Vault:**
-- [ ] `agents/{slug}/DESIGN_SPEC.md` exists with all sections filled
-- [ ] `agents/{slug}/agent-card.md` exists with real `agentId` + `kb_id`
-- [ ] `agents/{slug}/instincts.md` exists with domain starter content (not just placeholders)
-- [ ] `agents/{slug}/evo-log.md` exists
-
-**Smoke Test:**
-- [ ] `as_chat_with_agent` with UC-1 input returns non-empty response
-- [ ] All output keys from Output Contract present in response
-- [ ] `CONFIDENCE:` and `DATE:` present
-- [ ] No FORMAT_ERROR or QUALITY_GATE_FAIL on valid input
+Do not report the scaffold complete without running the Quality Bar checklist first.

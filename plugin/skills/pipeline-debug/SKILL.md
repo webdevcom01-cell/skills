@@ -1,6 +1,6 @@
 ---
 name: pipeline-debug
-version: 1.1.0
+version: 1.2.0
 description: >-
   Reactive diagnostic skill for the SOMA pipeline (TI → HW → CR → Score Analyzer). Accepts a problem
   description, runs structured multi-dimensional checks, maps evidence to root cause via explicit
@@ -43,10 +43,13 @@ allowed-tools:
 
 # Skill: pipeline-debug
 
-*Version: 1.0.0*
+*Version: 1.2.0*
 *Grounded in: live MCP schema audit 2026-05-17, forensic plan review, confirmed tool*
 *behaviours from agent-health-check and soma-memory-fix live sessions.*
 *Zero values from memory. All tool parameter names confirmed from live schemas.*
+*1.2.0: STEP 9–11 and reference tables moved to `references/` — SKILL.md was 873*
+*lines / ~8470 tokens, over the repo's own 500-line/5000-token limit (see*
+*`skill-creator-pro/references/skill-writing-guide.md`). No behavioural change.*
 
 ---
 
@@ -423,438 +426,50 @@ If escalating to DEEP:
 
 **CRITICAL: All root cause classification uses ONLY this table. No free-form LLM reasoning.**
 
-Evaluate all rules. Multiple rules can fire simultaneously. Process in priority order.
-
-### 9a — CRITICAL severity rules
-
-```
-RULE C1 — INFRA_DOWN
-  IF d0_status == "DOWN"
-  → Category: INFRA_DOWN | Severity: CRITICAL
-  → Stop all other rules. Report infra issue only.
-
-RULE C2 — FLOW_BROKEN (from D4)
-  IF {agent}_appears_in d4_issues with severity != "WARN"
-  → Category: FLOW_BROKEN | Severity: CRITICAL | Agent: {agent}
-  → Evidence: d4_issues[agent].issue
-  → Fix source: the suggested-fix text for this issue — treat as a hint, not as
-    four named keys; see 10b before building a patch from it
-  → Apply after user confirmation (trivial-eligible) — see Step 10
-
-RULE C3 — FLOW_BROKEN (from D4, WARN severity)
-  IF {agent}_appears_in d4_issues with severity == "WARN"
-  → Category: FLOW_BROKEN | Severity: MAJOR | Agent: {agent}
-  → Evidence: d4_issues[agent].issue
-  → Fix source: the suggested-fix text for this issue — see 10b
-  → Apply after user confirmation (trivial-eligible) — see Step 10
-
-RULE C4 — KB_DEAD
-  IF {agent}_kb_embedding_status == "empty"
-  AND {agent}_kb_search_nodes is non-empty (agent queries KB)
-  → Category: KB_DEAD | Severity: CRITICAL | Agent: {agent}
-  → Evidence: "KB empty AND kb_search node exists — agent runs without memory"
-  → Fix: "Run kb-sync skill to seed KB"
-  → Auto-apply: NO (kb-sync is a separate skill)
-
-RULE C5 — KB_MISSING
-  IF {agent}_kb_count == 0
-  AND {agent}_kb_search_nodes is non-empty
-  → Category: KB_MISSING | Severity: CRITICAL | Agent: {agent}
-  → Evidence: "No KB exists AND kb_search node wired — agent queries non-existent KB"
-  → Fix: "Create KB via agent-scaffolder, then run kb-sync"
-  → Auto-apply: NO
-
-RULE C6 — KB_FAILED
-  IF {agent}_kb_embedding_status == "failed"
-  → Category: KB_FAILED | Severity: CRITICAL | Agent: {agent}
-  → Evidence: "KB embedding permanently failed — agent memory is broken"
-  → Fix: "Delete and recreate KB, then reseed with kb-sync"
-  → Auto-apply: NO
-
-RULE C7 — KB_UNWIRED
-  IF D5 reveals {agent}_kb_search_node with knowledgeBaseId null or empty
-  AND {agent}_kb_count == 1 (exactly one KB exists)
-  → Category: KB_UNWIRED | Severity: CRITICAL | Agent: {agent}
-  → Evidence: "kb_search node exists but knowledgeBaseId is unset"
-  → Fix: as_patch_node_field (node_id from D5, kb_id from D6)
-  → Apply after user confirmation (trivial-eligible)
-
-RULE C8 — AGENT_FAILED (consecutive)
-  IF {agent}_consecutive_failed >= 3
-  → Category: AGENT_FAILED | Severity: CRITICAL | Agent: {agent}
-  → Evidence: "{N} consecutive FAILED executions"
-  → Fix: "Check flow config (D5) and KB status (D6) for this agent"
-  → Auto-apply: NO
-```
-
-### 9b — MAJOR severity rules
-
-```
-RULE M1 — TIMEOUT
-  IF {agent}_has_running == true AND any RUNNING execution duration > 5 min
-  → Category: TIMEOUT | Severity: MAJOR | Agent: {agent}
-  → Evidence: "Agent has RUNNING execution exceeding 5 minutes"
-  → Fix: "Increase timeout on call_agent node; check if web search is hanging"
-  → Auto-apply: NO
-
-RULE M2 — CASCADING
-  Cascade detection (requires at least 2 agents checked):
-  IF ti_last_status == "FAILED"
-  AND (hw_execution_count == 0 OR hw_last_timestamp < ti_last_timestamp)
-  → Category: CASCADING | Severity: MAJOR
-  → Evidence: "TI failed; HW has no subsequent executions → pipeline blocked at TI"
-  → Primary: TI fix (from C2/C3/C8/M1 rules above)
-  → Note: "Fix TI first — HW and CR failures are downstream consequences"
-
-  IF ti_last_status == "COMPLETED"
-  AND hw_last_status == "FAILED"
-  AND (cr_execution_count == 0 OR cr_last_timestamp < hw_last_timestamp)
-  → Category: CASCADING | Severity: MAJOR
-  → Evidence: "TI OK; HW failed; CR has no subsequent executions → pipeline blocked at HW"
-  → Primary: HW fix
-
-RULE M3 — AGENT_FAILED (single)
-  IF {agent}_consecutive_failed == 1 OR == 2
-  → Category: AGENT_FAILED | Severity: MAJOR | Agent: {agent}
-  → Evidence: "{N} recent FAILED executions"
-  → Fix: "Review D5 flow config; may be transient — retry pipeline"
-  → Auto-apply: NO
-```
-
-### 9c — WARNING severity rules
-
-```
-RULE W1 — KB_UNSEEDED
-  IF {agent}_kb_embedding_status == "empty"
-  AND {agent}_kb_search_nodes is empty (agent does NOT query KB)
-  → Category: KB_UNSEEDED | Severity: WARN | Agent: {agent}
-  → Evidence: "KB exists but empty; no kb_search node — not operationally blocking"
-  → Fix: "Seed KB via kb-sync when ready to enable memory"
-  → Auto-apply: NO
-
-RULE W2 — KB_PROCESSING
-  IF {agent}_kb_embedding_status == "processing"
-  → Category: KB_PROCESSING | Severity: WARN | Agent: {agent}
-  → Evidence: "KB embedding in progress — temporary state"
-  → Fix: "Wait 60s and re-run pipeline-debug"
-  → Auto-apply: NO
-
-RULE W3 — KB_DEGRADED
-  IF {agent}_kb_embedding_status == "partial_failure"
-  → Category: KB_DEGRADED | Severity: WARN | Agent: {agent}
-  → Evidence: "Some KB documents failed embedding — memory partially degraded"
-  → Fix: "Run kb-sync to re-upload failed documents"
-  → Auto-apply: NO
-
-RULE W4 — QUALITY_DEGRADATION (HW)
-  IF hw_quality_degradation == true (from D7)
-  → Category: QUALITY_DEGRADATION | Severity: WARN | Agent: HW
-  → Evidence: "{hw_unscored_count} consecutive UNSCORED entries in HW evo-log"
-  → Fix: "Check HW prompt (D5) for score output format; check KB for instincts freshness"
-  → Auto-apply: NO
-
-RULE W5 — QUALITY_DEGRADATION (CR)
-  IF cr_quality_violations == true (from D7)
-  → Category: QUALITY_DEGRADATION | Severity: WARN | Agent: CR
-  → Evidence: "Repeated QUALITY_VIOLATIONS in CR evo-log"
-  → Fix: "Check CR instincts.md via kb-sync; update banned phrase list"
-  → Auto-apply: NO
-
-RULE W6 — NEVER_RAN
-  IF {agent}_execution_count == 0 (NEVER_RAN)
-  AND {agent} is in debug_scope
-  → Category: NEVER_RAN | Severity: WARN | Agent: {agent}
-  → Evidence: "No execution records found — agent may never have been triggered"
-  → Fix: "Run soma-run to trigger the pipeline"
-  → Auto-apply: NO
-
-RULE W7 — DRIFT_PATTERN (TI)
-  IF ti_drift_pattern == true (from D7)
-  → Category: DRIFT_PATTERN | Severity: WARN | Agent: TI
-  → Evidence: "TI consistently redirecting from provided inputs to different trends"
-  → Fix: "Review TI prompt and instincts — consider whether drift is intentional"
-  → Auto-apply: NO
-
-RULE W8 — REPAIR_NOT_PERSISTED
-  IF hw_last_status == "COMPLETED" (hw-validator passed — gate returned "PASS")
-  AND cr_quality_violations == true (CR blocked on banned phrases in D7)
-  AND D5 reveals hw-validator node whose code contains SUBS map or BN_REP repair phase
-  AND call_agent-cr inputMapping uses {{hw_payload}} (the processor outputVariable)
-  AND no write-back function node exists between hw-validator and hw-gate
-  → Category: REPAIR_NOT_PERSISTED | Severity: WARN | Agent: HW→CR cascade
-  → Evidence: "hw-validator repairs payload in-memory but returns 'PASS' only — call_agent-cr sends {{hw_payload}} (original, unrepaired) to CR"
-  → Fix: "Add hw-payload-writeback function node (outputVariable: 'hw_payload') between hw-validator and hw-gate. Re-wire: hw-validator → hw-payload-writeback → hw-gate. Gate and call_agent-cr unchanged."
-  → Auto-apply: NO (requires as_update_flow with new node + edge rewiring — not a patch_node_field fix)
-```
-
-### 9d — CLEAN result
-```
-IF no rules fired above:
-  → {root_cause} = CLEAN
-  → Report: "No issues detected across all checked dimensions."
-  → If symptom_type != UNKNOWN: escalate to DEEP (Step 8 trigger)
-```
+Read `references/root-cause-rules.md` now and evaluate every rule in it against the
+data gathered in Steps 2–8. Evaluate all rules — multiple can fire simultaneously —
+and process in priority order: CRITICAL rules (C1–C8) first, then MAJOR (M1–M3),
+then WARNING (W1–W8), then the CLEAN fallback if nothing fired. That file also
+defines `{root_cause}` for the CLEAN case, which re-triggers the Step 8 escalation
+check.
 
 ---
 
 ## STEP 10 — Apply Trivial Fixes (after explicit confirmation)
 
-Eligible fixes from Step 9 are applied ONLY after the user confirms the exact patch (see 10a.5). This step **MUTATES production** via `as_patch_node_field`.
+Eligible fixes from Step 9 are applied ONLY after the user confirms the exact patch.
+This step **MUTATES production** via `as_patch_node_field`.
 
-**Trivial = eligible to apply AFTER explicit user confirmation:**
-1. RULE C2/C3 (FLOW_BROKEN from D4): ONLY where the suggested fix resolves to a
-   concrete `node_id` + `field_name` + `field_value` — see 10b. If it does not,
-   the issue is non-trivial and goes to the manual list.
-2. RULE C7 (KB_UNWIRED): `as_patch_node_field` with live IDs from D5 + D6
+Read `references/apply-trivial-fixes.md` now before proposing or applying any
+patch. It defines: which fixes are trivial-eligible vs. permanently manual, the
+pre-fix safety checks (running-agent guard, pre-patch re-read), the mandatory
+confirmation gate (10a.5 — fail-closed, apply nothing without explicit "da"/"yes"),
+the exact `as_patch_node_field` call shape for FLOW_BROKEN and KB_UNWIRED fixes,
+and post-patch verification.
 
-**Non-trivial = NEVER applied by this skill.** These override the C2/C3
-eligibility above: if a D4 issue is one of these, it is manual regardless of
-severity — the D4 scan covers empty prompts and phantom call_agent nodes, and
-both appear here.
-
-- Empty prompt (needs human content)
-- Wrong model value (needs target from user)
-- KB empty/failed (needs kb-sync — different skill)
-- Phantom call_agent (needs deletion decision)
-- Ambiguous KB (2+ KBs — same rule as soma-memory-fix)
-
-### 10a — Pre-fix safety checks (per agent to fix)
-
-Before touching any agent:
-
-1. **Active execution guard:** Check `{agent}_has_running`. If true → SKIP this agent.
-   Log: "⚠️ {agent} is currently RUNNING — skipping auto-fix to avoid race condition."
-
-2. **Pre-patch re-read:** Call `as_inspect_flow(agent_name: "{agent}")` to confirm
-   condition still exists. If condition resolved (another process fixed it) → SKIP.
-   Log: "ℹ️ {agent}: condition already resolved. Skipping."
-
-### 10a.5 — Confirmation gate (MANDATORY before any patch)
-
-Before any `as_patch_node_field` call, present every planned patch to the user:
-`{agent_name, node_id, field_name, old_value → field_value}` for each eligible fix.
-Ask: *"Apply these N flow patches to production? (da / yes)"*.
-
-- **Fail‑closed:** if the user does not explicitly confirm, apply NOTHING — report all eligible fixes as `PROPOSED (awaiting confirmation)` and stop the apply phase.
-- One confirmation may cover the whole batch; record it before proceeding.
-
-### 10b — Apply FLOW_BROKEN fix (from D4)
-
-```
-as_patch_node_field(
-  agent_name: "<from d4_issues>",
-  node_id:    "<node.id from an as_inspect_flow call made THIS session>",
-  field_name: "<from d4_issues>",
-  field_value: "\"<from d4_issues>\""
-)
-```
-
-**`field_value` must be a JSON literal.** The schema states it "is parsed as JSON"
-and gives these forms: `'"my-variable"'` (string), `'0.7'` (number), `'true'`
-(boolean), `'{"key":"value"}'` (object). So:
-- an id or any string value carries inner quotes — `'"cmxyz..."'`
-- a number does NOT — `'15'`, not `'"15"'`
-- a string containing newlines, `"` or `\` must be JSON-**escaped**, not merely
-  wrapped. This matters for prompt fields: a raw prompt wrapped in quotes is
-  invalid JSON.
-
-The schema does not document what happens when `field_value` fails to parse — it
-says only that "changes are applied directly to the database". So a malformed
-value may be rejected OR stored raw; do not assume either. Because 10d's
-post-patch verify compares the field to the value you sent, a raw-stored bad
-value can read back as a match. Verify the node's field against the intended
-value, not against the string you passed.
-
-**Do not treat `d4_issues[agent].fix` as structured data.** `as_find_broken_flows`
-returns "a list of issues per agent with severity and suggested fixes" — the `fix`
-field is a suggestion string of unspecified shape, not four named keys. If you
-cannot read `node_id` and `field_name` off it unambiguously, do NOT invent them:
-obtain `node_id` from an `as_inspect_flow` call in this session, and abort the
-patch if `field_name` is still ambiguous. Inventing either one while believing the
-"live IDs only" rule was honoured is exactly the failure that rule exists to stop.
-
-### 10c — Apply KB_UNWIRED fix (from D5+D6)
-
-```
-as_patch_node_field(
-  agent_name: "<agent_name>",
-  node_id:    "<node.id from D5 as_inspect_flow>",
-  field_name: "knowledgeBaseId",
-  field_value: "\"<kb id from D6 as_list_knowledge_bases>\""
-)
-```
-
-Only if `{agent}_kb_count` == 1. If 0 or 2+ → skip, report as manual.
-
-### 10d — Post-patch verification
-
-After each patch, re-read to confirm:
-```
-as_inspect_flow(agent_name: "<agent_name>", node_type: "<patched_node_type>")
-```
-
-- If field now has expected value → mark as `FIXED ✅`
-- If field still empty → mark as `VERIFY_FAILED ❌` — log error, report for manual follow-up
-- If field has unexpected value → mark as `VERIFY_MISMATCH ❌` — do NOT overwrite, report
-
-### 10e — Track results
-```
-{auto_fixes_applied}   = list of FIXED nodes
-{auto_fixes_failed}    = list of VERIFY_FAILED / VERIFY_MISMATCH
-{auto_fixes_skipped}   = list of skipped (running agent / ambiguous)
-```
+Never skip the confirmation gate and never invent a `node_id` or `field_name` —
+both must come from a live MCP call made this session.
 
 ---
 
 ## STEP 11 — Generate Debug Report
 
-```
-🔍 SOMA PIPELINE DEBUG REPORT
-══════════════════════════════════════════════════════════════
-Generated  : {timestamp}
-Scope      : {debug_scope}
-Symptom    : {symptom_type}
-Depth      : {STANDARD | DEEP}
-Time ref   : {time_reference or "last 10 executions per agent"}
-══════════════════════════════════════════════════════════════
-
-INFRASTRUCTURE: {✅ REACHABLE | 🔴 DOWN}
-
-EXECUTION STATUS SUMMARY:
-  TI  → {last_status} | {execution_count} executions | {consecutive_failed} consecutive failed
-  HW  → {last_status} | {execution_count} executions | {consecutive_failed} consecutive failed
-  CR  → {last_status} | {execution_count} executions | {consecutive_failed} consecutive failed
-  SA  → {last_status} | {execution_count} executions
-
-══════════════════════════════════════════════════════════════
-OVERALL: {🔴 CRITICAL | 🟠 MAJOR | 🟡 WARN | ✅ CLEAN} — {N total issues}
-══════════════════════════════════════════════════════════════
-
-🔴 CRITICAL ({N})
-──────────────────────────────────────────
-[For each CRITICAL finding:]
-  [Rule: {RULE_ID}] [{Category}] Agent: {agent}
-  Issue    : {description}
-  Evidence : {specific data from MCP response}
-  Fix      : {the exact patch that was confirmed, or "Manual: instruction"}
-  Auto-fix : {✅ Applied | ❌ Failed | ⏭️ Skipped | — N/A}
-
-🟠 MAJOR ({N})
-──────────────────────────────────────────
-[Same format]
-
-🟡 WARN ({N})
-──────────────────────────────────────────
-[Same format]
-
-══════════════════════════════════════════════════════════════
-ROOT CAUSE HYPOTHESIS
-══════════════════════════════════════════════════════════════
-Primary   : {highest-severity category} — {agent}
-Cascade   : {CASCADING note if M2 fired}
-Evidence  : {key data point from MCP that confirms root cause}
-Fix order : {numbered list of fixes in priority order}
-
-══════════════════════════════════════════════════════════════
-AUTO-FIX LOG
-══════════════════════════════════════════════════════════════
-Applied   ({N}): {list of FIXED nodes}
-Failed    ({N}): {list of VERIFY_FAILED nodes}
-Skipped   ({N}): {reasons}
-
-══════════════════════════════════════════════════════════════
-NEXT STEPS
-══════════════════════════════════════════════════════════════
-{Numbered action list — manual fixes, plus any confirmed fixes already applied}
-
-1. [CRITICAL] ...
-2. [MAJOR] ...
-...
-══════════════════════════════════════════════════════════════
-```
-
-**If CLEAN (no issues found):**
-```
-✅ No issues detected across all {N} dimensions checked.
-{If symptom reported}: Escalating to DEEP diagnostic...
-```
-
-**If auto-fixes were applied:**
-```
-⚡ {N} trivial fix(es) applied after confirmation. Recommend re-running soma-run to verify pipeline health.
-```
-
-**If DEEP mode ran:**
-```
-📋 DEEP mode: reviewed call log previews (300-char limit) for output content.
-   Useful for: detecting empty outputs, abort sentinels.
-   Not useful for: quality analysis, score patterns (use D7 evo-log for those).
-```
+Read `references/report-template.md` now and fill in the template from all data
+gathered in Steps 1–10: header fields, execution status summary, findings grouped
+by severity (CRITICAL/MAJOR/WARN) with rule ID, evidence and fix per finding, the
+root cause hypothesis, the auto-fix log, and numbered next steps. That file also
+has the CLEAN-result, auto-fixes-applied, and DEEP-mode variant footers.
 
 ---
 
-## Diagnostic Dimension Summary
+## Diagnostic Dimension Summary, Tool Reference, Constraints Summary
 
-| Dim | Tool | What it finds | SOMA-specific note |
-|---|---|---|---|
-| D0 | `as_health_check` | DB connectivity | Returns basic counts only |
-| D1 | `as_get_recent_executions` × 4 | Execution history per agent | PRIMARY tool for SOMA (external orchestration) |
-| D1b | `as_list_agent_calls` | A2A internal calls | Supplementary — usually empty for SOMA |
-| D4 | `as_find_broken_flows` | 4 static flow patterns | Does NOT check KB wiring |
-| D5 | `as_inspect_flow` | Full config: prompts, model, KB wiring | KB wiring check done here |
-| D6 | `as_list_knowledge_bases` | KB embedding status | Cross-referenced with D5 |
-| D7 | `obsidian_read_note` × 3 | Evo-log quality patterns | Conditional on symptom type |
-
-**MCP call count (corrected):**
-```
-STANDARD (no quality trigger):
-  D0(1) + D1(4) + D1b(1) + D4(1) + D5(0–4) + D6(0–3) = 7–13 calls, ~90s
-
-STANDARD (quality trigger, D7 added):
-  +3 obsidian reads = 10–16 calls, ~2min
-
-DEEP:
-  All above + as_get_agent_call_log × 3 + full D5 × 4 = max 22 calls, ~4min
-```
-
----
-
-## Tool Reference
-
-| Tool | Parameters used | Notes |
-|---|---|---|
-| `as_health_check` | none | Returns basic counts only |
-| `as_get_recent_executions` | `agent_name`, `limit`, optional `status` | PRIMARY execution check |
-| `as_list_agent_calls` | `since_hours`, `limit` | A2A only — supplementary |
-| `as_get_agent_call_log` | `agent_name`, `limit`, optional `status` | A2A only, no time filter |
-| `as_find_broken_flows` | none (optional `public_only`) | 4 patterns, all agents |
-| `as_inspect_flow` | `agent_name`, optional `node_type` | Full flow config |
-| `as_list_knowledge_bases` | `agent_name` | KB status per agent |
-| `as_patch_node_field` | `agent_name`, `node_id`, `field_name`, `field_value` (JSON literal — see 10b) | Apply only after 10a.5 confirmation |
-| `obsidian_read_note` | `path` | Evo-log analysis |
-
-**Excluded tools and reasons:**
-- `as_get_heartbeat_status`: requires exact `agent_id` — needs extra as_list_agents call for minimal value
-- `as_get_kb_embedding_status`: redundant — `as_list_knowledge_bases` already returns full status breakdown
-- `as_diagnose_models`: covered by agent-health-check scope, not needed reactively
-
----
-
-## Constraints Summary
-
-| Constraint | Rule |
-|---|---|
-| Root cause | ONLY from IF-THEN table in Step 9 — never LLM inference |
-| Fix IDs | ONLY from live MCP calls in current session — never from memory |
-| Apply after confirmation | ONLY trivial fixes (C2/C3 from D4, C7 with 1 KB) — never without 10a.5 |
-| Auto-apply guard | Check RUNNING status + pre-patch re-read before every patch |
-| Post-patch verify | Always re-read to confirm patch took effect |
-| A2A tools | D1b only — never as primary SOMA diagnostic |
-| D7 trigger | Quality keywords in input → Standard; otherwise → Deep only |
-| CONFIG_DRIFT | Not a category — cannot detect without config baseline |
-| Score Analyzer | D1 check only — no evo-log, no auto-fix, secondary scope |
-| 300-char limit | Call log output preview detects empty/sentinel outputs only |
-| Time filter | as_get_recent_executions has no time filter — always last N records |
+Consult `references/reference-tables.md` as needed — not required for every run.
+It has: which MCP tool covers which diagnostic dimension (D0/D1/D1b/D4/D5/D6/D7)
+and why, the expected MCP call count per depth (STANDARD 7–16 calls, DEEP up to
+22), full tool parameter reference, excluded tools and why, and the constraints
+summary table (root cause source, fix-ID source, auto-apply guardrails, etc.) —
+useful as a final self-check before closing out a run.
 
 ---
 
