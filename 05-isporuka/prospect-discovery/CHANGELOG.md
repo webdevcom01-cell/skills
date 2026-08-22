@@ -1,5 +1,13 @@
 # CHANGELOG — prospect-discovery
 
+## 1.0.0 — 2026-08-22 (formalizacija verzije, bez zabeleženog delta-a)
+
+`SKILL.md` do sada nije imao `version:` polje, iako ovaj CHANGELOG prati istoriju izmena — bio je
+jedini skill sa CHANGELOG-om a bez deklarisane verzije. Ovaj CHANGELOG prati **datume, ne verzije**,
+pa se broj nije mogao izvesti iz njega; `1.0.0` je dodeljen kao prva eksplicitna verzija zatečenog
+stanja. **Ovog datuma nije promenjen sadržaj skilla** — unos postoji samo da verzija ima polazište.
+Sve stvarne izmene su datumski unosi ispod.
+
 ## 2026-08-01 — fidelity and read-back patches
 
 Six changes, derived from a root-cause analysis of one real run (a Serbian food

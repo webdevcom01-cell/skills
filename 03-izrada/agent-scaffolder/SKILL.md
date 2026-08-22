@@ -9,6 +9,9 @@ description: >
   "dodaj agenta u pipeline", "set up new AgentStack agent", "build a new agent from scratch",
   "I want a new agent that does X", "new agent", "kreiraj agenta", "napravi agenta",
   "hocu novog agenta", "napravi mi agenta", "build agent", "create agent".
+  Use this only when plain scaffolding is what you want — no deterministic quality gate. If safety,
+  anti-hallucination, or fail-closed behavior matters at all, use safe-agent-builder instead; it is
+  the safer default for an unqualified "napravi mi agenta".
   Do NOT use for modifying existing agents (use as_patch_node_field directly) or debugging flows.
 ---
 
@@ -22,6 +25,8 @@ Use this skill when the user wants to:
 - "add agent to pipeline", "dodaj agenta u pipeline"
 - "set up new AgentStack agent", "build a new agent from scratch"
 - "I want a new agent that does X"
+
+If the user did not explicitly ask to skip the quality gate: use **safe-agent-builder** instead. It builds the same agent plus a `function`-node validator and a fail-closed condition gate, and smoke-tests a deliberately bad input to prove the gate blocks. This skill is the right choice only when that gate is knowingly unwanted.
 
 For modifying an existing agent's flow or prompts: describe what needs changing and use `as_patch_node_field` or `as_update_flow` directly.
 For debugging a broken flow: use the flow-debugger skill (when available).

@@ -1,3 +1,15 @@
+## [0.2.0] — 2026-08-22 (formalizacija verzije, bez zabeleženog delta-a)
+
+- **Verzija u `SKILL.md` frontmatteru (`0.2.0`) do sada nije imala odgovarajući unos ovde.** Svih
+  četrnaest prethodnih rundi zabeleženo je pod oznakom `[0.1.0-draft]`, dok `git log` pokazuje da je
+  `version: "0.2.0"` postojao već u prvom commit-u ovog repoa (`f794eaa`) — nema zapisa o tome šta se
+  promenilo pri prelasku sa `0.1.0-draft` na `0.2.0`. Ovaj unos postoji da bi frontmatter i vrh
+  CHANGELOG-a bili usklađeni, i **ne tvrdi da je ovog datuma promenjeno išta u sadržaju skilla**.
+  Sadržaj koji `0.2.0` obuhvata su runde zabeležene ispod.
+- **Dodat `scripts/requirements.txt`** (`jsonschema>=4.0`). Zavisnost je do sada postojala samo kao
+  proza u `compatibility:` opisu, iako je `validate_library.py` bez nje fail-closed — `_require_jsonschema()`
+  izlazi sa kodom 2 ("gate nije ni pokrenut"), što je namerno različito od izlaza 1 (biblioteka nevalidna).
+
 ## [0.1.0-draft] — 2026-08-02, četrnaesta runda (description tightening — ručno, ne kroz automatski loop)
 
 - **Automatski description-optimization loop (skill-creator-pro) pokrenut i odustao — pravi bug, ne šum.** Dva pokušaja (10 workera/30s timeout, pa 4 workera/90s timeout) su gotovo svi `claude -p` pozivi timeout-ovali. Dijagnoza: podprocesi su bili živi minutima ali sa skoro 0% CPU — blokirani, ne spori. Root cause potvrđen izolovano: `skill-creator-pro/scripts/run_eval.py`'s `subprocess.Popen()` nije postavljao `stdin=`, pa nasleđuje stdin OVE sesije — kad je `run_eval.py` pozvan iz VEĆ aktivne Claude Code sesije (nested `claude -p`), taj fd nije TTY sa kog dete bezbedno može da čita, pa blokira čekajući ulaz koji nikad ne stiže. Popravljeno (`stdin=subprocess.DEVNULL`) i potvrđeno: identičan poziv koji je ranije visio sad završava za 4.3s. **Ovo je popravka u skill-creator-pro (odvojen alat, van ovog skill bundla)** — pomenuto ovde samo zato što objašnjava zašto ovaj krug NIJE koristio izmereni loop.

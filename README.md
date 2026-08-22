@@ -85,6 +85,7 @@ Pokretanje, monitoring, ucenje iz logova i ciscenje nakon lansiranja.
 | [`winners-log-logger`](06-rad-odrzavanje/winners-log-logger/SKILL.md) | Logs a winning hook (score ≥ 17/20) into the Hook Writer winners-log in the Obsidian vault |
 | [`automation-triage`](06-rad-odrzavanje/automation-triage/SKILL.md) | Decides which of a client's repeated tasks are worth automating, which to teach a person instead, and which to tell them not to touch — c... |
 | [`obsidian-knowledge-logger`](06-rad-odrzavanje/obsidian-knowledge-logger/SKILL.md) | Structured knowledge capture into an Obsidian vault via any available Obsidian MCP server or REST API |
+| [`plugin-sync`](06-rad-odrzavanje/plugin-sync/SKILL.md) | Proverava i sinhronizuje `plugin/skills/` sa izvornim faznim folderima (01-08) i pakuje `plugin/` u distributable `.plugin` fajl |
 
 ### 07-izlazni-formati/ -- Izlazni formati / finalni materijal
 
@@ -92,10 +93,6 @@ Format u kom gotovo resenje stize do citaoca - dokument, prezentacija, tabela, a
 
 | Skill | Sta radi |
 |---|---|
-| [`docx`](07-izlazni-formati/docx/SKILL.md) | Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files) or Word templates (.dotx files) |
-| [`pptx`](07-izlazni-formati/pptx/SKILL.md) | Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both |
-| [`pdf`](07-izlazni-formati/pdf/SKILL.md) | Use this skill whenever the user wants to do anything with PDF files |
-| [`xlsx`](07-izlazni-formati/xlsx/SKILL.md) | Use this skill any time a spreadsheet file is the primary input or output |
 | [`canvas-design`](07-izlazni-formati/canvas-design/SKILL.md) | Create beautiful visual art in .png and .pdf documents using design philosophy |
 | [`theme-factory`](07-izlazni-formati/theme-factory/SKILL.md) | Toolkit for styling artifacts with a theme |
 | [`web-artifacts-builder`](07-izlazni-formati/web-artifacts-builder/SKILL.md) | Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind C... |
