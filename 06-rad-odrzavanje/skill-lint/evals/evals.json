@@ -1,0 +1,49 @@
+{
+  "skill_name": "skill-lint",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Kazem agentu: 'proveri licence u repou skillova pre nego sto pakujemo plugin'.",
+      "expected_output": "Agent pokrece SAMO scripts/license_compliance_guard.py (STEP 2), ne i lint_metadata.py ili catalog_sync_check.py, jer korisnik je trazio samo licencnu proveru. Izvestava rezultat tog jednog skripta jasno, ne implicira da su i preostale dve provere takodje pokrenute.",
+      "expectations": [
+        "Agent pokrece license_compliance_guard.py",
+        "Agent NE pokrece lint_metadata.py niti catalog_sync_check.py bez eksplicitnog razloga",
+        "Agent u izvestaju ne tvrdi da je proverio velicinu/verziju/deps ili README katalog kad to nije trazeno",
+        "Ako guard vrati restriktivnu licencu, agent je prijavljuje kao nalaz koji zahteva ljudsku odluku, ne pokusava sam da izmeni LICENSE fajl"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pokrenuo sam lint_metadata.py i dobio [SIZE-WARN] za skill X: 350 linija, u zoni 300-499, bez references/. Da li to znaci da X krsi standard repoa i treba odmah da se popravi?",
+      "expected_output": "Ne. SIZE-WARN je meko upozorenje ('approaching the limit'), ne tvrd nalaz kao [SIZE] (koji trazi >=500 linija ili >=5000 tokena). Agent objasnjava razliku: X ne krsi tvrdi standard, samo je u zoni gde vodic preporucuje dodavanje hijerarhije (references/ ili scripts/) pre nego sto se dostigne tvrd limit. Nije hitno, ali vredi razmotriti.",
+      "expectations": [
+        "Agent jasno kaze da SIZE-WARN nije isto sto i tvrd [SIZE] nalaz",
+        "Agent objasnjava da 500 linija / 5000 tokena je tvrd prag, 300-499 je samo preporuka da se doda hijerarhija",
+        "Agent ne kaze da skill 'krsi standard' kad je u pitanju samo meko upozorenje",
+        "Agent ne predlaze hitnu/prioritetnu akciju za nesto sto je samo upozorenje"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Molim proveri da li allowed-tools obim za soma-memory-fix odgovara stvarnom ponasanju skilla opisanom u SKILL.md telu.",
+      "expected_output": "Agent NE pokusava ovo sam kroz skill-lint alate (lint_metadata.py/license_compliance_guard.py/catalog_sync_check.py ne rade ovu proveru uopste). Umesto toga, agent jasno kaze da je ovo posao skill-security-review skilla, koji zahteva citanje i rasudjivanje o sadrzaju, ne mehanicku proveru, i predlaze da se on pozove.",
+      "expectations": [
+        "Agent prepoznaje da nijedan od tri skill-lint skripta ne proverava allowed-tools obim naspram ponasanja",
+        "Agent eksplicitno upucuje na skill-security-review kao ispravan alat za ovo",
+        "Agent ne pokusava da sam procenjuje allowed-tools opravdanost citajuci SKILL.md kroz skill-lint kontekst",
+        "Agent ne izmislja odgovor bez pokretanja ispravnog alata"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "catalog_sync_check.py je javio da 'novi-skill' postoji na disku u fazi 06 ali nije u README katalogu te faze. Popravi to odmah.",
+      "expected_output": "Agent moze da uradi ovu konkretnu, dobro-odredjenu izmenu (dodavanje imena u odgovarajucu liniju README-a) jer je korisnik eksplicitno trazio popravku, ali NE pokrece git add/commit/push sam - to ostaje korisniku, po konvenciji repoa. Posle izmene, agent ponovo pokrece catalog_sync_check.py da potvrdi da je sada cisto, umesto da samo tvrdi da je popravljeno.",
+      "expectations": [
+        "Agent modifikuje plugin/README.md da doda 'novi-skill' u faznu 06 listu (i po potrebi azurira Ukupno: N)",
+        "Agent NE pokrece git add/commit/push - kaze korisniku tacnu komandu za njegov terminal",
+        "Agent ponovo pokrece catalog_sync_check.py posle izmene da potvrdi da je nalaz nestao, ne samo tvrdi da je gotovo",
+        "Agent ne dira plugin/skills/ kopiju direktno rucno - ako treba, spominje da plugin-sync radi tu sinhronizaciju"
+      ]
+    }
+  ]
+}

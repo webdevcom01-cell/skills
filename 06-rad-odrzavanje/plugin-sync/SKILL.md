@@ -18,6 +18,9 @@ Use this skill when the user wants to:
 
 Do NOT use this skill for:
 - Creating or drafting a brand-new individual skill → use `skill-creator-pro`
+- Checking SKILL.md size/version/deps/license hygiene, or README catalog drift → use `skill-lint`
+  (mechanical checks this skill doesn't do)
+- Checking for hardcoded credentials or judging `allowed-tools` scope → use `skill-security-review`
 - Running `git add`/`git commit`/`git push` → tell the user the exact commands, don't run them
   yourself (this repo's convention: git write operations go through the user's own terminal)
 
@@ -92,6 +95,10 @@ Re-running Step 1's check command after `--apply` should report clean. If it doe
 report the mismatch rather than guessing why.
 
 ## STEP 3 — Package (only if the user asked to package/upload/install the plugin)
+
+Consider running `skill-lint` first (size/version/deps/license/catalog hygiene gate) — this
+script only checks that `plugin/skills/` matches the source, not whether the source itself is
+clean.
 
 ```
 python3 06-rad-odrzavanje/plugin-sync/scripts/package_plugin.py plugin dist

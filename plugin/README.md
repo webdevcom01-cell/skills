@@ -46,7 +46,7 @@ Obsidian MCP server se očekuje pod imenom `obsidian`.
 `agent-delivery-pack`, `prospect-discovery`, `soma-distribution`, `team-enablement-program`
 
 ### 06 — Rad / održavanje
-`agent-dependency-mapper`, `automation-triage`, `evo-log-writer`, `instincts-updater`, `kb-sync`, `memory-integrity-gate`, `obsidian-knowledge-logger`, `plugin-sync`, `soma-agent-cleanup`, `soma-memory-fix`, `soma-performance-review`, `soma-run`, `soma-score-analyzer`, `winners-log-logger`
+`agent-dependency-mapper`, `automation-triage`, `evo-log-writer`, `instincts-updater`, `kb-sync`, `memory-integrity-gate`, `obsidian-knowledge-logger`, `plugin-sync`, `skill-lint`, `skill-security-review`, `soma-agent-cleanup`, `soma-memory-fix`, `soma-performance-review`, `soma-run`, `soma-score-analyzer`, `winners-log-logger`
 
 ### 07 — Izlazni formati
 `algorithmic-art`, `brand-guidelines`, `canvas-design`, `doc-coauthoring`, `internal-comms`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`
@@ -54,7 +54,7 @@ Obsidian MCP server se očekuje pod imenom `obsidian`.
 ### 08 — Drugi projekti
 `geo-prompt-library`, `morning`, `tender-projekat`
 
-**Ukupno: 50 skillova.**
+**Ukupno: 52 skillova.**
 
 ### Skillovi koji se ne pozivaju sami
 

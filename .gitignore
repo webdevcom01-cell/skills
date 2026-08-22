@@ -1,3 +1,5 @@
 _to_delete/
 .DS_Store
 .agent-context/
+__pycache__/
+*.pyc

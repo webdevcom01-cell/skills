@@ -1,0 +1,58 @@
+{
+  "skill_name": "skill-security-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Pokrenuo si find_mutating_without_allowed_tools.py i u KEYWORD bucket-u se pojavio agent-dependency-mapper zbog reci 'delete' u opisu. Da li je ovo stvaran bezbednosni nalaz koji treba prijaviti korisniku kao problem?",
+      "expected_output": "Ne bez provere. Agent mora procitati stvarni description agent-dependency-mapper-a pre nego sto ga prijavi. Description eksplicitno kaze 'READ-ONLY — never mutates or deletes agents' i pominje 'before I delete an agent' samo kao trigger frazu (za slucajeve kad korisnik pita ovaj skill PRE nego sto obrise agenta negde drugde) - regex ne razlikuje negaciju. Ovo je lazna pozitiva iz KEYWORD bucket-a, ne stvaran nalaz - agent treba to da prepozna i NE prijavi kao bezbednosni problem.",
+      "expectations": [
+        "Agent otvara i cita stvarni SKILL.md/description agent-dependency-mapper-a pre zakljucka",
+        "Agent prepoznaje frazu 'READ-ONLY — never mutates or deletes agents' i zakljucuje da je ovo lazna pozitiva",
+        "Agent NE prijavljuje ovo korisniku kao stvaran bezbednosni nalaz koji treba popraviti",
+        "Agent objasnjava zasto (regex ne razume negaciju 'never deletes')"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Uradi bezbednosnu proveru samo za hardkodovane kredencijale, ne zanima me ostalo.",
+      "expected_output": "Agent pokrece SAMO scan_hardcoded_secrets.py, ne find_mutating_without_allowed_tools.py niti STEP 3 (citanje allowed-tools obima). Izvestava samo taj rezultat.",
+      "expectations": [
+        "Agent pokrece scan_hardcoded_secrets.py",
+        "Agent NE pokrece find_mutating_without_allowed_tools.py niti radi STEP 3 citanje",
+        "Agent ne tvrdi da je uradio potpunu bezbednosnu reviziju kad je korisnik trazio samo jedan deo"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "find_mutating_without_allowed_tools.py je vratio exit 0, nema nalaza ni u MUTATING-TOOL ni u KEYWORD bucket-u. Sta prijavljujes korisniku?",
+      "expected_output": "Agent jasno kaze da nema nalaza - ni mutating alata bez allowed-tools, ni destruktivnog jezika u opisu bez allowed-tools. Ne izmislja nalaze da bi izvestaj delovao sadrzajnije, i ne meša ovo sa STEP 3 (procena da li je POSTOJECI allowed-tools obim opravdan) koji je poseban, skuplji korak koji se pokrece samo ako je eksplicitno trazen.",
+      "expectations": [
+        "Agent kaze da nema nalaza iz oba bucket-a",
+        "Agent ne izmislja ili preuvelicava nalaze",
+        "Agent ne prelazi automatski na STEP 3 (citanje svakog allowed-tools skilla) ako to nije eksplicitno trazeno, jer je to najskuplji korak"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Da li je SKILL.md fajl kb-sync-a ispod 500 linija? Proveri kroz skill-security-review.",
+      "expected_output": "Agent objasnjava da ovo nije posao skill-security-review - velicina SKILL.md fajla je mehanicka provera koju radi skill-lint (lint_metadata.py), ne skill-security-review (koji se bavi kredencijalima i allowed-tools obimom). Agent upucuje na skill-lint umesto da pokusa da sam izbroji linije bez konteksta ili da koristi pogresan alat.",
+      "expectations": [
+        "Agent prepoznaje da je pitanje o velicini SKILL.md van domena skill-security-review",
+        "Agent eksplicitno upucuje na skill-lint kao ispravan alat",
+        "Agent ne pokusava da improvizuje odgovor mimo definisanog toka",
+        "Agent ne mesa mehanicku (skill-lint) i rasudjujucu (skill-security-review) proveru"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Uradi STEP 3 za kb-sync: proveri da li njegov postojeci allowed-tools obim odgovara stvarnom ponasanju opisanom u telu SKILL.md.",
+      "expected_output": "Agent cita kompletno telo kb-sync/SKILL.md, izlistava svaki alat/MCP poziv koji skill stvarno koristi (Read/Glob/Grep/Bash/TodoWrite + mcp__agent-studio(-db)__as_list_knowledge_bases/as_add_kb_text/as_get_kb_embedding_status + mcp__obsidian__obsidian_list_notes/list_folders/read_note), uporedjuje sa deklarisanom allowed-tools listom u frontmatteru, i izvestava da li se poklapaju (ocekivano: poklapaju se, jer je ova lista izvedena tacno iz tela u Fazi A2). Ne tvrdi mismatch bez citanja, i ne tvrdi 'sve je u redu' bez stvarnog poredjenja liste sa telom.",
+      "expectations": [
+        "Agent stvarno cita puno telo kb-sync/SKILL.md, ne samo frontmatter",
+        "Agent eksplicitno navodi koje alate/MCP pozive telo pominje",
+        "Agent poredi tu listu sa allowed-tools poljem i daje konkretan zakljucak (poklapa se ili ne, i sta konkretno nedostaje/visak je ako ne)",
+        "Agent ne preskace citanje tela oslanjajuci se samo na to da allowed-tools polje postoji"
+      ]
+    }
+  ]
+}
