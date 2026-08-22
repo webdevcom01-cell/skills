@@ -1,6 +1,7 @@
 ---
 name: evo-log-writer
 description: Logs SOMA agent run results into the correct evo-log.md file in the Obsidian vault. Use this skill whenever a SOMA agent (Trend Intelligence, Hook Writer, or Content Repurposer) has finished a run and the result needs to be recorded. Triggers on phrases like "logiraj run", "zapiši evo-log", "log this run", "log the agent", "evo log za [agent]", "Trend Intelligence je završio", "Hook Writer je generisao", "Content Repurposer je završio", "log the pipeline", "zapiši pipeline run", or any mention of a SOMA agent completing work. Also triggers when the user describes agent output and says "zapamti ovo" or "sačuvaj ovo" in a SOMA context. Do NOT use for general knowledge saving (use obsidian-knowledge-logger for that), and do NOT use for winners-log entries (use winners-log-logger for that).
+compatibility: Requires Obsidian MCP (obsidian_read_note, obsidian_update_note) -- writes directly into the vault's evo-log.md files. No other MCP or package dependency.
 allowed-tools:
   - mcp__obsidian__obsidian_read_note
   - mcp__obsidian__obsidian_update_note

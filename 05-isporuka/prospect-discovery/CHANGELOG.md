@@ -1,5 +1,12 @@
 # CHANGELOG — prospect-discovery
 
+## 1.1.1 — 2026-08-22 (#14: dodato compatibility polje)
+
+Dodato `compatibility:` frontmatter polje koje opisuje da skill nema specifičnu MCP alat
+zavisnost za osnovni istraživački tok (oslanja se na opštu web-research sposobnost sesije),
+i da `scripts/check_sources.py` (Python 3, samo stdlib) proverava izvore u dosijeu. Bez
+promene ponašanja.
+
 ## 1.1.0 — 2026-08-22 (D2: telo prebačeno delimično u references/)
 
 SKILL.md telo je prelazilo repoov 5000-token procenjeni limit (gusta proza, ne broj linija —

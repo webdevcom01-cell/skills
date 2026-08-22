@@ -2,11 +2,12 @@
 name: memory-integrity-gate
 description: >-
   Adds a DETERMINISTIC, fail-closed Memory Integrity Gate to any agent or loop that promotes its own outputs into LEARNED MEMORY (winners-log, instincts, KB read by kb_search). It vets every candidate before it is learned — grounding facts against the SOURCE (not the candidate itself), blocking banned/vague-hype phrasing, requiring a named anchor and an independent score verdict — and QUARANTINES anything that fails. The concrete defense against OWASP ASI06 (Memory & Context Poisoning) in a self-improving agent. Use when the user says "add a memory gate", "vet outputs before learning", "anti memory poisoning", "stop bad data entering the KB", or Serbian "dodaj memory gate", "zaštiti learning loop", "spreči memory poisoning", "neka loop bezbedno uči". ALSO use when hardening an agent the enterprise-readiness audit flags as "learns / feeds memory" (C5/D3/F4). Do NOT use for a one-shot agent with no self-memory, for pre-publish output safety (separate gate), or to build the whole agent (use a scaffolder).
+compatibility: Requires Agent Studio MCP (as_inspect_flow, as_chat_with_agent, as_create_agent, as_create_eval_case, as_update_flow, as_patch_node_field). Fail-closed by design -- vets every candidate before it's promoted into learned memory, and blocks the promotion if a required check can't run.
 standards:
   - OWASP Top 10 for Agentic Applications 2026 — ASI06 Memory & Context Poisoning
   - Anthropic engineering (anti-fabrication, deterministic validation in code)
   - NIST AI RMF / EU AI Act (human oversight for runtime-steering memory)
-version: 1.0.0
+version: 1.0.1
 allowed-tools:
   - Read
   - Glob

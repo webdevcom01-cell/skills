@@ -1,6 +1,7 @@
 ---
 name: kb-sync
 description: Syncs Obsidian vault files into Agent Studio knowledge bases using True-Sync (ADD new, wait READY, DELETE old). Use this skill whenever the user wants to sync vault docs to agent KBs, update agent memory, keep KB in sync after editing instincts or evo-logs, run a KB refresh, or says things like "sync the KB", "update agent memory", "push vault to KB", "KB is out of date", "sync SOMA agents", "refresh agent knowledge", "sinkronizuj KB", "azuriraj KB", "sync instincts", or "uradi kb sync". Change detection uses SHA-256 hash comparison against stored contentHash so only actually changed files are re-ingested. Handles rate limiting, ADD-before-DELETE ordering, and per-document polling automatically; old KB sources are DELETED only after explicit user approval (fail-closed). Do NOT use for creating new agents or KBs from scratch (use agent-scaffolder), diagnosing broken flows (use agent-health-check), or editing agent prompts directly.
+compatibility: Requires Agent Studio MCP (as_list_knowledge_bases, as_add_kb_text, as_get_kb_embedding_status) and Obsidian MCP (obsidian_list_notes, obsidian_list_folders, obsidian_read_note) together -- the True-Sync ADD-wait-DELETE cycle needs both sides live in the same session. references/reference-tables.md covers rate limits and error handling for both.
 allowed-tools:
   - Read
   - Glob
@@ -21,6 +22,7 @@ allowed-tools:
 # Skill: kb-sync
 *Version: 1.1 | Based on: kb-sync-implementation-plan.md + kb-sync-critical-review.md (added DELETE approval gate)*
 *1.2 (2026-08-22): Default Scope, Rate Limiting Reference, Tool Reference, and Error Handling Reference moved to references/reference-tables.md — file was approaching the repo's size limit. No behavior change.*
+*1.3 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio/Obsidian MCP dependency. No behavior change.*
 *Zero-hallucination implementation — every design decision grounded in live codebase reads*
 
 ---

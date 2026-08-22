@@ -12,6 +12,7 @@ description: >-
   the call graph from BOTH static flow wiring (as_inspect_flow call_agent nodes)
   and the runtime call log (as_list_agent_calls), labels every edge by source,
   and produces a dependency report. Requires the Agent Studio MCP (as_* tools).
+compatibility: Requires Agent Studio MCP (as_inspect_flow, as_list_agent_calls, as_list_agents). Read-only by design -- never mutates or deletes agents. No script or package dependency beyond that.
 allowed-tools:
   - Read
   - Write

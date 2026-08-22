@@ -1,6 +1,7 @@
 ---
 name: pipeline-input-validator
 description: Pre-flight validator for SOMA pipeline inputs. Scores any trend input (URL, text, or both) across 4 dimensions (Specificity, Niche, Freshness, Actionability) before it enters the TI→HW→CR chain. Returns PASS / WARN+ / WARN- / FAIL with a deterministic score and improvement guidance. Use when the user says "validiraj input", "provjeri input", "validate this", "is this a good input", "da li je ovo dobar input", "provjeri trend", "validate trend", "da li da pustim ovo u pipeline", "check before sending", "should I run this", "provjeri URL", "validate URL", "is this relevant", "da li je relevantno", "input check", "može li ovo kroz pipeline", "worth running", "kvalitet inputa", "input quality", or any request to evaluate, screen, or validate a trend input before running it through SOMA. Do NOT use for logging runs (use evo-log-writer), generating hooks (trigger TI directly), or reviewing past performance (use soma-performance-review).
+compatibility: No MCP or package dependency -- scores a stated trend input (URL and/or text) across 4 dimensions using deterministic rules. references/examples.md holds the 5 worked scoring examples; it's the only external file read.
 ---
 
 # SOMA Pipeline Input Validator

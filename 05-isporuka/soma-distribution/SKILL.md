@@ -1,7 +1,8 @@
 ---
 name: soma-distribution
-version: 0.1.0
+version: 0.1.1
 description: Takes SOMA Content Repurposer output (5 platform posts marked READY_FOR_REVIEW) through a human approval gate and turns approved posts into a publish-ready bundle - one formatted file per platform (LinkedIn, X, YouTube, Instagram, TikTok) plus a scheduling manifest - and logs the batch to Obsidian. If a social/scheduling MCP is connected it hands off; otherwise it produces the bundle for manual posting. The SOMA pipeline stops at READY_FOR_REVIEW with no distribution step - this is that step. Use when the user says "publish", "distribute", "objavi", "rasporedi postove", "schedule posts", "spremi za objavu", "posalji na platforme", "approve and post", "izvezi postove", or after a CR run when posts are ready. Do NOT use to generate or score content (use soma-run / soma-score-analyzer) - it never rewrites post copy, only formats, gates, and routes. Never auto-publishes without approval.
+compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_search_knowledge_base) and Obsidian MCP (obsidian_read_note, obsidian_update_note) -- reads Content Repurposer output marked READY_FOR_REVIEW and, after human approval, writes the publish-ready bundle.
 do_not_use_when:
   - User wants to generate or rewrite the posts (use soma-run / Content Repurposer)
   - User wants to score the posts (use soma-score-analyzer)

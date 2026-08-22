@@ -1,6 +1,6 @@
 ---
 name: soma-eval-harness
-version: 1.3.0
+version: 1.3.1
 description: >-
   Evaluates SOMA pipeline reliability (TI → HW → CR) by re-running real logged trends k times, grading
   each trial with structural + quality graders, scoring by correctness (polarity-aware), and reporting
@@ -9,6 +9,7 @@ description: >-
   eval", "test pipeline reliability", "provjeri pouzdanost pipeline-a", "pokreni eval", "regresijski
   eval", "da li je pipeline stabilan", "koliko je pipeline pouzdan", "testiraj agente eval". Triggers:
   "soma eval", "evaluiraj pipeline".
+compatibility: Requires Agent Studio MCP (as_chat_with_agent) to re-run logged trends k times, and Obsidian MCP (obsidian_create_note, obsidian_read_note, obsidian_update_note) to write the consistency report. references/graders.md and references/reference-tables.md hold the structural/quality grading rules.
 do_not_use_when:
   - "User wants to run a production pipeline (use soma-run)"
   - "User wants to log an existing run (use evo-log-writer / winners-log-logger)"
@@ -27,11 +28,12 @@ allowed-tools:
 
 # Skill: soma-eval-harness
 
-*Version: 1.3.0*
+*Version: 1.3.1*
 *Grounded in: live vault + skill audit 2026-06-21 — ti_handoff block, abort sentinels,*
 *evo-log paths/schemas, CR flag vocabulary, char limits, and dataset composition all*
 *confirmed from real files (soma-run SKILL.md + agents/*/evo-log.md). Zero values from memory.*
 *1.3.0 (2026-08-22): Graders (G1-H1), report format template, and the trailing*
+*1.3.1 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio/Obsidian MCP dependency. No behavior change.*
 *reference tables moved to `references/` — SKILL.md was 532 lines / ~5590 tokens,*
 *over the repo's own 500-line/5000-token limit (see*
 *`skill-creator-pro/references/skill-writing-guide.md`). No behavioural change.*

@@ -1,6 +1,6 @@
 ---
 name: rls-rollout
-version: 1.0.0
+version: 1.0.1
 description: >
   Audits, plans, and orchestrates a phased Postgres Row-Level Security (RLS)
   rollout for the agent-studio multi-tenant database (61 Prisma models).
@@ -13,6 +13,7 @@ description: >
   Do NOT use for: applying migrations without review (skill never does this),
   designing tenancy model from scratch (assumes existing organizationId schema),
   Redis cache audit (separate workstream), threat modeling (human task).
+compatibility: Requires a live Postgres connection to the target database (DATABASE_URL), the Prisma CLI, and a Node/tsx runtime for scripts/generate-migration.ts and scripts/classify-models.ts; scripts/audit.sh, scripts/verify-staging.sh, scripts/ci-fix.sh and scripts/rollback.sh are bash and assume a Unix shell with psql on PATH. Never applies a migration itself -- generates SQL drafts and runbooks for human review.
 disable-model-invocation: true
 allowed-tools:
   - Read

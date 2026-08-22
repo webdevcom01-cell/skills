@@ -1,6 +1,7 @@
 ---
 name: instincts-updater
 description: "Extracts patterns from SOMA agent evo-logs, proposes new instincts, and — after human approval — appends them to the correct instincts.md files in the Obsidian vault. Use when the user says \"update instincts\", \"ažuriraj instinkte\", \"instincts update\", \"nauči agente iz evo-logova\", \"analiziraj logove za instinkte\", \"šta su agenti naučili\", \"provjeri greške u logovima\", \"izgeneriši instinkte iz logova\", \"what have agents learned\", \"extract patterns\", \"ekstrakcija obrazaca\", \"nauči iz grešaka\", \"izvuci obrasce\", \"dodaj instinkte\", or after a batch of runs when the user wants to consolidate learnings. Do NOT use for general Obsidian writes (use obsidian-knowledge-logger), for running agents (use soma-run), or for checking pipeline health (use agent-health-check). ALWAYS wait for explicit human approval before writing any instinct to the vault."
+compatibility: Requires Obsidian MCP (obsidian_read_note, obsidian_update_note, obsidian_create_note) to read evo-logs and, after human approval, append to instincts.md files. No external package dependency.
 allowed-tools:
   - Read
   - Glob

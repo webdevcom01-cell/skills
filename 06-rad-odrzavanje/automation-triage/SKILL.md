@@ -1,6 +1,7 @@
 ---
 name: automation-triage
 description: Decides which of a client's repeated tasks are worth automating, which to teach a person instead, and which to tell them not to touch — computed from ten stated fields per task and your own build economics, never from a feeling. Runs after the discovery call, on tasks the team said in their own words. Produces a ranked triage, a client-facing list of what is not worth automating, and a handoff to the next skill. Use on "what should we automate", "which tasks are worth automating", "build or train", "is it worth building an agent for this", or Serbian "šta da automatizujemo", "koje zadatke automatizovati", "da li vredi graditi agenta za ovo", "graditi ili obučiti", "šta ne treba automatizovati", "trijaža zadataka". Do NOT use for market sizing or idea validation (market-research-navigator), to write the training programme (team-enablement-program), to build the agent (safe-agent-builder), or to screen a pipeline input (pipeline-input-validator).
+compatibility: No MCP dependency -- pure scoring logic from ten stated fields per task. Python 3 (stdlib only) runs scripts/screen_task.py, scripts/score_task.py and scripts/check_triage.py; scripts/selftest.py exercises all three plus mutation coverage.
 ---
 
 # Automation Triage

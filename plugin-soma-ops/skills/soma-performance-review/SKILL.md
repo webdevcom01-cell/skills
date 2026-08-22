@@ -1,6 +1,7 @@
 ---
 name: soma-performance-review
 description: "Generates a SOMA pipeline performance report by reading all 4 agent logs from the Obsidian vault (TI evo-log, HW evo-log, CR evo-log, winners-log) and producing a structured markdown report with per-agent metrics, pipeline health score, and if-then recommendations. Use when the user says \"uradi performance review\", \"performance check\", \"kako radi SOMA\", \"pregled performansi\", \"review agent logs\", \"SOMA statistike\", \"SOMA health\", \"koliko hookova je prošlo\", \"how is the pipeline doing\", \"pipeline review\", \"agent performance\", \"šta je SOMA uradila ovog meseca\", \"izveštaj o agentima\", \"agent stats\", \"koji agent loše radi\", \"SOMA performance\", \"koliko runa je urađeno\", \"SOMA report\", \"pipeline status\", \"check logs\", or any request to evaluate, audit, or summarize SOMA agent performance over a time period. Do NOT use for logging a single run (use evo-log-writer), logging a winner hook (use winners-log-logger), or updating agent instincts (use instincts-updater)."
+compatibility: Requires Obsidian MCP (obsidian_create_note, obsidian_list_folders, obsidian_read_note) -- reads all 4 agent evo-logs from the vault and writes the report there. references/recommendation-rules.md and references/report-template.md hold the R1-R10 rule table and the exact report template.
 allowed-tools:
   - mcp__obsidian__obsidian_create_note
   - mcp__obsidian__obsidian_list_folders

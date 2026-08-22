@@ -1,7 +1,8 @@
 ---
 name: prospect-discovery
-version: 1.1.0
+version: 1.1.1
 description: Researches a company from a URL or name and produces a consultant-ready discovery pack — a sourced dossier where every claim carries a citation or is marked unverified, a discovery call agenda built from that company's actual business, a filled intake block that feeds straight into team-enablement-program, and a proposal skeleton with hypotheses marked as unconfirmed. Use whenever the user gives a company website, names a prospect or client to look into, or asks to prepare for a sales or discovery call, research a lead, build a client dossier, qualify a prospect, or find out what a business actually does before pitching them. Also use before any client-facing engagement skill, since researched facts are what separate a specific deliverable from a template. Do NOT use for market sizing or competitor landscapes (use market-research-navigator), for verifying a single claim (use skill-research), or for building the training programme itself (use team-enablement-program).
+compatibility: No specific MCP tool dependency for the core research workflow -- relies on the calling session's general web research capability rather than a named tool. Python 3 (stdlib only) runs scripts/check_sources.py to gate the dossier's citations; scripts/selftest.py covers it with mutation testing. Read references/scope-and-compliance.md before researching adverse findings.
 ---
 
 # Prospect Discovery

@@ -11,6 +11,7 @@ description: >
   "da li je sve ok", "is everything ok", "system check", "provjeri sve agente".
   Do NOT use for: running agents, fixing a specific known issue (use as_patch_node_field directly),
   adding KB documents, or scaffolding new agents.
+compatibility: Requires Agent Studio MCP (as_diagnose_models, as_find_broken_flows, as_get_kb_embedding_status, as_inspect_flow, as_list_agents, as_list_knowledge_bases) to score the 5 health dimensions -- any dimension it can't reach through those tools is reported as not-checked, never guessed. references/report-format.md is read at report time; no external package dependency.
 allowed-tools:
   - TodoWrite
   - mcp__agent-studio__as_diagnose_models
@@ -28,8 +29,9 @@ allowed-tools:
 ---
 
 # Skill: agent-health-check
-*Version: 1.1 | Based on: agent-health-check-implementation-plan.md + agent-health-check-critical-review.md*
+*Version: 1.2 | Based on: agent-health-check-implementation-plan.md + agent-health-check-critical-review.md*
 *1.1 (2026-08-22): STEP 6 report format moved to references/report-format.md — file was approaching the repo's size limit. No behavior change.*
+*1.2 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio MCP dependency. No behavior change.*
 
 ---
 

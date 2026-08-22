@@ -12,6 +12,7 @@ description: >
   anti-hallucination, or fail-closed behavior matters at all, use safe-agent-builder instead; it is
   the safer default for an unqualified "napravi mi agenta".
   Do NOT use for modifying existing agents (use as_patch_node_field directly) or debugging flows.
+compatibility: Requires Agent Studio MCP (as_create_agent, as_get_agent, as_update_flow, as_update_agent_model, as_patch_node_field, as_add_kb_text, as_get_kb_embedding_status, as_list_agents, as_list_knowledge_bases, as_chat_with_agent, as_inspect_flow) to build and wire the live agent, and Obsidian MCP (obsidian_create_note, obsidian_read_note, obsidian_update_note) to write its Insights/instincts notes. Without both, scaffolding stops short of a deployed agent.
 allowed-tools:
   - TodoWrite
   - mcp__agent-studio__as_create_agent
@@ -42,9 +43,10 @@ allowed-tools:
 ---
 
 # Skill: agent-scaffolder
-*Version: 2.2 | Based on: IMPLEMENTATION_PLAN_V2.md*
+*Version: 2.3 | Based on: IMPLEMENTATION_PLAN_V2.md*
 *2.1 (2026-07-29): STEP 5d now dry-runs `as_update_flow` before applying — the call has no undo.*
 *2.2 (2026-08-22): STEP 2/3/6/9 and their templates moved to `references/` — SKILL.md*
+*2.3 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio/Obsidian MCP dependency. No behavior change.*
 *was 811 lines / ~7280 tokens, over the repo's own 500-line/5000-token limit (see*
 *`skill-creator-pro/references/skill-writing-guide.md`). No behavioural change.*
 

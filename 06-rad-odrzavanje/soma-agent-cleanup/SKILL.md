@@ -1,7 +1,8 @@
 ---
 name: soma-agent-cleanup
-version: 0.1.0
+version: 0.1.1
 description: Finds and safely removes duplicate or abandoned AgentStack agents. Detects agents sharing a name, ranks each cluster by real usage (agent-to-agent calls + recent executions + wired flow), proposes which copy to KEEP and which to DELETE, and deletes only after explicit human confirmation. Built for workspaces left with accidental duplicates from repeated batch scaffolding (e.g. Email Campaign Copywriter x5). Use when the user says "clean up agents", "remove duplicates", "obrisi duplikate", "ocisti agente", "imam duplikate", "dedup agents", "which agents are unused", "koji agenti se ne koriste", "delete agent", "obrisi agenta", "sredi listu agenata", or after a scaffolding batch created copies. Do NOT use to fix a broken flow (use soma-agent-debugger), build a new agent (use agent-scaffolder / safe-agent-builder), or edit one field (use as_patch_node_field). Deletion is destructive and never automatic.
+compatibility: Requires Agent Studio MCP (as_list_agents, as_get_agent, as_inspect_flow, as_get_recent_executions, as_list_agent_calls, as_find_broken_flows, as_patch_node_field, as_delete_agent) -- ranks duplicate or abandoned agent clusters by real usage before proposing which copy to keep.
 do_not_use_when:
   - User wants to fix a broken flow (use soma-agent-debugger)
   - User wants to create a new agent (use agent-scaffolder or safe-agent-builder)

@@ -12,6 +12,7 @@ description: >
   Do NOT use for quick/plain scaffolding without a quality gate (use agent-scaffolder instead —
   same base flow, no validator/gate overhead), for debugging an existing agent (use a debugger
   skill), or for editing one field (use as_patch_node_field directly).
+compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_create_eval_case, as_get_recent_executions, as_inspect_flow, as_list_evals, as_patch_node_field, as_run_eval, as_update_flow) to build and quality-gate the new agent's flow. The anti-hallucination input-guard it bakes in is enforced through as_patch_node_field, not through prompt instructions alone.
 allowed-tools:
   - TodoWrite
   - mcp__agent-studio__as_chat_with_agent

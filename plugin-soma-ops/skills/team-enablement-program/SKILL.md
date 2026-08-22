@@ -1,6 +1,7 @@
 ---
 name: team-enablement-program
 description: Builds a client-ready 14-week AI enablement program (Week 0 baseline, 12 training weeks, Week 13 handoff) tailored to a company's real tools and real repeated tasks, producing a markdown program plan, a Week 0 baseline workbook (.xlsx), a one-page governance card and an HTML dashboard. Use whenever the user wants to train a team to run AI themselves instead of buying a custom build or an agency retainer, or says "AI enablement program", "team training program", "12-week AI curriculum", "AI adoption plan", "AI rollout plan", "train the team instead of building", or Serbian "program obuke", "obuka tima za AI", "napravi program za klijenta", "plan uvođenja AI-ja", "kurikulum za tim", "predlog obuke". Also use when asked how to prove ROI on AI training, how to measure hours saved, or who owns an AI workflow once the consultant leaves. Do NOT use to deliver the sessions, to build an agent (agent-scaffolder), or to write one skill (skill-creator-pro).
+compatibility: No MCP dependency. Python 3 with the openpyxl package (scripts/requirements.txt) builds the Week 0 baseline .xlsx via scripts/build_baseline_xlsx.py; scripts/build_dashboard.py (stdlib only) builds the HTML dashboard. scripts/selftest.py covers both.
 ---
 
 # Team Enablement Program

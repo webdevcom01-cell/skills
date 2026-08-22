@@ -1,6 +1,6 @@
 ---
 name: soma-run
-version: 1.3.0
+version: 1.3.1
 description: >-
   End-to-end SOMA pipeline runner: validates input, runs Trend Intelligence, captures the output,
   writes evo-logs to Obsidian, and logs winners. One skill call replaces manual as_chat_with_agent +
@@ -11,6 +11,7 @@ description: >-
   2026-06-19). Triggers: "soma run", "pokreni pipeline", "run pipeline", "pokreni SOMA", "run SOMA",
   "run TI", "pokreni TI", "full pipeline run", "end-to-end run", "soma-run", "run the pipeline",
   "pusti kroz pipeline", "pusti trend kroz pipeline".
+compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_get_agent, as_get_recent_executions, as_list_agent_calls, as_list_agents) and Obsidian MCP (obsidian_create_note, obsidian_read_note, obsidian_update_note) -- runs Trend Intelligence end-to-end and writes evo-logs and winners directly, replacing separate as_chat_with_agent, evo-log-writer and winners-log-logger calls.
 do_not_use_when:
   - "User wants to validate input only (use pipeline-input-validator)"
   - "User wants to log an existing run (use evo-log-writer)"
@@ -36,13 +37,14 @@ allowed-tools:
 
 # Skill: soma-run
 
-*Version: 1.3.0*
+*Version: 1.3.1*
 *Grounded in: live MCP audit 2026-05-16 — all tool schemas, evo-log formats, Obsidian*
 *paths, and timeout values confirmed from live data. Zero values from memory.*
 *Revised 2026-07-29: added the auto-chain conflict section and the scope gate below,*
 *from live flow reads, two measured runs, and live heartbeat/goal checks. The orchestration*
 *model itself is unchanged — see "Why this skill has not been rewritten to match".*
 *1.3.0 (2026-08-22): architectural-conflict evidence, STEP 4 (TI run procedure), STEP 9*
+*1.3.1 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio/Obsidian MCP dependency. No behavior change.*
 *report template, and the trailing reference tables moved to `references/` — SKILL.md*
 *was 791 lines / ~7654 tokens, over the repo's own 500-line/5000-token limit (see*
 *`skill-creator-pro/references/skill-writing-guide.md`). No behavioural change.*

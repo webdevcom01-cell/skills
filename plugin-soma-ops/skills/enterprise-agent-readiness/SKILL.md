@@ -2,12 +2,13 @@
 name: enterprise-agent-readiness
 description: >-
   Audits an Agent Studio / AgentStack agent against an enterprise readiness bar (8 dimensions A–H, mapped to OWASP Agentic Top 10 2026, Anthropic engineering, NIST AI RMF / EU AI Act), then proposes and — only after human approval — applies hardening to make it production-grade. Every verdict comes from a live MCP call, never assumed. READ-ONLY by default; any fix goes through inspect → snapshot → dry_run → apply → smoke. Use when the user says "is this agent enterprise-ready", "audit this agent", "production readiness", "sign off this agent", "harden this agent", "enterprise checklist", or Serbian "da li je agent enterprise spreman", "audituj agenta", "produkciona spremnost", "potpiši agenta", "pojačaj agenta". Also use after scaffolding a new agent, before exposing it publicly, or before scheduling/heartbeat. Do NOT use to build an agent from scratch (use a scaffolder) or to debug a broken flow (use a debugger). Requires the Agent Studio MCP (as_* tools).
+compatibility: Requires Agent Studio MCP (as_list_agents, as_get_agent, as_inspect_flow, as_find_broken_flows, as_diagnose_models, as_list_knowledge_bases, as_get_kb_embedding_status, as_list_evals, as_get_agent_budget, as_list_agent_calls, as_get_recent_executions, as_chat_with_agent, as_update_flow, as_patch_node_field, as_set_agent_budget) to audit all 8 readiness dimensions (A-H), and Obsidian MCP (obsidian_read_note, obsidian_update_note, obsidian_create_note) for supporting notes. Proposed fixes are gated behind human approval regardless of tool access.
 standards:
   - OWASP Top 10 for Agentic Applications 2026 (ASI01–ASI10)
   - Anthropic engineering (building effective agents, evals, tool design)
   - Gartner 2026 agentic readiness
   - NIST AI RMF / EU AI Act (human oversight, audit, governance)
-version: 1.0.0
+version: 1.0.1
 allowed-tools:
   - Read
   - Glob

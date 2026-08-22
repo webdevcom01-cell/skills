@@ -1,7 +1,8 @@
 ---
 name: soma-model-preflight
-version: 0.1.0
+version: 0.1.1
 description: Pre-run guard for AgentStack model/API-key mismatches. Before an agent runs, checks every model it (and each flow node) uses against the API keys actually set on the server, catching the silent "input variable is empty" / no-op failures that happen when a required key is missing. Proposes a safe fallback (e.g. deepseek-chat or llama to gpt-4.1-mini, since only OPENAI_API_KEY is set) and applies it with as_update_agent_model after confirmation, or warns and stops. Built because ETL Pipeline Architect uses deepseek-chat + llama-3.3-70b with neither key set, so it fails at runtime. Use when the user says "preflight", "provjeri model", "check api keys", "why is the agent failing silently", "model fallback", "zameni model", "agent vraca prazno", "WILL FAIL", "pre nego sto pokrenem", or before running any non-OpenAI-model agent. Do NOT use to debug flow logic (use soma-agent-debugger) or check KB embeddings (use agent-health-check).
+compatibility: Requires Agent Studio MCP (as_diagnose_models, as_get_agent, as_update_agent_model, as_patch_node_field) -- checks every model an agent or flow node uses against the API keys actually set on the server before a run.
 do_not_use_when:
   - User wants to debug flow/node logic (use soma-agent-debugger)
   - User wants a full system health scan incl. KB/embeddings (use agent-health-check)

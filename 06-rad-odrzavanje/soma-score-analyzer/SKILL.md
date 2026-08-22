@@ -1,6 +1,6 @@
 ---
 name: soma-score-analyzer
-version: 0.1.0
+version: 0.1.1
 description: >
   Restores the missing 4th stage of the SOMA pipeline (TI → HW → CR → Score Analyzer).
   Scores Content Repurposer output per platform on the SOMA 20-point rubric, writes the
@@ -13,6 +13,7 @@ description: >
   persistent Score Analyzer agent into the live chain (Appendix A). Do NOT use to run the
   pipeline (use soma-run), to log an already-scored run (use evo-log-writer /
   winners-log-logger), or to review historical performance (use soma-performance-review).
+compatibility: Requires Agent Studio MCP (as_search_knowledge_base, as_chat_with_agent, as_inspect_flow, as_update_flow, as_add_kb_text) and Obsidian MCP (obsidian_read_note, obsidian_update_note, obsidian_create_note) -- scores Content Repurposer output on the SOMA 20-point rubric and writes real scores back into evo-logs.
 do_not_use_when:
   - User wants to run the full pipeline (use soma-run)
   - User wants to log an already-scored run (use evo-log-writer or winners-log-logger)
