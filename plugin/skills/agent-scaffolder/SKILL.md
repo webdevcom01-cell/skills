@@ -12,6 +12,33 @@ description: >
   anti-hallucination, or fail-closed behavior matters at all, use safe-agent-builder instead; it is
   the safer default for an unqualified "napravi mi agenta".
   Do NOT use for modifying existing agents (use as_patch_node_field directly) or debugging flows.
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_create_agent
+  - mcp__agent-studio-db__as_create_agent
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
+  - mcp__agent-studio__as_update_agent_model
+  - mcp__agent-studio-db__as_update_agent_model
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__agent-studio__as_add_kb_text
+  - mcp__agent-studio-db__as_add_kb_text
+  - mcp__agent-studio__as_get_kb_embedding_status
+  - mcp__agent-studio-db__as_get_kb_embedding_status
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__obsidian__obsidian_create_note
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
 ---
 
 # Skill: agent-scaffolder

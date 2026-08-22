@@ -12,6 +12,24 @@ description: >
   Do NOT use for quick/plain scaffolding without a quality gate (use agent-scaffolder instead —
   same base flow, no validator/gate overhead), for debugging an existing agent (use a debugger
   skill), or for editing one field (use as_patch_node_field directly).
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_create_eval_case
+  - mcp__agent-studio-db__as_create_eval_case
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_evals
+  - mcp__agent-studio-db__as_list_evals
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__agent-studio__as_run_eval
+  - mcp__agent-studio-db__as_run_eval
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
 ---
 
 # Safe Agent Builder

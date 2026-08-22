@@ -16,6 +16,13 @@ do_not_use_when:
   - "User wants a pre-run system check (use agent-health-check)"
   - "User wants to fix kb_search wiring (use soma-memory-fix)"
   - "User wants to update agent instincts (use instincts-updater)"
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__obsidian__obsidian_create_note
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
 ---
 
 # Skill: soma-eval-harness

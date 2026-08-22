@@ -17,6 +17,21 @@ do_not_use_when:
   - "User wants to sync KB content (use kb-sync)"
   - "User wants a health check (use agent-health-check)"
   - "User wants to fix kb_search wiring (use soma-memory-fix)"
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_list_agent_calls
+  - mcp__agent-studio-db__as_list_agent_calls
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__obsidian__obsidian_create_note
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
 ---
 
 # Skill: soma-run
@@ -472,28 +487,12 @@ Real format example:
 ## STEP 9 — REPORT: Final Summary
 
 Read `references/report-template.md` now and fill it in from all data gathered in
-STEPs 1–8: step results (TI/TI Quality/HW/CR), TI/HW/CR output summaries, and the
-logging status line for each evo-log plus winners-log. Append the FAILED-steps notice
-or the clean-completion line as appropriate.
+STEPs 1–8 (step results, TI/HW/CR output summaries, logging status per evo-log and
+winners-log). Append the FAILED-steps notice or the clean-completion line as appropriate.
 
----
+## Error Recovery Guide, Tool Reference, Constraints Summary, Invocation Examples
 
-## Error Recovery Guide, Tool Reference, Constraints Summary
-
-Consult `references/reference-tables.md` as needed: the Error Recovery Guide (include
-in the report only if a step FAILED), the Tool Reference, and the Constraints Summary
-(date injection always present, `{ti_handoff}` used for TI→HW never raw `{ti_output}`,
-read-before-write on every evo-log, winners threshold ≥17/20 per platform).
-
----
-
-## Invocation examples
-
-```
-"soma run — Claude Sonnet 4 released, SWE-bench +40%"
-"pokreni pipeline — https://anthropic.com/news/claude-sonnet-4"
-"run SOMA — samo TI"
-"pusti trend kroz pipeline: OpenAI GPT-5 Turbo announced"
-"soma-run — TI i HW samo, bez CR"
-"run the pipeline on this: Anthropic released Claude 4 Opus today"
-```
+Consult `references/reference-tables.md`: Error Recovery Guide (only if a step FAILED),
+Tool Reference, Constraints Summary (date injection always present, `{ti_handoff}` for
+TI→HW never raw `{ti_output}`, read-before-write per evo-log, winners threshold ≥17/20
+per platform), and sample invocation phrases.

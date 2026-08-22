@@ -11,6 +11,20 @@ description: >
   "da li je sve ok", "is everything ok", "system check", "provjeri sve agente".
   Do NOT use for: running agents, fixing a specific known issue (use as_patch_node_field directly),
   adding KB documents, or scaffolding new agents.
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_diagnose_models
+  - mcp__agent-studio-db__as_diagnose_models
+  - mcp__agent-studio__as_find_broken_flows
+  - mcp__agent-studio-db__as_find_broken_flows
+  - mcp__agent-studio__as_get_kb_embedding_status
+  - mcp__agent-studio-db__as_get_kb_embedding_status
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
 ---
 
 # Skill: agent-health-check

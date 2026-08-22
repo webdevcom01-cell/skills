@@ -1,6 +1,23 @@
 ---
 name: soma-agent-debugger
 description: "Specijalizovan skill za debug, fix i deploy production AgentStack agenata (SOMA pipeline). Kapitalizuje learnings iz Hook Writer 9-sprint debug-a. 4 mode-a: Investigate (root cause), Plan Fix (structured Claude Code prompt), Build Validator (deterministic quality gate), Verify Deploy (post-deploy smoke test). Triggeri: debug agent, fix agent, audit agent, agent ne radi, agent broken, production broken, build quality gate, smoke test agent, verify deploy, popravi agent, audituj agent, pukla produkcija, hocu validator, validate deploy. Anti-hallucination first: forensic verification PRE svake izmene koda."
+allowed-tools:
+  - Read
+  - Grep
+  - Bash
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
+  - mcp__obsidian__obsidian_read_note
 ---
 
 # SOMA Agent Debugger

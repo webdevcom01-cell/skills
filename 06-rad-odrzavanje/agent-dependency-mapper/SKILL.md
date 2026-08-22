@@ -12,6 +12,16 @@ description: >-
   the call graph from BOTH static flow wiring (as_inspect_flow call_agent nodes)
   and the runtime call log (as_list_agent_calls), labels every edge by source,
   and produces a dependency report. Requires the Agent Studio MCP (as_* tools).
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_agent_calls
+  - mcp__agent-studio-db__as_list_agent_calls
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
 ---
 
 # Agent Dependency / Blast-Radius Mapper

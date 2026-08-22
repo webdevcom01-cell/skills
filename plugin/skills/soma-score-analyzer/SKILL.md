@@ -17,6 +17,21 @@ do_not_use_when:
   - User wants to run the full pipeline (use soma-run)
   - User wants to log an already-scored run (use evo-log-writer or winners-log-logger)
   - User wants a historical performance report (use soma-performance-review)
+allowed-tools:
+  - TodoWrite
+  - mcp__agent-studio__as_search_knowledge_base
+  - mcp__agent-studio-db__as_search_knowledge_base
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
+  - mcp__agent-studio__as_add_kb_text
+  - mcp__agent-studio-db__as_add_kb_text
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
+  - mcp__obsidian__obsidian_create_note
 ---
 
 # SOMA Score Analyzer

@@ -1,6 +1,11 @@
 ---
 name: winners-log-logger
 description: Logs a winning hook (score ≥ 17/20) into the Hook Writer winners-log in the Obsidian vault. Use when a Hook Writer run produces a hook that scores 17 or higher, or when the user says "logiraj winnera", "winner hook", "zapiši winner", "hook je dostigao 17", "log this as a winner", "dodaj u winners log", "winner log za hook", "this hook scored [17+]", "hook je prošao threshold", "hook winner", "best hook", "top hook", or any phrase combining "hook" with a score ≥ 17/20 or terms like "winner", "pobednik", "prošao prag". Also triggers when evo-log-writer redirects because a hook scored ≥ 17/20. Do NOT use for hooks scoring below 17/20 (use evo-log-writer for the run log), do NOT use for instincts updates (use instincts-updater), and do NOT use for general notes (use obsidian-knowledge-logger).
+allowed-tools:
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
 ---
 
 # Winners Log Logger

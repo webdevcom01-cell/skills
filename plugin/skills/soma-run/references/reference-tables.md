@@ -46,3 +46,15 @@ Include this only in the report if a FAILED step occurred:
 
 ---
 
+---
+
+## Invocation examples
+
+```
+"soma run — Claude Sonnet 4 released, SWE-bench +40%"
+"pokreni pipeline — https://anthropic.com/news/claude-sonnet-4"
+"run SOMA — samo TI"
+"pusti trend kroz pipeline: OpenAI GPT-5 Turbo announced"
+"soma-run — TI i HW samo, bez CR"
+"run the pipeline on this: Anthropic released Claude 4 Opus today"
+```

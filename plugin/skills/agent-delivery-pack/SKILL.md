@@ -1,6 +1,24 @@
 ---
 name: agent-delivery-pack
 description: Turns an agent you have already built into something a client can accept, own and be handed — five client-facing documents plus the receipts behind them. Runs an acceptance test against the live agent through the Agent Studio MCP, records each run with the server's own execution record, and writes the real dated result into the document instead of the words "it has been tested". Use when handing an agent to a client, or on "delivery pack", "handover", "acceptance test", "sign-off", "what do I send the client", "how do I charge for maintenance", or Serbian "primopredaja", "prijemni test", "predaja agenta klijentu", "dokumentacija za klijenta", "šta šaljem klijentu", "održavanje i cena". Also use before invoicing an agent build. Do NOT use to build or fix an agent (agent-scaffolder, safe-agent-builder, soma-agent-debugger), or to audit it against an enterprise bar (enterprise-agent-readiness).
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__agent-studio__as_list_eval_cases
+  - mcp__agent-studio-db__as_list_eval_cases
+  - mcp__agent-studio__as_list_evals
+  - mcp__agent-studio-db__as_list_evals
 ---
 
 # Agent Delivery Pack
