@@ -64,9 +64,9 @@ vezani za Agent Studio agente i konsalting rad koji se oko njih obavlja.
 `agent-delivery-pack`, `prospect-discovery`, `soma-distribution`, `team-enablement-program`
 
 ### 06 — Rad / održavanje
-`agent-dependency-mapper`, `automation-triage`, `evo-log-writer`, `instincts-updater`, `kb-sync`, `memory-integrity-gate`, `soma-agent-cleanup`, `soma-memory-fix`, `soma-performance-review`, `soma-run`, `soma-score-analyzer`, `winners-log-logger`
+`agent-dependency-mapper`, `automation-triage`, `evo-log-writer`, `instincts-updater`, `kb-sync`, `memory-integrity-gate`, `soma-agent-cleanup`, `soma-memory-fix`, `soma-performance-review`, `soma-run`, `soma-score-analyzer`, `vault-schema-reference`, `winners-log-logger`
 
-**Ukupno: 27 skillova.**
+**Ukupno: 28 skillova.**
 
 ### Skillovi koji se ne pozivaju sami
 

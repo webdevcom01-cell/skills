@@ -5,6 +5,11 @@ All notable changes to the `soma-ops-skills` plugin package are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), dates in
 YYYY-MM-DD.
 
+## 2026-08-22 (later same day) — vault-schema-reference added
+
+### Added
+- `vault-schema-reference` (#15 in the improvement plan) — documentation-only skill covering the SOMA/Agent Studio Obsidian vault's folder structure, note types, and known schemas, assembled from what the other soma-ops skills already stated about the vault (not a fresh live audit). Two items are explicitly marked unconfirmed pending verification: whether `system/soma-rules.md` and `system/config.md` actually exist. Package total: 27 -> 28, `plugin.json` version bumped to `0.2.0`.
+
 ## 2026-08-22
 
 ### Added
