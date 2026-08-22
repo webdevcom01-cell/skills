@@ -2,7 +2,7 @@
 name: vault-schema-reference
 description: Reference for the structure of the SOMA/Agent Studio Obsidian vault used by the soma-ops skills — folders, note types, and their known schemas. Use when writing to or reading from the vault in a task that doesn't already document the schema itself, when a vault path assumption needs checking before hardcoding it into a new skill, when debugging a "note not found" error, or when creating a new agent's vault files by hand instead of through agent-scaffolder. Do NOT use as a substitute for reading the actual current file with obsidian_read_note or obsidian_list_notes/obsidian_list_folders — this documents the known/intended schema, not a live snapshot.
 compatibility: No MCP dependency to read this reference itself. Skills that act on the vault still need Obsidian MCP (and Agent Studio MCP where relevant) — this document only describes what those calls should expect to find; it does not call them.
-version: 1.1.0
+version: 1.3.0
 ---
 
 # Vault Schema Reference
@@ -39,7 +39,7 @@ Confirmed slugs (the 4 SOMA pipeline agents): `trend-intelligence`, `hook-writer
 | File | Schema | Who reads/writes it |
 |---|---|---|
 | `evo-log.md` | `# {agent} — Evolution Log`, then `## Log Format` (pipe-delimited: `date \| key \| confidence \| summary \| downstream_triggered`), then `## Entries`. Entries can span multiple lines — a continuation line is anything not starting with `YYYY-MM-DD \|`. | Written by `evo-log-writer` and `soma-run`; read by `instincts-updater`, `soma-performance-review`, `pipeline-debug`, `soma-agent-debugger`. |
-| `instincts.md` | Free-form rules, not a fixed structure. **Format currently differs per agent** — see "Known inconsistencies" below. Human-approval gated: only `instincts-updater` writes here, and only after the user approves each proposed instinct. | Written by `instincts-updater` (with human approval); read by most soma-ops skills for context; scaffolded with a domain-specific starter block by `agent-scaffolder`. |
+| `instincts.md` | Free-form rules, not a fixed structure — **body skeleton still differs per agent by design** (see "instincts.md metadata skeleton" below), but as of 2026-08-22 all four share the same metadata skeleton: `version:` in frontmatter + a trailing `## Changelog` table. Human-approval gated: only `instincts-updater` writes here, and only after the user approves each proposed instinct. | Written by `instincts-updater` (with human approval); read by most soma-ops skills for context; scaffolded with a domain-specific starter block by `agent-scaffolder`. |
 | `agent-card.md` | Fixed sections: Identity, Knowledge Base, Pipeline, Input, Output, "How to Wire Another Agent to This One". | Written once by `agent-scaffolder` (STEP 6) when the agent is created; not actively maintained elsewhere as of this writing. |
 | `winners-log.md` | Only exists for `hook-writer` today. 4 fixed sections (header, Log Format, Winners, Reference); every write rebuilds the full body verbatim to avoid structural drift. Threshold: score >= 17/20. | Written by `winners-log-logger`; read by `hook-writer` runs for calibration. |
 | `DESIGN_SPEC.md` | 11 fixed sections in order: Purpose, Pipeline Position, Use Cases, Tools, Constraints, I/O Contract, Quality Gate, Evo-log Schema, Open Questions, Implementation Plan, Versioning. | Drafted by `agent-architect` Mode 4 into `Insights/proposed-agents/` first (see below) — promotion into `agents/{slug}/DESIGN_SPEC.md` is a human decision, not automatic. Read (read-only) by `agent-architect` Mode 2 once present. |
@@ -80,21 +80,46 @@ assorted incident/handoff notes (`HANDOFF-*`, `open-problems-ledger-*`, `rollbac
 currently documented elsewhere in this reference; add them here if a future skill starts depending
 on one.
 
-## Known inconsistencies (documented as-is, not resolved)
+## `instincts.md` metadata skeleton — converged 2026-08-22
 
-**`instincts.md` format differs per agent.** As of the last audit reflected in `instincts-updater`:
+All 4 agents now carry the same metadata skeleton, confirmed by a live read of each note:
 
-| Agent | Has Quality-Gate-Failures section | Has YAML frontmatter |
+| Agent | `version:` in frontmatter | `## Changelog` table |
 |---|---|---|
-| Trend Intelligence | No | No |
-| Hook Writer | No | No |
-| Content Repurposer | Yes | No |
-| Score Analyzer | No | Yes |
+| Trend Intelligence | Yes (`1.0`) | Yes |
+| Hook Writer | Yes (`1.0`) | Yes |
+| Content Repurposer | Yes (`1.0`) | Yes |
+| Score Analyzer | Yes (`1.0`, pre-existing — this was the reference format the others converged to) | Yes (pre-existing) |
 
-This is intentionally documented as current state, not prescribed as correct — the working
-assumption is that this converges toward one canonical format over time as agents are touched, not
-that all four should be force-migrated immediately. A skill writing to `instincts.md` should match
-the target agent's existing format rather than imposing a different one.
+This was a deliberately narrow convergence — **only** the frontmatter `version:` field and a
+trailing `## Changelog` table (`| Date | Change | Trigger |`) were added to the three agents that
+lacked them. `1.0` marks "first explicit version of the already-existing state", same convention
+`prospect-discovery`'s `CHANGELOG.md` used in the skills repo itself — it does not imply the content
+is new or that anything before this date is undocumented; known prior additions (e.g. Trend
+Intelligence's 2026-06-15 anti-hallucination rules, Hook Writer's 2026-06-28 quarantine entry,
+Content Repurposer's 2026-05-15 Run 3 findings) are logged as dated pre-`1.0` rows.
+
+**Explicitly NOT converged** — still genuinely different per agent, by design, not by omission:
+
+- **Body skeleton.** Score Analyzer's `## Scoring Calibration` / `## Confidence Rating Guide` /
+  `## Common Edge Cases` structure was not imposed on the other three, and their
+  `## Learned Patterns` structure was not imposed on Score Analyzer — these describe genuinely
+  different things per agent type (a scoring agent vs. content-generation agents), and forcing one
+  skeleton onto the other would misrepresent the content, not just reformat it.
+- **`## Quality Gate Failures` section.** Hook Writer and Content Repurposer have one (with real
+  learned entries); Trend Intelligence and Score Analyzer do not. Left as-is rather than adding
+  empty placeholder sections — a skill proposing a new QGF entry for TI/Score Analyzer should add
+  the section fresh at that point, in Content Repurposer's format (`### <emoji> Run N — date —
+  title` then `What happened` / `Root cause` / `Fix`), which is the house style going forward if
+  this is revisited.
+- **Header "Last updated" line** — fixed in a follow-up pass the same day (was stale on all three,
+  e.g. Trend Intelligence's predated its own `created:` date). Now matches frontmatter `modified:`.
+  Still a manually-maintained line, not auto-synced to `modified:` — a future edit to any of these
+  files should update both, or a skill touching `instincts.md` should stop relying on this line and
+  read frontmatter `modified:` / the Changelog's last row instead.
+
+A skill writing to `instincts.md` should still match the target agent's existing body structure
+rather than imposing a different one — only the metadata skeleton above is now guaranteed uniform.
 
 ## Explicitly out of scope
 
