@@ -7,8 +7,7 @@ description: >
   instincts.md, evo-log.md), KB seeding with 3 documents, and smoke testing.
   Triggers: "create a new agent", "scaffold an agent", "napravi novog agenta", "add agent to pipeline",
   "dodaj agenta u pipeline", "set up new AgentStack agent", "build a new agent from scratch",
-  "I want a new agent that does X", "new agent", "kreiraj agenta", "napravi agenta",
-  "hocu novog agenta", "napravi mi agenta", "build agent", "create agent".
+  "I want a new agent that does X", "kreiraj agenta", "hocu novog agenta", "napravi mi agenta".
   Use this only when plain scaffolding is what you want — no deterministic quality gate. If safety,
   anti-hallucination, or fail-closed behavior matters at all, use safe-agent-builder instead; it is
   the safer default for an unqualified "napravi mi agenta".
