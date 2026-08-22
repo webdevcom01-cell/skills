@@ -6,6 +6,27 @@ do_not_use_when:
   - User wants to fix a broken flow (use soma-agent-debugger)
   - User wants to create a new agent (use agent-scaffolder or safe-agent-builder)
   - User wants to patch one node field (use as_patch_node_field directly)
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - TodoWrite
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_list_agent_calls
+  - mcp__agent-studio-db__as_list_agent_calls
+  - mcp__agent-studio__as_find_broken_flows
+  - mcp__agent-studio-db__as_find_broken_flows
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__agent-studio__as_delete_agent
+  - mcp__agent-studio-db__as_delete_agent
 ---
 
 # SOMA Agent Cleanup

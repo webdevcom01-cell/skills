@@ -5,6 +5,19 @@ description: Pre-run guard for AgentStack model/API-key mismatches. Before an ag
 do_not_use_when:
   - User wants to debug flow/node logic (use soma-agent-debugger)
   - User wants a full system health scan incl. KB/embeddings (use agent-health-check)
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - TodoWrite
+  - mcp__agent-studio__as_diagnose_models
+  - mcp__agent-studio-db__as_diagnose_models
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_update_agent_model
+  - mcp__agent-studio-db__as_update_agent_model
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
 ---
 
 # SOMA Model Preflight

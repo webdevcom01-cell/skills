@@ -7,6 +7,25 @@ standards:
   - Anthropic engineering (anti-fabrication, deterministic validation in code)
   - NIST AI RMF / EU AI Act (human oversight for runtime-steering memory)
 version: 1.0.0
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Write
+  - TodoWrite
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_create_agent
+  - mcp__agent-studio-db__as_create_agent
+  - mcp__agent-studio__as_create_eval_case
+  - mcp__agent-studio-db__as_create_eval_case
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
 ---
 
 # Memory Integrity Gate

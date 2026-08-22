@@ -8,6 +8,46 @@ standards:
   - Gartner 2026 agentic readiness
   - NIST AI RMF / EU AI Act (human oversight, audit, governance)
 version: 1.0.0
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Write
+  - TodoWrite
+  - mcp__agent-studio__as_list_agents
+  - mcp__agent-studio-db__as_list_agents
+  - mcp__agent-studio__as_get_agent
+  - mcp__agent-studio-db__as_get_agent
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_find_broken_flows
+  - mcp__agent-studio-db__as_find_broken_flows
+  - mcp__agent-studio__as_diagnose_models
+  - mcp__agent-studio-db__as_diagnose_models
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
+  - mcp__agent-studio__as_get_kb_embedding_status
+  - mcp__agent-studio-db__as_get_kb_embedding_status
+  - mcp__agent-studio__as_list_evals
+  - mcp__agent-studio-db__as_list_evals
+  - mcp__agent-studio__as_get_agent_budget
+  - mcp__agent-studio-db__as_get_agent_budget
+  - mcp__agent-studio__as_list_agent_calls
+  - mcp__agent-studio-db__as_list_agent_calls
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_update_flow
+  - mcp__agent-studio-db__as_update_flow
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__agent-studio__as_set_agent_budget
+  - mcp__agent-studio-db__as_set_agent_budget
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
+  - mcp__obsidian__obsidian_create_note
 ---
 
 # Enterprise Agent Readiness

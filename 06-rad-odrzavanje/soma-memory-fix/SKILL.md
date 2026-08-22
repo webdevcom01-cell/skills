@@ -13,6 +13,19 @@ do_not_use_when:
   - "User wants to SYNC KB content from Obsidian (use kb-sync)"
   - "User wants to RUN an agent (use as_chat_with_agent)"
   - "User wants a full system health check (use agent-health-check)"
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - TodoWrite
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
 ---
 
 # Skill: soma-memory-fix

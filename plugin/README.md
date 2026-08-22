@@ -10,6 +10,24 @@ Ovaj `plugin/` folder je **generisan** iz izvornih skillova u glavnim fazonim fo
 
 **Claude Code:** instalacija plugina prati isti manifest (`.claude-plugin/plugin.json`), obično preko marketplace repozitorijuma — detalje proveriti na docs.claude.com pre prve instalacije sa CLI-ja.
 
+## MCP zavisnosti (Agent Studio, Obsidian)
+
+Devet operativnih skillova (faze 04–06: `pipeline-debug`, `soma-memory-fix`, `soma-agent-cleanup`,
+`enterprise-agent-readiness`, `memory-integrity-gate`, `instincts-updater`, `kb-sync`,
+`soma-distribution`, `soma-model-preflight`) imaju `allowed-tools` ograničen na Agent Studio MCP
+(`as_*`) i/ili Obsidian MCP alate. Da bi radili, ti serveri moraju biti povezani u sesiji koja
+poziva skill — `allowed-tools` samo ograničava, ne dodaje pristup.
+
+Ime pod kojim je Agent Studio MCP server povezan zavisi od okruženja — na istom sistemu viđena su
+dva različita imena (`agent-studio` u nekim Claude Code konfiguracijama, `agent-studio-db` preko
+Cowork/Desktop bridge konekcije). Zato `allowed-tools` za svih devet skillova namerno navodi OBA
+prefiksa za svaki `as_*` alat (`mcp__agent-studio__as_X` i `mcp__agent-studio-db__as_X`) — skill
+radi bez obzira pod kojim je od ta dva imena server povezan. Ako je kod tebe povezan pod trećim
+imenom, skill neće imati pristup — dodaj taj prefiks ručno u `allowed-tools` tog skilla, ili
+preimenuj konekciju u jedno od ova dva.
+
+Obsidian MCP server se očekuje pod imenom `obsidian`.
+
 ## Skillovi po fazama
 
 ### 01 — Ideja / validacija

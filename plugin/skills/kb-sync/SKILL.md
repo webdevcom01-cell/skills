@@ -1,6 +1,21 @@
 ---
 name: kb-sync
 description: Syncs Obsidian vault files into Agent Studio knowledge bases using True-Sync (ADD new, wait READY, DELETE old). Use this skill whenever the user wants to sync vault docs to agent KBs, update agent memory, keep KB in sync after editing instincts or evo-logs, run a KB refresh, or says things like "sync the KB", "update agent memory", "push vault to KB", "KB is out of date", "sync SOMA agents", "refresh agent knowledge", "sinkronizuj KB", "azuriraj KB", "sync instincts", or "uradi kb sync". Change detection uses SHA-256 hash comparison against stored contentHash so only actually changed files are re-ingested. Handles rate limiting, ADD-before-DELETE ordering, and per-document polling automatically; old KB sources are DELETED only after explicit user approval (fail-closed). Do NOT use for creating new agents or KBs from scratch (use agent-scaffolder), diagnosing broken flows (use agent-health-check), or editing agent prompts directly.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - TodoWrite
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
+  - mcp__agent-studio__as_add_kb_text
+  - mcp__agent-studio-db__as_add_kb_text
+  - mcp__agent-studio__as_get_kb_embedding_status
+  - mcp__agent-studio-db__as_get_kb_embedding_status
+  - mcp__obsidian__obsidian_list_notes
+  - mcp__obsidian__obsidian_list_folders
+  - mcp__obsidian__obsidian_read_note
 ---
 
 # Skill: kb-sync

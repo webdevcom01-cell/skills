@@ -17,6 +17,28 @@ do_not_use_when:
   - "User wants to sync Obsidian vault to KB (use kb-sync)"
   - "User wants to run the pipeline (use soma-run)"
   - "User asks about AI Nekretnine CG agents (different architecture — not in scope)"
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - TodoWrite
+  - mcp__agent-studio__as_health_check
+  - mcp__agent-studio-db__as_health_check
+  - mcp__agent-studio__as_get_recent_executions
+  - mcp__agent-studio-db__as_get_recent_executions
+  - mcp__agent-studio__as_list_agent_calls
+  - mcp__agent-studio-db__as_list_agent_calls
+  - mcp__agent-studio__as_get_agent_call_log
+  - mcp__agent-studio-db__as_get_agent_call_log
+  - mcp__agent-studio__as_find_broken_flows
+  - mcp__agent-studio-db__as_find_broken_flows
+  - mcp__agent-studio__as_inspect_flow
+  - mcp__agent-studio-db__as_inspect_flow
+  - mcp__agent-studio__as_list_knowledge_bases
+  - mcp__agent-studio-db__as_list_knowledge_bases
+  - mcp__agent-studio__as_patch_node_field
+  - mcp__agent-studio-db__as_patch_node_field
+  - mcp__obsidian__obsidian_read_note
 ---
 
 # Skill: pipeline-debug

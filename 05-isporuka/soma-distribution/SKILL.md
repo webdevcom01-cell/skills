@@ -5,6 +5,18 @@ description: Takes SOMA Content Repurposer output (5 platform posts marked READY
 do_not_use_when:
   - User wants to generate or rewrite the posts (use soma-run / Content Repurposer)
   - User wants to score the posts (use soma-score-analyzer)
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - TodoWrite
+  - mcp__agent-studio__as_chat_with_agent
+  - mcp__agent-studio-db__as_chat_with_agent
+  - mcp__agent-studio__as_search_knowledge_base
+  - mcp__agent-studio-db__as_search_knowledge_base
+  - mcp__obsidian__obsidian_read_note
+  - mcp__obsidian__obsidian_update_note
 ---
 
 # SOMA Distribution
