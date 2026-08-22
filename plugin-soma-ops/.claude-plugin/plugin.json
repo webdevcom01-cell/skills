@@ -1,0 +1,9 @@
+{
+  "name": "soma-ops-skills",
+  "version": "0.1.0",
+  "description": "27 Claude Skills za Agent Studio/AgentStack/SOMA content pipeline i konsalting rad. Sestrinski paket: soma-skills (opšti toolkit).",
+  "author": {
+    "name": "buky"
+  },
+  "repository": "https://github.com/webdevcom01-cell/skills"
+}

@@ -35,3 +35,26 @@ plugin's commit history from before that date.**
   prose alone ("ask the user before...") to gate the action.
 - `geo-prompt-library`: `CHANGELOG.md`/`version` alignment; `plugin.json` version bumped to
   `0.2.0`.
+
+## 2026-08-22 (later same day) — package split
+
+### Changed
+- Split this package (#16 in the improvement plan). 27 skills specific to Agent
+  Studio/AgentStack/SOMA content pipeline and the consulting layer built on it moved to a new
+  sibling package, `plugin-soma-ops/` — copied fresh from their phase-folder source, not moved
+  from here (this package's copies were removed). List: `agent-architect`,
+  `agent-delivery-pack`, `agent-dependency-mapper`, `agent-health-check`, `agent-scaffolder`,
+  `automation-triage`, `enterprise-agent-readiness`, `evo-log-writer`, `instincts-updater`,
+  `kb-sync`, `memory-integrity-gate`, `pipeline-debug`, `pipeline-input-validator`,
+  `prospect-discovery`, `rls-rollout`, `safe-agent-builder`, `soma-agent-cleanup`,
+  `soma-agent-debugger`, `soma-distribution`, `soma-eval-harness`, `soma-memory-fix`,
+  `soma-model-preflight`, `soma-performance-review`, `soma-run`, `soma-score-analyzer`,
+  `team-enablement-program`, `winners-log-logger`.
+- `plugin-sync` and `tender-projekat` removed from this package entirely (not moved to
+  `plugin-soma-ops/` either) — `plugin-sync` is a meta-tool for maintaining this repo itself,
+  `tender-projekat` is hardcoded to a single client engagement. Both remain in their phase
+  folders for personal use.
+- Package total: 50 → 21 skills. `plugin.json` version bumped to `0.3.0`, description updated to
+  reflect the narrower scope.
+- `catalog_sync_check.py` generalized to accept `--package-dir`, so the same script checks either
+  package's README catalog against its own `skills/` mirror.
