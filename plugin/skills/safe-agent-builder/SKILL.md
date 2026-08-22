@@ -9,10 +9,9 @@ description: >
   "scaffold an agent", "build a new agent", "napravi/kreiraj agenta", "dodaj agenta u pipeline",
   "set up an AgentStack agent", or wants an agent that "won't hallucinate", "blocks bad output",
   "has a quality gate", or "is production-safe" — even if they don't say "deterministic" or "gate".
-  Prefer this over plain scaffolding when safety, anti-hallucination, or fail-closed behavior matters.
-  Do NOT use for quick/plain scaffolding when no quality gate is wanted (use agent-scaffolder
-  instead — same base flow, without the validator/gate overhead). Do NOT use for debugging an
-  existing agent (use a debugger skill) or editing one field (use as_patch_node_field directly).
+  Do NOT use for quick/plain scaffolding without a quality gate (use agent-scaffolder instead —
+  same base flow, no validator/gate overhead), for debugging an existing agent (use a debugger
+  skill), or for editing one field (use as_patch_node_field directly).
 ---
 
 # Safe Agent Builder
