@@ -3,3 +3,7 @@ _to_delete/
 .agent-context/
 __pycache__/
 *.pyc
+.env
+.env.*
+*.pem
+*.key
