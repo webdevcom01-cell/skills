@@ -2,7 +2,7 @@
 
 Agent Studio / AgentStack / SOMA content pipeline (TI → HW → CR → Score Analyzer) i konsalting
 sloj iz repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) —
-27 Claude Skills koji zahtevaju tu infrastrukturu (Agent Studio MCP, specifičan Obsidian vault sa
+28 Claude Skills koji zahtevaju tu infrastrukturu (Agent Studio MCP, specifičan Obsidian vault sa
 evo-logs/instincts/winners-log) ili su izgrađeni oko konsalting rada koji tu infrastrukturu
 koristi. Korisno tebi i bilo kome ko radi na istom Agent Studio/SOMA sistemu — ne generički
 koristan van tog konteksta.

@@ -2,7 +2,7 @@
 
 Opšti toolkit iz repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) — 21 Claude Skill koji **ne zavise** od Agent Studio / AgentStack / SOMA content pipeline / ličnog Obsidian vault-a, organizovanih kroz 8-fazni razvojni pipeline (ideja → projekat → rešenje). Koristan bilo kom Claude Code/Cowork korisniku.
 
-Sestrinski paket **[`plugin-soma-ops/`](../plugin-soma-ops/README.md)** sadrži 27 skillova specifičnih za Agent Studio/AgentStack/SOMA pipeline i konsalting rad — instaliraj ga posebno ako ti treba ta funkcionalnost. Podela je urađena 22.08.2026 (vidi §12/§13 u internom D1 izveštaju) da bi ovaj paket ostao instalabilan i koristan i van tvoje sopstvene Agent Studio infrastrukture.
+Sestrinski paket **[`plugin-soma-ops/`](../plugin-soma-ops/README.md)** sadrži 28 skillova specifičnih za Agent Studio/AgentStack/SOMA pipeline i konsalting rad — instaliraj ga posebno ako ti treba ta funkcionalnost. Podela je urađena 22.08.2026 (vidi §12/§13 u internom D1 izveštaju) da bi ovaj paket ostao instalabilan i koristan i van tvoje sopstvene Agent Studio infrastrukture.
 
 Ovaj `plugin/` folder je **generisan** iz izvornih skillova u glavnim fazonim folderima repozitorijuma (`01-ideja-validacija/` do `08-drugi-projekti/`). Fazna organizacija je izvor istine za dokumentaciju i razvoj; ovaj folder samo pakuje kopije skillova u format koji Claude Cowork i Claude Code očekuju za instalaciju plugina (`skills/<ime>/SKILL.md`, ravno, bez faznih podfoldera). Kad se neki skill promeni u izvornom folderu, ovaj folder treba ponovo generisati pre sledeće instalacije.
 
@@ -40,7 +40,7 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
 
 ### Šta nije u ovom paketu i zašto
 
-- **27 skillova** specifičnih za Agent Studio/AgentStack/SOMA pipeline (uključujući konsalting
+- **28 skillova** specifičnih za Agent Studio/AgentStack/SOMA pipeline (uključujući konsalting
   sloj: `prospect-discovery`, `team-enablement-program`, `agent-delivery-pack`) su premešteni u
   sestrinski paket **`plugin-soma-ops/`** — pogledaj taj folder ako ti treba ta funkcionalnost.
 - `market-research-navigator` (faza 01) i `system-teardown` (faza 02) postoje u faznim folderima
