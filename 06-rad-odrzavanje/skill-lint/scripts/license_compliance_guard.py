@@ -9,6 +9,15 @@ installed by other Cowork/Claude Code users. A LICENSE.txt whose text explicitly
 these materials from the Services... Distribute, sublicense, or transfer these materials to any
 third party") cannot legally sit inside that distributable package.
 
+This guard scans BOTH the phase folders (01-08, the source of truth where a restrictive license
+would first land) AND the two actual distributable package directories, `plugin/` and
+`plugin-soma-ops/` (root-level package LICENSE plus every `skills/*/LICENSE*` inside each) --
+scanning only the phase folders was a real coverage gap found in a 2026-08-29 forensic review:
+a skill added directly to `plugin/skills/` or `plugin-soma-ops/skills/` (bypassing the phase
+folder and the sync step entirely) would have shipped with zero license check. The phase-folder
+scan stays first-class, not a proxy for the package scan -- catching a bad license before it's
+even synced saves a step, but the package scan is what actually protects what ships.
+
 Method: any LICENSE file matching a known-permissive identifier (Apache, MIT, BSD, ISC, ...) is
 treated as compliant without further inspection. Everything else is scanned for a restrictive
 combination of phrases (not just the exact Anthropic wording, so a differently-worded future
@@ -29,6 +38,8 @@ from pathlib import Path
 
 PHASE_RE = re.compile(r"^\d\d-")
 LICENSE_NAMES = {"LICENSE.txt", "LICENSE", "LICENSE.md"}
+# The actual distributable packages this guard exists to protect -- see module docstring.
+PACKAGE_DIRS = ["plugin", "plugin-soma-ops"]
 
 # Identifiers of well-known permissive licenses -- if any of these appear near the top of the
 # file, treat it as compliant without running the restrictive-phrase heuristic below. Checked
@@ -66,6 +77,7 @@ def discover_phase_dirs(root: Path):
 
 
 def find_license_files(root: Path):
+    """Phase-folder LICENSE files: (skill_name, path) pairs."""
     files = []
     for phase_dir in discover_phase_dirs(root):
         for skill_dir in sorted(phase_dir.iterdir()):
@@ -75,6 +87,32 @@ def find_license_files(root: Path):
                 candidate = skill_dir / name
                 if candidate.is_file():
                     files.append((skill_dir.name, candidate))
+    return files
+
+
+def find_package_license_files(root: Path):
+    """LICENSE files actually shipped inside plugin/ and plugin-soma-ops/: the package's own
+    root LICENSE plus every skills/*/LICENSE* inside it (flat layout, no phase nesting).
+    Returns (label, path) pairs where label identifies the package for the report."""
+    files = []
+    for pkg_name in PACKAGE_DIRS:
+        pkg_dir = root / pkg_name
+        if not pkg_dir.is_dir():
+            continue
+        for name in LICENSE_NAMES:
+            root_license = pkg_dir / name
+            if root_license.is_file():
+                files.append((f"{pkg_name} (root)", root_license))
+        skills_dir = pkg_dir / "skills"
+        if not skills_dir.is_dir():
+            continue
+        for skill_dir in sorted(skills_dir.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+            for name in LICENSE_NAMES:
+                candidate = skill_dir / name
+                if candidate.is_file():
+                    files.append((f"{pkg_name}/{skill_dir.name}", candidate))
     return files
 
 
@@ -96,38 +134,46 @@ def main():
     args = ap.parse_args()
     root = Path(args.repo_root).resolve()
 
-    license_files = find_license_files(root)
+    phase_files = [(name, path, "faza") for name, path in find_license_files(root)]
+    package_files = [(name, path, "PAKET") for name, path in find_package_license_files(root)]
+    license_files = phase_files + package_files
     restrictive, unknown, permissive = [], [], []
 
-    for skill_name, path in license_files:
+    for label, path, origin in license_files:
         text = path.read_text(encoding="utf-8", errors="replace")
         verdict, detail = classify(text)
         if verdict == "restrictive":
-            restrictive.append((skill_name, path, detail))
+            restrictive.append((label, path, detail, origin))
         elif verdict == "unknown":
-            unknown.append((skill_name, path, detail))
+            unknown.append((label, path, detail, origin))
         else:
-            permissive.append((skill_name, path, detail))
+            permissive.append((label, path, detail, origin))
 
-    print(f"license-compliance-guard — {len(license_files)} LICENSE fajlova pregledano\n")
+    print(f"license-compliance-guard — {len(phase_files)} u faznim folderima, "
+          f"{len(package_files)} u distributable paketima (plugin/, plugin-soma-ops/)\n")
 
     if permissive:
-        print(f"✅ Permisivna ({len(permissive)}): " + ", ".join(s for s, _, _ in permissive))
+        print(f"✅ Permisivna ({len(permissive)}): " + ", ".join(s for s, _, _, _ in permissive))
         print()
 
     if unknown:
         print(f"--- Nepoznato ({len(unknown)}) — nije prepoznat kao permisivan, ali ni ispod praga za restriktivan; pogledaj ručno ---")
-        for skill_name, path, hits in unknown:
-            print(f"  {skill_name} ({path}) — signali: {hits or 'nijedan'}")
+        for label, path, hits, origin in unknown:
+            print(f"  [{origin}] {label} ({path}) — signali: {hits or 'nijedan'}")
         print()
 
     if restrictive:
-        print(f"❌ {len(restrictive)} LICENSE fajl(ova) izgleda restriktivno (nespojivo sa deljivim .plugin paketom):")
-        for skill_name, path, hits in restrictive:
-            print(f"  [LICENSE] {skill_name} ({path}) — signali: {hits}")
+        package_hits = [r for r in restrictive if r[3] == "PAKET"]
+        print(f"❌ {len(restrictive)} LICENSE fajl(ova) izgleda restriktivno:")
+        for label, path, hits, origin in restrictive:
+            severity = "PRAVNI RIZIK — unutar deljivog paketa" if origin == "PAKET" else "faza (pre sync-a)"
+            print(f"  [{origin}] {label} ({path}) — {severity} — signali: {hits}")
+        if package_hits:
+            print(f"\n  {len(package_hits)} od ovih je VEĆ unutar plugin/ ili plugin-soma-ops/ — "
+                  "to je nešto što je stvarno objavljeno/deljivo, ne samo teorijski rizik.")
         sys.exit(1)
     else:
-        print("✅ Nema restriktivnih licenci.")
+        print("✅ Nema restriktivnih licenci (ni u faznim folderima, ni u distributable paketima).")
         sys.exit(0)
 
 

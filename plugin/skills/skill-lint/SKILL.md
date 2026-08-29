@@ -77,12 +77,16 @@ own:
      `requirements.txt` anywhere under the skill folder.
 
 2. **`scripts/license_compliance_guard.py`** — finds every `LICENSE.txt` / `LICENSE` file under
-   the phase folders and `plugin/skills/`, and flags any whose text matches known
-   redistribution-restrictive language (e.g. Anthropic's "Services only" / "may not extract...
-   outside the Services" / "may not distribute, sublicense, or transfer" pattern) as incompatible
-   with `plugin/README.md`'s stated distribution model (a shareable `.plugin` package). A skill
-   with no `LICENSE.txt` at all is not flagged — silence isn't a restrictive license, it's just
-   the absence of an explicit one.
+   the phase folders AND both distributable packages (`plugin/` and `plugin-soma-ops/` — their
+   own root `LICENSE` plus every `skills/*/LICENSE*` actually shipped inside each), and flags any
+   whose text matches known redistribution-restrictive language (e.g. Anthropic's "Services only"
+   / "may not extract... outside the Services" / "may not distribute, sublicense, or transfer"
+   pattern) as incompatible with the packages' stated distribution model (a shareable `.plugin`
+   file). Scanning the packages directly — not just the phase folders they're synced from — is
+   what actually protects what ships; a skill added straight into `plugin/skills/` or
+   `plugin-soma-ops/skills/`, bypassing the phase folder, would otherwise slip through unchecked.
+   A skill with no `LICENSE.txt` at all is not flagged — silence isn't a restrictive license, it's
+   just the absence of an explicit one.
 
 3. **`scripts/catalog_sync_check.py`** — parses `plugin/README.md`'s phase-by-phase skill catalog
    (the `### 0N — ...` sections) and its `**Ukupno: N skillova.**` line, and compares both against
@@ -108,22 +112,32 @@ they didn't ask about (e.g. "proveri licence" only needs the license task):
 
 Mark each in_progress before starting, completed when done.
 
+The three scripts live in `scripts/` next to this SKILL.md — resolve that path relative to
+*this file's own location*, not to a hardcoded repo path: if you're reading this from
+`06-rad-odrzavanje/skill-lint/SKILL.md`, the scripts are at
+`06-rad-odrzavanje/skill-lint/scripts/`; if you're reading this from an installed
+`plugin/skills/skill-lint/SKILL.md`, they're at `plugin/skills/skill-lint/scripts/` instead. The
+repo-root argument (`.` below) always points at the actual repo root regardless of which copy of
+this skill is running — for `license_compliance_guard.py` and `catalog_sync_check.py`
+specifically, that must be a checkout that contains the phase folders (`01-*`–`08-*`) or the
+`plugin`/`plugin-soma-ops` package dirs, not just this skill's own folder in isolation.
+
 ## STEP 1 — Size / version / deps
 
 ```
-python3 06-rad-odrzavanje/skill-lint/scripts/lint_metadata.py .
+python3 <this-skill's-scripts-dir>/lint_metadata.py <repo_root>
 ```
 
 ## STEP 2 — License compliance
 
 ```
-python3 06-rad-odrzavanje/skill-lint/scripts/license_compliance_guard.py .
+python3 <this-skill's-scripts-dir>/license_compliance_guard.py <repo_root>
 ```
 
 ## STEP 3 — Catalog sync
 
 ```
-python3 06-rad-odrzavanje/skill-lint/scripts/catalog_sync_check.py .
+python3 <this-skill's-scripts-dir>/catalog_sync_check.py <repo_root>
 ```
 
 ## STEP 4 — Report
