@@ -92,16 +92,25 @@ didn't ask about:
 - "Pročitaj skillove sa allowed-tools i proceni obim"
 - "Izveštaj nalaze"
 
+The two scripts live in `scripts/` next to this SKILL.md — resolve that path relative to *this
+file's own location*, not to a hardcoded repo path: if you're reading this from
+`06-rad-odrzavanje/skill-security-review/SKILL.md`, the scripts are at
+`06-rad-odrzavanje/skill-security-review/scripts/`; if you're reading this from an installed
+`plugin/skills/skill-security-review/SKILL.md`, they're at
+`plugin/skills/skill-security-review/scripts/` instead. The repo-root argument (`.` below) always
+points at the actual repo root — must be a checkout that contains the phase folders
+(`01-*`–`08-*`), not just this skill's own folder in isolation.
+
 ## STEP 1 — Hardcoded secrets
 
 ```
-python3 06-rad-odrzavanje/skill-security-review/scripts/scan_hardcoded_secrets.py .
+python3 <this-skill's-scripts-dir>/scan_hardcoded_secrets.py <repo_root>
 ```
 
 ## STEP 2 — Mutating tools / destructive language without allowed-tools
 
 ```
-python3 06-rad-odrzavanje/skill-security-review/scripts/find_mutating_without_allowed_tools.py .
+python3 <this-skill's-scripts-dir>/find_mutating_without_allowed_tools.py <repo_root>
 ```
 Treat the KEYWORD bucket in the output as candidates only — read each flagged skill's actual
 description before reporting it as a real finding, per the `agent-dependency-mapper` example
