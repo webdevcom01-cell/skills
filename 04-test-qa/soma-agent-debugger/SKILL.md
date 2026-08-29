@@ -1,6 +1,6 @@
 ---
 name: soma-agent-debugger
-description: "Specijalizovan skill za debug, fix i deploy production AgentStack agenata (SOMA pipeline). Kapitalizuje learnings iz Hook Writer 9-sprint debug-a. 4 mode-a: Investigate (root cause), Plan Fix (structured Claude Code prompt), Build Validator (deterministic quality gate), Verify Deploy (post-deploy smoke test). Triggeri: debug agent, fix agent, audit agent, agent ne radi, agent broken, production broken, build quality gate, smoke test agent, verify deploy, popravi agent, audituj agent, pukla produkcija, hocu validator, validate deploy. Anti-hallucination first: forensic verification PRE svake izmene koda."
+description: "Specijalizovan skill za debug, fix i deploy production AgentStack agenata (SOMA pipeline). Kapitalizuje learnings iz Hook Writer 9-sprint debug-a. 4 mode-a: Investigate (root cause), Plan Fix (structured Claude Code prompt), Build Validator (deterministic quality gate), Verify Deploy (post-deploy smoke test). Triggeri: debug agent, fix agent, audit a broken/production agent, agent ne radi, agent broken, production broken, build quality gate, smoke test agent, verify deploy, popravi agent, audituj pokvaren/production agent, pukla produkcija, hocu validator, validate deploy. Anti-hallucination first: forensic verification PRE svake izmene koda. Do NOT use for a design/pattern audit against Anthropic best practices or hard/soft rules on an agent that isn't reported broken (use agent-architect Mode 2) — this skill's 'audit' trigger is specifically about diagnosing a malfunctioning production agent, not scoring architecture quality."
 compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_get_agent, as_get_recent_executions, as_inspect_flow, as_patch_node_field, as_update_flow) and Obsidian MCP (obsidian_read_note) across its 4 modes. references/templates.md holds the fix-prompt, validator-script and verification-report templates used in modes 2-4.
 allowed-tools:
   - Read
@@ -35,6 +35,7 @@ Production-grade debug + fix + deploy workflow za AgentStack agente. Izgrađen i
 
 **Kada NE koristiti:**
 - Za design novog agenta (koristi `agent-architect` skill)
+- Za audit dizajna/arhitekture agenta protiv Anthropic best practices i hard/soft pravila kad agent NIJE prijavljen kao pokvaren u produkciji (koristi `agent-architect` Mode 2 — "audit agent"/"audituj agent" iz ovog skilla znači konkretno dijagnostikuj-i-popravi pokvaren production agent, ne architecture score)
 - Za pisanje content-a (koristi specifične content skills)
 - Za skill sa low-stakes (npr. proba ili test)
 - Kad nije AgentStack/SOMA agent (npr. čisto Claude Code skill)
