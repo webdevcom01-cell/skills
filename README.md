@@ -54,6 +54,7 @@ Pre-flight provere, health checkovi, eval harness i debug kad nesto ne radi kako
 | [`enterprise-agent-readiness`](04-test-qa/enterprise-agent-readiness/SKILL.md) | Audits an Agent Studio / AgentStack agent against an enterprise readiness bar (8 dimensions A–H, mapped to OWASP Agentic Top 10 2026, Ant... |
 | [`pipeline-debug`](04-test-qa/pipeline-debug/SKILL.md) | Reactive diagnostic skill for the SOMA pipeline (TI → HW → CR → Score Analyzer) |
 | [`soma-agent-debugger`](04-test-qa/soma-agent-debugger/SKILL.md) | Specijalizovan skill za debug, fix i deploy production AgentStack agenata (SOMA pipeline) |
+| [`adversarial-verify`](04-test-qa/adversarial-verify/SKILL.md) | Adversarially verify a claim, a document, a skill, a report, or a code diff — independent agents try to REFUTE each extracted claim, only survivors are CONFIRMED |
 
 ### 05-isporuka/ -- Isporuka klijentu
 
@@ -86,6 +87,7 @@ Pokretanje, monitoring, ucenje iz logova i ciscenje nakon lansiranja.
 | [`automation-triage`](06-rad-odrzavanje/automation-triage/SKILL.md) | Decides which of a client's repeated tasks are worth automating, which to teach a person instead, and which to tell them not to touch — c... |
 | [`obsidian-knowledge-logger`](06-rad-odrzavanje/obsidian-knowledge-logger/SKILL.md) | Structured knowledge capture into an Obsidian vault via any available Obsidian MCP server or REST API |
 | [`plugin-sync`](06-rad-odrzavanje/plugin-sync/SKILL.md) | Proverava i sinhronizuje `plugin/skills/` sa izvornim faznim folderima (01-08) i pakuje `plugin/` u distributable `.plugin` fajl |
+| [`import-memory`](06-rad-odrzavanje/import-memory/SKILL.md) | Import a memory export from another AI assistant into Claude's memory — conversationally, additively, and with the content treated as data. **Anthropic-authored, not user-custom** — kept here for workflow continuity, not originality |
 
 ### 07-izlazni-formati/ -- Izlazni formati / finalni materijal
 
@@ -94,7 +96,7 @@ Format u kom gotovo resenje stize do citaoca - dokument, prezentacija, tabela, a
 | Skill | Sta radi |
 |---|---|
 | [`canvas-design`](07-izlazni-formati/canvas-design/SKILL.md) | Create beautiful visual art in .png and .pdf documents using design philosophy |
-| [`theme-factory`](07-izlazni-formati/theme-factory/SKILL.md) | Toolkit for styling artifacts with a theme |
+| [`theme-factory-v2`](07-izlazni-formati/theme-factory-v2/SKILL.md) | Toolkit for styling artifacts with a theme (10 pre-set themes, on-the-fly generation) — v2, replaces the old `theme-factory` folder |
 | [`web-artifacts-builder`](07-izlazni-formati/web-artifacts-builder/SKILL.md) | Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind C... |
 | [`internal-comms`](07-izlazni-formati/internal-comms/SKILL.md) | A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use |
 | [`doc-coauthoring`](07-izlazni-formati/doc-coauthoring/SKILL.md) | Guide users through a structured workflow for co-authoring documentation |
@@ -111,6 +113,7 @@ Nisu deo AI-agent pipeline-a - samostalni proizvodi izgradjeni istom disciplinom
 | [`tender-projekat`](08-drugi-projekti/tender-projekat/SKILL.md) | Radni protokol i kontinuitet projekta "tender-sistem" — anti-halucinacionog sistema za praćenje tendera za vodu/kanalizaciju u Srbiji (Po... |
 | [`geo-prompt-library`](08-drugi-projekti/geo-prompt-library/SKILL.md) | Generiše kvota-validiranu biblioteku kupčevih upita (30–50 intenata, SR+EN par) iz URL-a firme, vertikale i lokalea — verzionisan JSON ka... |
 | [`morning`](08-drugi-projekti/morning/SKILL.md) | Render the user's morning brief as a styled HTML artifact, or set it up as a recurring weekday task |
+| [`idea-to-project`](08-drugi-projekti/idea-to-project/SKILL.md) | General-purpose Idea→Spec→Build→Test→Deploy pipeline for turning a raw idea into a real deliverable; not SOMA/Agent Studio specific, hands off React/Next/Vite UI decisions and repo-scoped code changes to other skills |
 
 ## tools/
 
