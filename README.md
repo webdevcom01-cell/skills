@@ -87,7 +87,6 @@ Pokretanje, monitoring, ucenje iz logova i ciscenje nakon lansiranja.
 | [`automation-triage`](06-rad-odrzavanje/automation-triage/SKILL.md) | Decides which of a client's repeated tasks are worth automating, which to teach a person instead, and which to tell them not to touch — c... |
 | [`obsidian-knowledge-logger`](06-rad-odrzavanje/obsidian-knowledge-logger/SKILL.md) | Structured knowledge capture into an Obsidian vault via any available Obsidian MCP server or REST API |
 | [`plugin-sync`](06-rad-odrzavanje/plugin-sync/SKILL.md) | Proverava i sinhronizuje `plugin/skills/` sa izvornim faznim folderima (01-08) i pakuje `plugin/` u distributable `.plugin` fajl |
-| [`import-memory`](06-rad-odrzavanje/import-memory/SKILL.md) | Import a memory export from another AI assistant into Claude's memory — conversationally, additively, and with the content treated as data. **Anthropic-authored, not user-custom** — kept here for workflow continuity, not originality |
 
 ### 07-izlazni-formati/ -- Izlazni formati / finalni materijal
 
@@ -96,7 +95,7 @@ Format u kom gotovo resenje stize do citaoca - dokument, prezentacija, tabela, a
 | Skill | Sta radi |
 |---|---|
 | [`canvas-design`](07-izlazni-formati/canvas-design/SKILL.md) | Create beautiful visual art in .png and .pdf documents using design philosophy |
-| [`theme-factory-v2`](07-izlazni-formati/theme-factory-v2/SKILL.md) | Toolkit for styling artifacts with a theme (10 pre-set themes, on-the-fly generation) — v2, replaces the old `theme-factory` folder |
+| [`theme-factory`](07-izlazni-formati/theme-factory/SKILL.md) | Toolkit for styling artifacts with a theme |
 | [`web-artifacts-builder`](07-izlazni-formati/web-artifacts-builder/SKILL.md) | Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind C... |
 | [`internal-comms`](07-izlazni-formati/internal-comms/SKILL.md) | A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use |
 | [`doc-coauthoring`](07-izlazni-formati/doc-coauthoring/SKILL.md) | Guide users through a structured workflow for co-authoring documentation |
