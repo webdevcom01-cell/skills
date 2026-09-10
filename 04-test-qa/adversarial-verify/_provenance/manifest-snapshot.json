@@ -1,0 +1,504 @@
+{
+  "lastUpdated": 1789020252360,
+  "skills": [
+    {
+      "skillId": "skill_01U8vS81nTZ2foFeeGKWXBib",
+      "name": "skill-distiller",
+      "description": "Distill a new Agent Skill (SKILL.md + bundled files) from a substantial source — existing code, documentation, a book or spec, a long conversation, or a described multi-step workflow — following the agentskills.io open standard so the result works unmodified in Claude, Hermes Agent, and other compatible clients. Use when there is real source material to distill from (not just a bare idea), when the user says \"napravi skill iz\", \"distiliraj skill\", \"generiši skill iz dokumentacije/koda/knjige\", \"uradi /learn\", \"build a skill from this\", or wants a large body of knowledge turned into a lean, standards-compliant skill with properly organized reference files. Do NOT use for interactively drafting a skill from scratch with no source material and then eval-testing it — use skill-creator-pro for that (and chain into it after this skill produces a first draft). Do NOT use for building or auditing AgentStack/SOMA agents.",
+      "creatorType": "user",
+      "updatedAt": "2026-09-09T07:20:23.649822Z",
+      "enabled": true,
+      "backingPluginId": "plugin_01V8efe7Gm39CdRoC9YASfV2"
+    },
+    {
+      "skillId": "skill_01P3UMxZwzMBguU6dppYGhFg",
+      "name": "sdd-workflow",
+      "description": "Implements a complete Spec-Driven Development (SDD) workflow for code changes: Constitution, Specify, Clarify, Plan, Tasks, Implement, independent Converge/Verify — human approval between phases, verification done separately from implementation. Use for any new feature, module, or non-trivial code change needing discipline over ad-hoc prompting. Triggers: spec driven development, SDD, napravi spec za X, hocu SDD tok, specify plan tasks, constitution za projekat, planiraj pre nego sto pises kod, EARS notacija. Scales rigor to change size — trivial fixes get a lightweight task, features get the full flow, regulated work (fiscalization, payments, compliance) gets the full flow plus mandatory EARS. Do NOT use for whole-product ideation from a raw idea (use idea-to-project, which can call this skill for BUILD), for scaffolding AgentStack agents (use agent-scaffolder), or for a human-facing RFC/decision doc with no code gate (use doc-coauthoring).",
+      "creatorType": "user",
+      "updatedAt": "2026-09-07T08:10:07.633279Z",
+      "enabled": true,
+      "backingPluginId": "plugin_011LV2pMFJ1CBxVnT7DPvPwm"
+    },
+    {
+      "skillId": "skill_01J1axx1yhp2nNrUex19QwUm",
+      "name": "idea-to-project",
+      "description": "Use when someone has a raw idea and wants a real deliverable built through Idea→Spec→Build→Test→Deploy; hands off React/Next/Vite UI decisions to react-design:director first.",
+      "creatorType": "user",
+      "updatedAt": "2026-09-03T20:28:01.913132Z",
+      "enabled": true,
+      "backingPluginId": "plugin_01Cys6njBnnBmfwYFh8U66DR"
+    },
+    {
+      "skillId": "skill_01H6kLkZ6Swn7q1GSLUPWkpn",
+      "name": "vault-schema-reference",
+      "description": "Reference for the structure of the SOMA/Agent Studio Obsidian vault used by the soma-ops skills — folders, note types, and their known schemas. Use when writing to or reading from the vault in a task that doesn't already document the schema itself, when a vault path assumption needs checking before hardcoding it into a new skill, when debugging a \"note not found\" error, or when creating a new agent's vault files by hand instead of through agent-scaffolder. Do NOT use as a substitute for reading the actual current file with obsidian_read_note or obsidian_list_notes/obsidian_list_folders — this documents the known/intended schema, not a live snapshot.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-22T18:03:53.519685Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01Sf2N45iUzkyfRz79hQ2H5F",
+      "name": "plugin-sync",
+      "description": "Proverava i sinhronizuje plugin/skills/ sa izvornim faznim folderima (01-08) u ovom repou, i pakuje plugin/ u distributable .plugin fajl za Cowork/Claude Code instalaciju. Koristi ovaj skill kad god korisnik menja neki skill u faznim folderima i treba da ažurira plugin kopiju, kad pita da li je plugin/skills/ usklađen sa izvorom, kad želi da spakuje plugin za instalaciju, ili kaže nešto poput \"sinhronizuj plugin\", \"azuriraj plugin\", \"spakuj plugin\", \"napravi .plugin fajl\", \"da li je plugin u sync-u\", \"regeneriši plugin/skills\", \"plugin je zastareo\". Takođe koristi PRE svakog \"package/upload the plugin\" zahteva da bi se izbeglo pakovanje zastarelog plugin/skills/. Ne koristi za kreiranje novog pojedinačnog skilla (koristi skill-creator-pro), niti za git add/commit/push (to korisnik radi sam).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-21T21:28:18.244099Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01HzFv92dPHkG3eB3t826cid",
+      "name": "theme-factory-v2",
+      "description": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-21T18:33:31.932239Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01MASY2ExU1qZGvam4NcpKHF",
+      "name": "agent-architect",
+      "description": "Savetnik za dizajn i audit AI agenata, baziran na Anthropic engineering principima i SOMA pipeline arhitekturi. 4 mode-a: pattern selector, agent audit, reference library, DESIGN_SPEC generator. Triggeri (en/sr): design a new agent, audit my agent, which pattern should I use, create DESIGN_SPEC, review SOMA agent, kako da dizajniram agent, audituj agent, koji pattern da koristim, napravi spec za agent. Piše samo u Insights/. Ne menja agents/, system/, ili skills/. Do NOT use for debugging a broken production agent (use soma-agent-debugger) or for an enterprise/OWASP-mapped readiness sign-off (use enterprise-agent-readiness) — this skill is advisory design/pattern guidance, not a fix-it or compliance tool.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-21T16:48:22.348456Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01L6PU6LxkmbNGxANsyqHzCr",
+      "name": "adversarial-verify",
+      "description": "Adversarially verify a claim, a document, a skill, a report, or a code diff by extracting its discrete claims and having independent agents try to REFUTE each one — only claims that survive with positive evidence are CONFIRMED. Use when the user says verify this, fact-check, adversarially review, red-team this, poke holes in, prove this wrong, is this actually true, check every claim, or Serbian: provjeri ovo, obori ako mozes, fakticka provjera, adversarijalna revizija, da li je ovo tacno, provjeri svaku tvrdnju, nadji rupe. Runs as a dynamic workflow when a workflow engine is available, and falls back to spawning verifier subagents when it is not. Do NOT use to verify a single external fact end to end (use skill-research), to reconstruct how an undocumented system is built (use system-teardown), or to write or improve a prompt or skill rather than check one (use prompt-engineer-pro or skill-creator-pro).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-21T13:25:44.019602Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01XL1PxtJc2LVUg62gnrKRdh",
+      "name": "deep-research",
+      "description": "Conducts systematic, multi-step web research on a target topic, filters for high-quality primary and authoritative secondary sources, synthesizes key themes, and produces a structured, readable markdown report with citations. Use this skill whenever the user asks for deep research, a research report, market or industry research, competitive intelligence, a literature review, a state-of-the-art overview, fact-finding with citations, or wants multiple sources compared and synthesized on a specific topic — even if they don't say \"research\" explicitly (e.g. \"what's the latest on X\", \"find me credible sources on Y\", \"how do experts view Z\", \"compare what's been reported about W\"). Do NOT use for market-sizing, competitor-landscape, or business-validation research (use market-research-navigator instead), or to verify one external claim end-to-end (use skill-research instead).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-21T11:55:25.108098Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01MeekLGfW1eULauHrC1MFMF",
+      "name": "system-teardown",
+      "description": "Reconstruct how an existing system works when documentation is missing, then produce an as-built spec or a rebuild plan. Four targets: a codebase you did not write, a live web product, an AI prompt or agent inferred from behavior, a binary or network protocol. Use when the user says reverse engineer, teardown, reconstruct the architecture, recover the design, figure out how X is built, what stack does X use, or Serbian: reverse inzenjering, rekonstruisi arhitekturu, naslijedjeni kod koji niko ne razumije, koji stack koriste, koji prompt koriste, sta radi ovaj exe. Do NOT use for market or competitor landscapes (use market-research-navigator), a commercial dossier from a company URL (use prospect-discovery), fixing or hardening an agent you own (use soma-agent-debugger), agent call graphs (use agent-dependency-mapper), writing a new prompt (use prompt-engineer-pro), documenting a system you already understand (use engineering:documentation), or checking one external claim (use skill-research).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-20T22:40:19.138798Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_011ueWEZAr1J7umAAUy2aqwe",
+      "name": "market-research-navigator",
+      "description": "Guided market research assistant that provides structure, frameworks, and helps find data for any business research. Use when user wants to research a market, analyze competitors, validate a business idea, understand customers, size a market, or says \"market research\", \"competitor analysis\", \"is there a market for\", \"who are my competitors\", \"how big is the market\", \"customer research\", \"validate my idea\", \"istraživanje tržišta\", \"analiza konkurencije\", \"validacija ideje\", \"koliko je veliko tržište\", \"ko su mi konkurenti\", \"da li ima tržište za\", \"Srbija\", \"Balkan\", \"region\".",
+      "creatorType": "user",
+      "updatedAt": "2026-08-20T22:16:47.843410Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01CQ9JzmdZtBs4oZHrwB5Gz6",
+      "name": "tender-projekat",
+      "description": "Radni protokol i kontinuitet projekta \"tender-sistem\" — anti-halucinacionog sistema za praćenje tendera za vodu/kanalizaciju u Srbiji (Portal javnih nabavki, TED, EBRD ECEPP, planovi nabavki). Use this skill whenever the user mentions the tender project in any form: \"tender projekat\", \"tenderi\", \"javne nabavke\", \"Portal javnih nabavki\", \"stigao je email sa Portala\", \"uradi analizu kompletnosti\", \"nova verzija isporuke\", \"nastavi tender projekat\", \"proveri tendere\", \"GM tender\", \"Stara Pazova\", \"isporuka\", or wants to continue, check, extend, or hand over the Serbian water/sewerage tender monitoring system — even if the request seems small. The skill carries the project's verification constitution and recurring workflows; skipping it loses the discipline that caught every real bug so far.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-15T15:36:09.167515Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_018rPWFecaa51rkUu1DpKxH8",
+      "name": "prompt-engineer-pro",
+      "description": "Write, audit and shrink production prompts for Claude — API system prompts, tool descriptions, CLAUDE.md files, and agent prompts. Use when the user wants to create a prompt, improve or debug an existing one, cut an overgrown system prompt, evaluate a prompt against a deterministic checklist, A/B two versions, or fix a prompt that gets ignored, hallucinates, or over-verifies. Also for tool-use and function-calling schema design, prompt injection hardening, and cost/caching decisions. Serbian - napravi prompt, kreiraj prompt, poboljšaj prompt, skrati prompt, prepiši prompt, optimizuj prompt, testiraj prompt, audituj prompt, sistem prompt, prompt za API, prompt za alat, zaštita od injectiona. Do NOT use for authoring or evaluating SKILL.md files (use skill-creator-pro), for building or debugging AgentStack/SOMA agents (use agent-scaffolder, soma-agent-debugger), or for GEO/AI-search query libraries (use geo-prompt-library).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-15T07:34:16.022092Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01RrbcapxbiEZkrgVwpjXt48",
+      "name": "prospect-discovery",
+      "description": "Researches a company from a URL or name and produces a consultant-ready discovery pack — a sourced dossier where every claim carries a citation or is marked unverified, a discovery call agenda built from that company's actual business, a filled intake block that feeds straight into team-enablement-program, and a proposal skeleton with hypotheses marked as unconfirmed. Use whenever the user gives a company website, names a prospect or client to look into, or asks to prepare for a sales or discovery call, research a lead, build a client dossier, qualify a prospect, or find out what a business actually does before pitching them. Also use before any client-facing engagement skill, since researched facts are what separate a specific deliverable from a template. Do NOT use for market sizing or competitor landscapes (use market-research-navigator), for verifying a single claim (use skill-research), or for building the training programme itself (use team-enablement-program).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-14T10:29:18.871969Z",
+      "enabled": true
+    },
+    {
+      "skillId": "import-memory",
+      "name": "import-memory",
+      "description": "Import a memory export from another AI assistant into Claude's memory — conversationally, additively, and with the content treated as data.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.849357Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01RZmc6MBEfM4nNXQgSFrpsz",
+      "name": "geo-prompt-library",
+      "description": "Generiše kvota-validiranu biblioteku kupčevih upita (30–50 intenata, SR+EN par) iz URL-a firme, vertikale i lokalea — verzionisan JSON kao ulaz za GEO/AI-search monitoring. Koristiti kad korisnik traži biblioteku upita, prompt set, query set, listu pitanja koja kupci postavljaju ChatGPT-u/Perplexity-ju/AI Overviews, promptove za praćenje brenda, pripremu za merenje vidljivosti u AI pretrazi, GEO ili AEO monitoring setup; kad samo da URL i pita šta bi ljudi pitali AI o toj firmi; ili kad već koristi alat za merenje (npr. Peec AI) pa mu treba ulazni seed set. Izlaz je samo taj zamrznuti seed set — skill ga NIKAD ne izvršava niti meri. Ne koristiti za izvršavanje upita u LLM-ovima, merenje vidljivosti ili share-of-voice, skorovanje odgovora, praćenje kroz vreme i alarme, klijentske izveštaje, pisanje SEO/GEO ili FAQ sadržaja, ni tehnički audit sajta — to su odvojeni downstream koraci.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-02T09:51:36.197632Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01LSke6aCjC51UMf3B6bvYT2",
+      "name": "skill-creator-pro",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Also use when the request is in Serbian - napravi skill, kreiraj skill, napravi mi skill, poboljšaj skill, izmeni skill, optimizuj skill, izmeri skill, testiraj skill, napravi SKILL.md, optimizuj opis skilla, upakuj skill, spakuj skill - or when the user wants a skill packaged into a .skill file. Do NOT use for building, scaffolding or auditing AgentStack and SOMA agents, for running SOMA pipeline evals, or for writing API system prompts and chat prompts that are not skills.",
+      "creatorType": "user",
+      "updatedAt": "2026-08-01T10:56:46.298805Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01SjM6TE3Ci8eWmWDpiv9XTx",
+      "name": "team-enablement-program",
+      "description": "Builds a client-ready 14-week AI enablement program (Week 0 baseline, 12 training weeks, Week 13 handoff) tailored to a company's real tools and real repeated tasks, producing a markdown program plan, a Week 0 baseline workbook (.xlsx), a one-page governance card and an HTML dashboard. Use whenever the user wants to train a team to run AI themselves instead of buying a custom build or an agency retainer, or says \"AI enablement program\", \"team training program\", \"12-week AI curriculum\", \"AI adoption plan\", \"AI rollout plan\", \"train the team instead of building\", or Serbian \"program obuke\", \"obuka tima za AI\", \"napravi program za klijenta\", \"plan uvođenja AI-ja\", \"kurikulum za tim\", \"predlog obuke\". Also use when asked how to prove ROI on AI training, how to measure hours saved, or who owns an AI workflow once the consultant leaves. Do NOT use to deliver the sessions, to build an agent (agent-scaffolder), or to write one skill (skill-creator-pro).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-01T07:04:38.573359Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01GXaG8N99man69zcEKiqP3d",
+      "name": "agent-delivery-pack",
+      "description": "Turns an agent you have already built into something a client can accept, own and be handed — five client-facing documents plus the receipts behind them. Runs an acceptance test against the live agent through the Agent Studio MCP, records each run with the server's own execution record, and writes the real dated result into the document instead of the words \"it has been tested\". Use when handing an agent to a client, or on \"delivery pack\", \"handover\", \"acceptance test\", \"sign-off\", \"what do I send the client\", \"how do I charge for maintenance\", or Serbian \"primopredaja\", \"prijemni test\", \"predaja agenta klijentu\", \"dokumentacija za klijenta\", \"šta šaljem klijentu\", \"održavanje i cena\". Also use before invoicing an agent build. Do NOT use to build or fix an agent (agent-scaffolder, safe-agent-builder, soma-agent-debugger), or to audit it against an enterprise bar (enterprise-agent-readiness).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-01T07:04:32.355096Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01VN5tso9uAMHyKvXW6g4jJ4",
+      "name": "automation-triage",
+      "description": "Decides which of a client's repeated tasks are worth automating, which to teach a person instead, and which to tell them not to touch — computed from ten stated fields per task and your own build economics, never from a feeling. Runs after the discovery call, on tasks the team said in their own words. Produces a ranked triage, a client-facing list of what is not worth automating, and a handoff to the next skill. Use on \"what should we automate\", \"which tasks are worth automating\", \"build or train\", \"is it worth building an agent for this\", or Serbian \"šta da automatizujemo\", \"koje zadatke automatizovati\", \"da li vredi graditi agenta za ovo\", \"graditi ili obučiti\", \"šta ne treba automatizovati\", \"trijaža zadataka\". Do NOT use for market sizing or idea validation (market-research-navigator), to write the training programme (team-enablement-program), to build the agent (safe-agent-builder), or to screen a pipeline input (pipeline-input-validator).",
+      "creatorType": "user",
+      "updatedAt": "2026-08-01T07:03:44.809917Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01LdaQKLKkP3EPvWdyfB5mAF",
+      "name": "soma-eval-harness",
+      "description": "Evaluates SOMA pipeline reliability (TI → HW → CR) by re-running real logged trends k times, grading each trial with structural + quality graders, scoring by correctness (polarity-aware), and reporting consistency with pass/regression detection. Separate from soma-run (agent harness) — read-only on production evo-logs. Triggers (en/sr): \"eval harness\", \"run eval\", \"capability eval\", \"regression eval\", \"test pipeline reliability\", \"provjeri pouzdanost pipeline-a\", \"pokreni eval\", \"regresijski eval\", \"da li je pipeline stabilan\", \"koliko je pipeline pouzdan\", \"testiraj agente eval\". Triggers: \"soma eval\", \"evaluiraj pipeline\".",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T19:29:42.053465Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_011yBrGYRddsNJLhpcmRqsuR",
+      "name": "soma-memory-fix",
+      "description": "Audits AgentStack agents for unwired kb_search nodes (missing knowledgeBaseId), proposes a fix plan, and — after confirmation — patches each node using only live MCP data. Zero hallucination tolerance: every ID used in a patch comes from a real tool response in the current session. Triggers: \"memory fix\", \"fix kb wiring\", \"soma memory fix\", \"kb_search not wired\", \"knowledgeBaseId missing\", \"agents not using KB\", \"popravni memory\", \"popravi kb_search\", \"wiring fix\", \"fix agent memory\", \"agent nema memory\", \"popravni wiring\".",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T19:29:36.617177Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01STFj7LSrhW1V5ezxMgbygF",
+      "name": "pipeline-debug",
+      "description": "Reactive diagnostic skill for the SOMA pipeline (TI → HW → CR → Score Analyzer). Accepts a problem description, runs structured multi-dimensional checks, maps evidence to root cause via explicit IF-THEN rules, applies trivial fixes ONLY after explicit user confirmation (MUTATES production via as_patch_node_field), and delivers a prioritized debug report. Replaces 5–8 manual MCP calls with one structured investigation. Triggers: \"pipeline-debug\", \"debug pipeline\", \"pipeline se srušio\", \"pipeline broke\", \"pipeline failed\", \"pipeline ne radi\", \"TI ne radi\", \"HW timeout\", \"CR ne radi\", \"prazan output\", \"empty output\", \"scores dropping\", \"quality dropped\", \"debug TI\", \"debug HW\", \"debug CR\", \"šta je pokvareno u pipeline-u\", \"zašto pipeline ne radi\", \"provjeri SOMA\", \"istražii grešku\".",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T19:29:31.506638Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01QvxNZypGdivtuUgGnfE9dX",
+      "name": "soma-run",
+      "description": "End-to-end SOMA pipeline runner: validates input, runs Trend Intelligence, captures the output, writes evo-logs to Obsidian, and logs winners. One skill call replaces manual as_chat_with_agent + evo-log-writer + winners-log-logger. Default scope is TI only, because TI calls Hook Writer and Hook Writer calls Content Repurposer server-side — the full chain runs from one call. Running the external TI → HW → CR relay on top of that would execute HW twice and CR three times, so that scope is gated behind explicit confirmation until the call_agent nodes are removed (decision of 2026-06-19). Triggers: \"soma run\", \"pokreni pipeline\", \"run pipeline\", \"pokreni SOMA\", \"run SOMA\", \"run TI\", \"pokreni TI\", \"full pipeline run\", \"end-to-end run\", \"soma-run\", \"run the pipeline\", \"pusti kroz pipeline\", \"pusti trend kroz pipeline\".",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T19:29:25.652054Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_011CXHFbnRwYd1iDv2pjCd6e",
+      "name": "agent-scaffolder",
+      "description": "Fully scaffolds a new AgentStack agent from spec to live deployment using SOMA-standard architecture. Automates: agent creation, standard flow building (kb_search → processor → extractor → optional web_search and call_agent nodes), Obsidian vault initialization (DESIGN_SPEC.md, agent-card.md, instincts.md, evo-log.md), KB seeding with 3 documents, and smoke testing. Triggers: \"create a new agent\", \"scaffold an agent\", \"napravi novog agenta\", \"add agent to pipeline\", \"dodaj agenta u pipeline\", \"set up new AgentStack agent\", \"build a new agent from scratch\", \"I want a new agent that does X\", \"new agent\", \"kreiraj agenta\", \"napravi agenta\", \"hocu novog agenta\", \"napravi mi agenta\", \"build agent\", \"create agent\". Do NOT use for modifying existing agents (use as_patch_node_field directly) or debugging flows.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T19:12:30.985919Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01NBbar9tqxSTTnutJUKPNdw",
+      "name": "rls-rollout",
+      "description": "Audits, plans, and orchestrates a phased Postgres Row-Level Security (RLS) rollout for the agent-studio multi-tenant database (61 Prisma models). Produces SQL migration drafts, cross-tenant test suites, and rollout runbooks. NEVER auto-applies migrations — human approval gates every write operation. Triggers: \"rls audit\", \"rls rollout\", \"rls migration\", \"enable rls\", \"tenant isolation\", \"row level security\", \"row-level security\", \"rls phase 1\", \"rls phase 2\", \"rls plan\", \"rls verify\", \"rls audit produkcije\", \"uradi rls audit\", \"krenimo sa rls\", \"rls staging\". Do NOT use for: applying migrations without review (skill never does this), designing tenancy model from scratch (assumes existing organizationId schema), Redis cache audit (separate workstream), threat modeling (human task).",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:54.616895Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01QizKtm1YR5YeTMqkA5PkV3",
+      "name": "soma-agent-debugger",
+      "description": "Specijalizovan skill za debug, fix i deploy production AgentStack agenata (SOMA pipeline). Kapitalizuje learnings iz Hook Writer 9-sprint debug-a. 4 mode-a: Investigate (root cause), Plan Fix (structured Claude Code prompt), Build Validator (deterministic quality gate), Verify Deploy (post-deploy smoke test). Triggeri: debug agent, fix agent, audit agent, agent ne radi, agent broken, production broken, build quality gate, smoke test agent, verify deploy, popravi agent, audituj agent, pukla produkcija, hocu validator, validate deploy. Anti-hallucination first: forensic verification PRE svake izmene koda.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:42.564708Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01Ew7UVMKkJa9ZP52qJUYgm6",
+      "name": "roast",
+      "description": "Adversarial \"council of personas\" that stress-tests an idea, plan, business concept, strategy, or technical/architecture proposal to find fatal flaws BEFORE any time or money is spent building it. Use this whenever the user shares an idea, pitch, plan, PRD, architecture, or asks \"what do you think\", \"is this a good idea\", \"poke holes in this\", \"stress test this\", \"find the flaws\", \"roast this\", \"play devil's advocate\", \"red team my plan\", or any Serbian equivalent like \"izbuši ovu ideju\", \"iskritikuj\", \"nađi mane\", \"da li ovo ima smisla\", \"izanaliziraj rizike\", \"uradi roast\". Especially use when the user is about to commit to a direction and would benefit from honest pushback instead of agreement. Do NOT use for finished-work review where the user only wants polish, or for emotional support.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:30.042857Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01XsvPgUaaVY1qpx1xVYkL6i",
+      "name": "soma-score-analyzer",
+      "description": "Restores the missing 4th stage of the SOMA pipeline (TI → HW → CR → Score Analyzer). Scores Content Repurposer output per platform on the SOMA 20-point rubric, writes the real scores back into evo-logs (replacing UNSCORED), and feeds winners-log for hooks scoring ≥17/20 — closing the feedback loop that SOMA Evolution Advisor keeps flagging as \"scoring missing since 2026-06-14\". Use whenever a CR run finished UNSCORED, when the user says \"score this output\", \"oceni postove\", \"skoruj output\", \"zašto je UNSCORED\", \"popravi scoring\", \"feed winners-log\", \"score analyzer\", \"missing scoring\", \"oceni hookove\", \"izračunaj score\", or after any soma-run that returned UNSCORED. Also use to scaffold a persistent Score Analyzer agent into the live chain (Appendix A). Do NOT use to run the pipeline (use soma-run), to log an already-scored run (use evo-log-writer / winners-log-logger), or to review historical performance (use soma-performance-review).",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:23.860433Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01NbbtBfGSsmNp4htx16q2Ku",
+      "name": "winners-log-logger",
+      "description": "Logs a winning hook (score ≥ 17/20) into the Hook Writer winners-log in the Obsidian vault. Use when a Hook Writer run produces a hook that scores 17 or higher, or when the user says \"logiraj winnera\", \"winner hook\", \"zapiši winner\", \"hook je dostigao 17\", \"log this as a winner\", \"dodaj u winners log\", \"winner log za hook\", \"this hook scored [17+]\", \"hook je prošao threshold\", \"hook winner\", \"best hook\", \"top hook\", or any phrase combining \"hook\" with a score ≥ 17/20 or terms like \"winner\", \"pobednik\", \"prošao prag\". Also triggers when evo-log-writer redirects because a hook scored ≥ 17/20. Do NOT use for hooks scoring below 17/20 (use evo-log-writer for the run log), do NOT use for instincts updates (use instincts-updater), and do NOT use for general notes (use obsidian-knowledge-logger).",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:17.636450Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_018XMXA32jqqsvcvT4LDit1C",
+      "name": "evo-log-writer",
+      "description": "Logs SOMA agent run results into the correct evo-log.md file in the Obsidian vault. Use this skill whenever a SOMA agent (Trend Intelligence, Hook Writer, or Content Repurposer) has finished a run and the result needs to be recorded. Triggers on phrases like \"logiraj run\", \"zapiši evo-log\", \"log this run\", \"log the agent\", \"evo log za [agent]\", \"Trend Intelligence je završio\", \"Hook Writer je generisao\", \"Content Repurposer je završio\", \"log the pipeline\", \"zapiši pipeline run\", or any mention of a SOMA agent completing work. Also triggers when the user describes agent output and says \"zapamti ovo\" or \"sačuvaj ovo\" in a SOMA context. Do NOT use for general knowledge saving (use obsidian-knowledge-logger for that), and do NOT use for winners-log entries (use winners-log-logger for that).",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:08:11.039397Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01PSgbBz9rhizm2SUX8QwHuz",
+      "name": "session-start-hook",
+      "description": "Creating and developing startup hooks for Claude Code on the web. Use when the user wants to set up a repository for Claude Code on the web, create a SessionStart hook to ensure their project can run tests and linters during web sessions.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T15:07:30.718802Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01V3SuZLCVxKgFZyEyvwD1oj",
+      "name": "soma-agent-cleanup",
+      "description": "Finds and safely removes duplicate or abandoned AgentStack agents. Detects agents sharing a name, ranks each cluster by real usage (agent-to-agent calls + recent executions + wired flow), proposes which copy to KEEP and which to DELETE, and deletes only after explicit human confirmation. Built for workspaces left with accidental duplicates from repeated batch scaffolding (e.g. Email Campaign Copywriter x5). Use when the user says \"clean up agents\", \"remove duplicates\", \"obrisi duplikate\", \"ocisti agente\", \"imam duplikate\", \"dedup agents\", \"which agents are unused\", \"koji agenti se ne koriste\", \"delete agent\", \"obrisi agenta\", \"sredi listu agenata\", or after a scaffolding batch created copies. Do NOT use to fix a broken flow (use soma-agent-debugger), build a new agent (use agent-scaffolder / safe-agent-builder), or edit one field (use as_patch_node_field). Deletion is destructive and never automatic.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T13:15:34.039642Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01Kj2mTLHDMrh1QtKpxNeYyz",
+      "name": "kb-sync",
+      "description": "Syncs Obsidian vault files into Agent Studio knowledge bases using True-Sync (ADD new, wait READY, DELETE old). Use this skill whenever the user wants to sync vault docs to agent KBs, update agent memory, keep KB in sync after editing instincts or evo-logs, run a KB refresh, or says things like \"sync the KB\", \"update agent memory\", \"push vault to KB\", \"KB is out of date\", \"sync SOMA agents\", \"refresh agent knowledge\", \"sinkronizuj KB\", \"azuriraj KB\", \"sync instincts\", or \"uradi kb sync\". Change detection uses SHA-256 hash comparison against stored contentHash so only actually changed files are re-ingested. Handles rate limiting, ADD-before-DELETE ordering, and per-document polling automatically; old KB sources are DELETED only after explicit user approval (fail-closed). Do NOT use for creating new agents or KBs from scratch (use agent-scaffolder), diagnosing broken flows (use agent-health-check), or editing agent prompts directly.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T13:15:27.898299Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_011VKBNb5ZvLLY7m82TkVSzs",
+      "name": "memory-integrity-gate",
+      "description": "Adds a DETERMINISTIC, fail-closed Memory Integrity Gate to any agent or loop that promotes its own outputs into LEARNED MEMORY (winners-log, instincts, KB read by kb_search). It vets every candidate before it is learned — grounding facts against the SOURCE (not the candidate itself), blocking banned/vague-hype phrasing, requiring a named anchor and an independent score verdict — and QUARANTINES anything that fails. The concrete defense against OWASP ASI06 (Memory & Context Poisoning) in a self-improving agent. Use when the user says \"add a memory gate\", \"vet outputs before learning\", \"anti memory poisoning\", \"stop bad data entering the KB\", or Serbian \"dodaj memory gate\", \"zaštiti learning loop\", \"spreči memory poisoning\", \"neka loop bezbedno uči\". ALSO use when hardening an agent the enterprise-readiness audit flags as \"learns / feeds memory\" (C5/D3/F4). Do NOT use for a one-shot agent with no self-memory, for pre-publish output safety (separate gate), or to build the whole agent (use a scaffolder).",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T13:15:19.708573Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_011LkZNXr4wX5gmGoBC8opVh",
+      "name": "skill-research",
+      "description": "Research or verify anything about the real world — from a quick \"is this true?\" check to a full sourced report. Use whenever the user asks to research, investigate, look into, or find out about something; to verify, fact-check, or double-check a claim; to check whether a circulating claim is real (\"did [company/person] really say or release X\", \"is this post true\", \"someone sent me this\"); or to gather background on a person, technology, event, or concept before a decision or a meeting. Use it even when the user never says \"research\" — \"what do we know about X\", \"check if this is true\", \"help me understand Y\", or any question whose answer needs to be true rather than merely plausible. Scale the effort to the question — a one-line sourced answer is a valid outcome. Do NOT use for market sizing, competitor analysis, or business-idea validation — use market-research-navigator instead. Every material claim must cite a checkable source, with anything unconfirmed flagged as such.",
+      "creatorType": "user",
+      "updatedAt": "2026-07-29T12:33:09.500535Z",
+      "enabled": true
+    },
+    {
+      "skillId": "morning",
+      "name": "morning",
+      "description": "Render the user's morning brief as a styled HTML artifact, or set it up as a recurring weekday task. Use only when the user explicitly asks to run, see, or set up their morning brief, or if they invoke /morning by name. A question about their day, schedule, or calendar is not by itself a request for the brief; answer it directly instead.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.839692Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01PRL6xJ94BYc8aMRULcpXzq",
+      "name": "enterprise-agent-readiness",
+      "description": "Audits an Agent Studio / AgentStack agent against an enterprise readiness bar (8 dimensions A–H, mapped to OWASP Agentic Top 10 2026, Anthropic engineering, NIST AI RMF / EU AI Act), then proposes and — only after human approval — applies hardening to make it production-grade. Every verdict comes from a live MCP call, never assumed. READ-ONLY by default; any fix goes through inspect → snapshot → dry_run → apply → smoke. Use when the user says \"is this agent enterprise-ready\", \"audit this agent\", \"production readiness\", \"sign off this agent\", \"harden this agent\", \"enterprise checklist\", or Serbian \"da li je agent enterprise spreman\", \"audituj agenta\", \"produkciona spremnost\", \"potpiši agenta\", \"pojačaj agenta\". Also use after scaffolding a new agent, before exposing it publicly, or before scheduling/heartbeat. Do NOT use to build an agent from scratch (use a scaffolder) or to debug a broken flow (use a debugger). Requires the Agent Studio MCP (as_* tools).",
+      "creatorType": "user",
+      "updatedAt": "2026-06-30T16:47:43.379510Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01VtyVBZ3nGYVc7Yd8vecQKq",
+      "name": "agent-dependency-mapper",
+      "description": "Maps agent-to-agent call dependencies in an AgentStack / Agent Studio system and derives blast radius, single points of failure (SPOF), orphan agents, and static-vs-runtime mismatches. READ-ONLY — never mutates or deletes agents. Use whenever the user asks \"who calls this agent\", \"what breaks if X fails\", \"blast radius\", \"dependency map\", \"call graph\", \"find orphan or unused agents\", \"single point of failure\", \"before I delete an agent\", or Serbian equivalents like \"ko zove\", \"ko koga zove\", \"mapa zavisnosti\", \"sta puca ako pukne\", \"nadji sirocice\", \"pre nego sto obrisem agenta\", \"koji agenti zavise\". Builds the call graph from BOTH static flow wiring (as_inspect_flow call_agent nodes) and the runtime call log (as_list_agent_calls), labels every edge by source, and produces a dependency report. Requires the Agent Studio MCP (as_* tools).",
+      "creatorType": "user",
+      "updatedAt": "2026-06-28T13:46:39.196309Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01T2KqQN5Pz4VFLwJcEWdCXX",
+      "name": "soma-model-preflight",
+      "description": "Pre-run guard for AgentStack model/API-key mismatches. Before an agent runs, checks every model it (and each flow node) uses against the API keys actually set on the server, catching the silent \"input variable is empty\" / no-op failures that happen when a required key is missing. Proposes a safe fallback (e.g. deepseek-chat or llama to gpt-4.1-mini, since only OPENAI_API_KEY is set) and applies it with as_update_agent_model after confirmation, or warns and stops. Built because ETL Pipeline Architect uses deepseek-chat + llama-3.3-70b with neither key set, so it fails at runtime. Use when the user says \"preflight\", \"provjeri model\", \"check api keys\", \"why is the agent failing silently\", \"model fallback\", \"zameni model\", \"agent vraca prazno\", \"WILL FAIL\", \"pre nego sto pokrenem\", or before running any non-OpenAI-model agent. Do NOT use to debug flow logic (use soma-agent-debugger) or check KB embeddings (use agent-health-check).",
+      "creatorType": "user",
+      "updatedAt": "2026-06-26T12:51:44.006044Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_0166L5n6Pg3UrMZWHzgUnihW",
+      "name": "soma-distribution",
+      "description": "Takes SOMA Content Repurposer output (5 platform posts marked READY_FOR_REVIEW) through a human approval gate and turns approved posts into a publish-ready bundle - one formatted file per platform (LinkedIn, X, YouTube, Instagram, TikTok) plus a scheduling manifest - and logs the batch to Obsidian. If a social/scheduling MCP is connected it hands off; otherwise it produces the bundle for manual posting. The SOMA pipeline stops at READY_FOR_REVIEW with no distribution step - this is that step. Use when the user says \"publish\", \"distribute\", \"objavi\", \"rasporedi postove\", \"schedule posts\", \"spremi za objavu\", \"posalji na platforme\", \"approve and post\", \"izvezi postove\", or after a CR run when posts are ready. Do NOT use to generate or score content (use soma-run / soma-score-analyzer) - it never rewrites post copy, only formats, gates, and routes. Never auto-publishes without approval.",
+      "creatorType": "user",
+      "updatedAt": "2026-06-26T12:51:42.612978Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_0146guZVk2pu1zUvMUJo8U41",
+      "name": "soma-performance-review",
+      "description": "Generates a SOMA pipeline performance report by reading all 4 agent logs from the Obsidian vault (TI evo-log, HW evo-log, CR evo-log, winners-log) and producing a structured markdown report with per-agent metrics, pipeline health score, and if-then recommendations. Use when the user says \"uradi performance review\", \"performance check\", \"kako radi SOMA\", \"pregled performansi\", \"review agent logs\", \"SOMA statistike\", \"SOMA health\", \"koliko hookova je prošlo\", \"check SOMA health\", \"how is the pipeline doing\", \"pipeline review\", \"agent performance\", \"šta je SOMA uradila ovog meseca\", \"izveštaj o agentima\", \"agent stats\", \"koji agent loše radi\", \"SOMA performance\", \"koliko runa je urađeno\", \"uradi review\", \"SOMA report\", \"pipeline status\", \"check logs\", or any request to evaluate, audit, or summarize SOMA agent performance over a time period. Do NOT use for logging a single run (use evo-log-writer), logging a winner hook (use winners-log-logger), or updating agent instincts (use instincts-updater).",
+      "creatorType": "user",
+      "updatedAt": "2026-06-20T23:00:19.194894Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01VYccqJqPZuWgKsAjKrfF96",
+      "name": "instincts-updater",
+      "description": "Extracts patterns from SOMA agent evo-logs, proposes new instincts, and — after human approval — appends them to the correct instincts.md files in the Obsidian vault. Use when the user says \"update instincts\", \"ažuriraj instinkte\", \"instincts update\", \"nauči agente iz evo-logova\", \"analiziraj logove za instinkte\", \"šta su agenti naučili\", \"provjeri greške u logovima\", \"izgeneriši instinkte iz logova\", \"what have agents learned\", \"extract patterns\", \"ekstrakcija obrazaca\", \"nauči iz grešaka\", \"izvuci obrasce\", \"dodaj instinkte\", or after a batch of runs when the user wants to consolidate learnings. Do NOT use for general Obsidian writes (use obsidian-knowledge-logger), for running agents (use soma-run), or for checking pipeline health (use agent-health-check). ALWAYS wait for explicit human approval before writing any instinct to the vault.",
+      "creatorType": "user",
+      "updatedAt": "2026-06-20T22:45:22.269716Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01KJqqU2yMWHxH4okvTLUvD5",
+      "name": "pipeline-input-validator",
+      "description": "Pre-flight validator for SOMA pipeline inputs. Scores any trend input (URL, text, or both) across 4 dimensions (Specificity, Niche, Freshness, Actionability) before it enters the TI→HW→CR chain. Returns PASS / WARN+ / WARN- / FAIL with a deterministic score and improvement guidance. Use when the user says \"validiraj input\", \"provjeri input\", \"validate this\", \"is this a good input\", \"da li je ovo dobar input\", \"provjeri trend\", \"validate trend\", \"da li da pustim ovo u pipeline\", \"check before sending\", \"should I run this\", \"provjeri URL\", \"validate URL\", \"is this relevant\", \"da li je relevantno\", \"input check\", \"može li ovo kroz pipeline\", \"worth running\", \"kvalitet inputa\", \"input quality\", or any request to evaluate, screen, or validate a trend input before running it through SOMA. Do NOT use for logging runs (use evo-log-writer), generating hooks (trigger TI directly), or reviewing past performance (use soma-performance-review).",
+      "creatorType": "user",
+      "updatedAt": "2026-05-15T19:49:00.776365Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_01FAYQhkYfspvVjKFo2Vuxuf",
+      "name": "obsidian-knowledge-logger",
+      "description": "Structured knowledge capture into an Obsidian vault via any available Obsidian MCP server or REST API. Saves typed notes (concept, resource, insight, decision, project-log, question) with consistent frontmatter, tags, folder placement, and wikilinks. Use whenever the user wants to save, log, capture, archive, or remember something — phrases like \"save this to Obsidian\", \"log this\", \"add to my vault\", \"capture this idea\", \"note this down\", \"remember this\", or Serbian equivalents \"sačuvaj u Obsidian\", \"zapiši ovo\", \"dodaj u vault\", \"zabeleži\", \"logiraj\". ALSO trigger proactively, without waiting to be asked, whenever the user shares a useful resource, makes a clear decision in conversation, or arrives at a real insight worth preserving — offer to save it as a one-line question. Do NOT use for one-off scratch notes the user doesn't want preserved, or when no Obsidian tool (MCP, REST API, or filesystem access to a vault) is available.",
+      "creatorType": "user",
+      "updatedAt": "2026-05-15T13:45:02.914906Z",
+      "enabled": true
+    },
+    {
+      "skillId": "skill_019MFkj41WR2UC8kBPuQZWon",
+      "name": "brainstorming-buddy",
+      "description": "Interactive brainstorming companion for exploring ideas, projects, and solutions. Triggers on \"let's brainstorm\", \"I have an idea\", \"help me think through\", \"what if\", \"I'm stuck\", \"need ideas for\", creative/planning discussions, or Serbian equivalents like \"hajde da brainstormujemo\", \"imam ideju\", \"pomozi mi da razmislim\", \"zapeo sam\", \"treba mi ideja\". Do NOT use for quick factual questions, when user already has a clear plan, or for time-critical emergencies.",
+      "creatorType": "user",
+      "updatedAt": "2025-12-27T11:34:11.457624Z",
+      "enabled": true
+    },
+    {
+      "skillId": "doc-coauthoring",
+      "name": "doc-coauthoring",
+      "description": "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.321628Z",
+      "enabled": true
+    },
+    {
+      "skillId": "web-artifacts-builder",
+      "name": "web-artifacts-builder",
+      "description": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.424625Z",
+      "enabled": true
+    },
+    {
+      "skillId": "mcp-builder",
+      "name": "mcp-builder",
+      "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.469104Z",
+      "enabled": true
+    },
+    {
+      "skillId": "internal-comms",
+      "name": "internal-comms",
+      "description": "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.).",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.458016Z",
+      "enabled": true
+    },
+    {
+      "skillId": "canvas-design",
+      "name": "canvas-design",
+      "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.443442Z",
+      "enabled": true
+    },
+    {
+      "skillId": "brand-guidelines",
+      "name": "brand-guidelines",
+      "description": "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.434968Z",
+      "enabled": true
+    },
+    {
+      "skillId": "slack-gif-creator",
+      "name": "slack-gif-creator",
+      "description": "Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for Slack.\"",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.491337Z",
+      "enabled": true
+    },
+    {
+      "skillId": "algorithmic-art",
+      "name": "algorithmic-art",
+      "description": "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-09-10T00:05:25.385067Z",
+      "enabled": true
+    },
+    {
+      "skillId": "xlsx",
+      "name": "xlsx",
+      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \"the xlsx in my downloads\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-08-29T01:00:31.073935Z",
+      "enabled": true
+    },
+    {
+      "skillId": "pptx",
+      "name": "pptx",
+      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations as PowerPoint (.pptx) files; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email, summary, or creating a different type of slide deck); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user asks for a PowerPoint or .pptx file, or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. However, when the user asks for a deck, slides, a slide deck, or a presentation without naming a file format, default to using a dedicated slide-deck artifact type or a separate slides skill if this session offers one; otherwise, use this skill.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-08-28T02:00:39.535636Z",
+      "enabled": true
+    },
+    {
+      "skillId": "pdf",
+      "name": "pdf",
+      "description": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-07-10T19:23:15.432550Z",
+      "enabled": true
+    },
+    {
+      "skillId": "docx",
+      "name": "docx",
+      "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx) or Word templates (.dotx). Triggers include: any mention of 'Word doc', 'word document', '.docx', '.dotx', or requests to produce professional documents with formatting like tables of contents, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx or .dotx files, inserting or replacing images in documents, find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file (to download, email or print), use this skill. However, if they ask for a document, page, report, memo, or notes WITHOUT naming a file format and the session offers a dedicated document or page skill or connector, use that instead. Do NOT use for PDFs, spreadsheets, Google Docs, or coding unrelated to document generation.",
+      "creatorType": "anthropic",
+      "updatedAt": "2026-08-31T20:00:31.499122Z",
+      "enabled": true
+    },
+    {
+      "skillId": "schedule",
+      "name": "schedule",
+      "description": "Create or update a scheduled task that runs automatically. Use when the user says things like \"every day\", \"each morning\", \"remind me in an hour\", \"run this at noon\", or wants to reschedule an existing task.",
+      "creatorType": "anthropic",
+      "updatedAt": null,
+      "enabled": true
+    },
+    {
+      "skillId": "setup-cowork",
+      "name": "setup-cowork",
+      "description": "Guided setup — install role-matched plugins, connect your tools, try a skill.",
+      "creatorType": "anthropic",
+      "updatedAt": null,
+      "enabled": true
+    },
+    {
+      "skillId": "consolidate-memory",
+      "name": "consolidate-memory",
+      "description": "Reflective pass over your memory files — merge duplicates, fix stale facts, prune the index.",
+      "creatorType": "anthropic",
+      "updatedAt": null,
+      "enabled": true
+    },
+    {
+      "skillId": "explain-usage",
+      "name": "explain-usage",
+      "description": "Explain where this session's tokens went, with one simple chart in plain language. Use when the user says things like \"explain my usage\", \"where did my tokens go\", or asks for a usage breakdown.",
+      "creatorType": "anthropic",
+      "updatedAt": null,
+      "enabled": true
+    }
+  ]
+}
