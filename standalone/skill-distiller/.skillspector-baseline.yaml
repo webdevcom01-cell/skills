@@ -1,0 +1,72 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.11.1
+rules:
+- id: AE1
+  path: SKILL.md
+  reason: >-
+    Systemic false positive, manually verified 2026-09-08 (5 occurrences,
+    re-verified 2026-09-08 after content changes — using a path-based rule
+    instead of per-line fingerprints because line numbers shift whenever the
+    file is edited). Scanner flags every in-prose mention of a bundled
+    reference file path (e.g. "references/quality-checks.md", generic
+    "<path/to/skill-folder>" placeholders) as an unresolved/uninspected
+    artifact, despite the same report's own Inspection Completeness section
+    showing Coverage 100.0%, all files fully inspected. This is a
+    path-resolution limitation in the scanner, not a missing or hidden file
+    in this skill.
+- id: YR4
+  path: references/distillation-algorithm.md
+  reason: >-
+    Systemic false positive, manually verified 2026-09-08 and re-verified
+    2026-09-08 after content changes (same underlying line, shifted
+    position — using a path-based rule so this stays suppressed across
+    future edits to this file, since the finding is about wording, not
+    location). Flagged text ("central mental models, the decision rules
+    worth having in every session...") is a plain description of
+    skill-authoring principles, with no exploit/recon/pentest content. YARA
+    rule agent_skill_prompt_injection_hidden_instructions matched on
+    unrelated wording, not actual injection content.
+- id: P1
+  path: references/distillation-algorithm.md
+  reason: >-
+    Systemic false positive, manually verified 2026-09-08 and re-verified
+    2026-09-08 after content changes (same underlying text, shifted
+    position — using a path-based rule for the same reason as YR4 above).
+    The flagged text is the "Source hygiene" section instructing the agent
+    to defend against prompt injection, and quotes example attack phrases
+    ("ignore previous instructions and...") specifically as illustrations
+    of what to recognize and refuse — not as an actual instruction. The
+    scanner's pattern match fired on the quoted example without recognizing
+    the surrounding defensive/educational context.
+- id: LP3
+  path: SKILL.md
+  reason: >-
+    Accepted, not a false positive. Deliberate design choice: this skill
+    does not declare 'allowed-tools' because the field is explicitly marked
+    experimental in the agentskills.io specification with inconsistent
+    support across client implementations (verified in this project's own
+    frontmatter-reference.md). Using a path-based rule since this is a
+    whole-file property (absence of a field), not tied to any specific
+    line. Revisit if a target environment requires it.
+- id: YR4
+  path: evals/evals.json
+  reason: >-
+    False positive, manually verified 2026-09-08. Flagged eval prompt text
+    (eval id 1, discussing agent distribution ecosystems including "Hermes
+    Agent") contains no exploit/recon/pentest content — same YARA rule
+    matching on unrelated wording as seen elsewhere in this skill. Using a
+    path-based rule for the whole file since it is a fixed test-fixture
+    file that legitimately discusses these topics as eval scenarios.
+- id: P1
+  path: evals/evals.json
+  reason: >-
+    False positive by design, manually verified 2026-09-08. Flagged text is
+    the eval id 3 prompt, which deliberately embeds a simulated
+    prompt-injection attempt (the exact scenario Test 3 in this skill's
+    development validated resistance against) as test fixture data. This is
+    the intended content of an adversarial-source eval case, not an actual
+    embedded instruction — suppressing the whole file since evals.json's
+    purpose is to contain exactly this kind of adversarial test content.
+fingerprints: []
