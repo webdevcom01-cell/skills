@@ -40,6 +40,7 @@ Skafolduju i grade novi agent, skill, MCP server ili menjaju bezbednosni sloj ba
 | [`skill-creator-pro`](03-izrada/skill-creator-pro/SKILL.md) | Create new skills, modify and improve existing skills, and measure skill performance |
 | [`rls-rollout`](03-izrada/rls-rollout/SKILL.md) | Audits, plans, and orchestrates a phased Postgres Row-Level Security (RLS) rollout for the agent-studio multi-tenant database (61 Prisma ... |
 | [`session-start-hook`](03-izrada/session-start-hook/SKILL.md) | Creating and developing startup hooks for Claude Code on the web |
+| [`sdd-workflow`](03-izrada/sdd-workflow/SKILL.md) | Spec-Driven Development workflow for code changes — Constitution, Specify, Clarify, Plan, Tasks, Implement, independent Converge/Verify, with rigor scaled to change size |
 
 ### 04-test-qa/ -- Testiranje / QA
 
