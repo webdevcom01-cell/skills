@@ -27,3 +27,15 @@ skill was recovered into this repo.
 
 This snapshot documents where the skill came from. It does not imply the session-cache
 original has been deleted — it has not.
+
+**A note on the checksum proof:** the SHA-256 hash recorded for this snapshot proves that
+`manifest-snapshot.json` was byte-for-byte faithful to the source `manifest.json` **at the
+moment this snapshot was taken** (commit `18ec284`). It is not a permanently-holding
+invariant against the source — the session-cache `manifest.json` is a live, shared
+registry that changes on its own from time to time (e.g. its top-level `lastUpdated`
+epoch field), without necessarily changing any individual skill entry. If a future
+sha256 recheck against the current live source does not match this snapshot, that only
+means the source has since been touched — it does not mean this snapshot is corrupt or
+wrong. To verify the integrity of the snapshot file itself, use `git log`/`git diff` on
+this file (should be empty since it was committed), not a comparison against the
+source's current state.
