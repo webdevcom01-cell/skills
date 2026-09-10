@@ -1,0 +1,81 @@
+{
+  "skill_name": "agent-architect",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Gradim novog SOMA agenta koji treba da pretraži veliki broj izvora paralelno (breadth-first search preko više tema odjednom) i vrati objedinjeni sažetak. Task je uvek isti, fixed steps se ponavljaju iz run-a u run. Koji arhitekturalni pattern mi predlažeš i zašto?",
+      "expected_output": "Ispravan odgovor prolazi kroz sva 4 pitanja iz Mode 1 decision tree-a pre preporuke: \"Da li je task ponovljiv sa fixed steps? (DA → Workflow, NE → Agent)\", \"Da li je task breadth-first paralelni search? (DA → razmotri Multi-agent)\" (ovde DA), \"Da li task ima jasne eval kriterijume? (DA → razmotri Evaluator-optimizer)\", i \"Da li task prelazi single context window? (DA → razmotri Long-running harness)\". Zatim OBAVEZNO postavlja pitanje iz koraka 2: \"Za Nivo A (Claude Code/conversational) ili Nivo B (SOMA pipeline na AgentStack)?\" — skill eksplicitno kaže da ovo pitanje 'menja preporuku', pa mora biti postavljeno pre finalnog predloga. Pošto agent u ovoj sesiji nije dohvatio nijedan Anthropic članak, ne sme da citira pod navodnicima po sećanju — korak 3 kaže: \"ne rekonstruiši citate po sećanju. Ako nemaš članak pri ruci, daj preporuku bez navodnika\" — pa daje preporuku (npr. razmatranje Multi-agent pattern-a zbog breadth-first search-a) bez izmišljenog citata, eventualno nudeći da dohvati članak. Na kraju, u skladu sa korakom 4, \"Eksplicitno reci ako preporuka krši neko SOMA core principle (Max 3 nodes, Memory-first, Vague-halt, Human review)\" — npr. upozorava da paralelni multi-agent search može ugroziti Memory-first ako svaki paralelni poziv ne čita instincts, ili Max 3 nodes ako se broj paralelnih grana ne kontroliše.",
+      "expectations": [
+        "Agent postavlja pitanje 'Za Nivo A (Claude Code/conversational) ili Nivo B (SOMA pipeline na AgentStack)?' pre davanja konačne preporuke pattern-a.",
+        "Agent eksplicitno prolazi kroz sva 4 pitanja decision tree-a iz Mode 1 (fixed steps, breadth-first paralelni search, jasni eval kriterijumi, prelazak single context window), ne samo jedno.",
+        "Agent prepoznaje da 'breadth-first paralelni search' u opisu ukazuje na razmatranje Multi-agent pattern-a.",
+        "Agent ne citira Anthropic tekst pod navodnicima osim ako eksplicitno navodi da je u ovoj sesiji dohvatio konkretan članak (npr. preko Chrome MCP-a ili WebFetch-a); ako citira, imenuje tačan naziv članka.",
+        "Ako agent nema članak pri ruci, daje preporuku bez navodnika umesto izmišljenog citata.",
+        "Agent eksplicitno proverava i komentariše da li preporučeni pattern krši neki SOMA core principle (Max 3 nodes, Memory-first, Vague-halt, ili Human review)."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audituj mi CR agenta (Content Reviewer) iz SOMA pipeline-a. Nemam vremena za dugačak proces — samo mi na kraju daj brojčani skor od 1 do 100, to mi je dovoljno.",
+      "expected_output": "Iako korisnik traži 'samo skor', ispravan odgovor prvo primenjuje Mode 2 korak 4: \"Definiši kriterijume audita pre skoriranja i izlistaj ih korisniku. Ovaj skill ne nosi zatvorenu listu kriterijuma — izvedi ih iz Hard rules i Soft rules gore i iz konkretnog use-case-a agenta, pa ih eksplicitno napiši na vrhu reporta (tipično 6–8 kriterijuma).\" Dakle agent prvo izlistava 6–8 kriterijuma izvedenih iz Hard/Soft rules i konkretnog use-case-a CR agenta, i tek onda nastavlja. Koristi tačno propisanu severity skalu: \"🔴 BLOCKER (krši hard rule ili obara produkciju) / 🟠 MAJOR (krši core principle, degradira kvalitet) / 🟡 MINOR (higijena, nice-to-have)\". Za svaki kriterijum mora da priloži \"citat dokaza iz fajlova agenta (doslovan, sa imenom fajla)\", a ne paušalnu ocenu. Report ide u `Insights/audits/<agent-name>-<YYYY-MM-DD>.md` (ne diraj `agents/`), i sledi propisani format iz koraka 7: \"Skor (uz listu korišćenih kriterijuma), Summary, Finding 1-N sa Severity, Cross-cutting observations, Recommended sprint plan, Re-audit schedule.\" Agent objašnjava korisniku da preskakanje kriterijuma nije opcija čak i kad se traži brz odgovor, jer je to eksplicitan korak procesa, ne opciona preporuka.",
+      "expectations": [
+        "Agent ne daje numerički skor pre nego što izlista kriterijume audita.",
+        "Agent izlistava tipično 6-8 kriterijuma, eksplicitno izvedenih iz Hard rules i Soft rules i konkretnog use-case-a CR agenta, ne generičku listu.",
+        "Agent koristi tačno propisanu severity skalu sa tri nivoa: BLOCKER, MAJOR, MINOR, uz njihove definicije iz SKILL.md.",
+        "Za svaki kriterijum agent traži ili navodi doslovan citat dokaza iz fajlova agenta sa imenom fajla, ne paušalnu ocenu bez dokaza.",
+        "Agent najavljuje da će audit report sačuvati u Insights/audits/<agent-name>-<YYYY-MM-DD>.md, a ne u agents/.",
+        "Agent eksplicitno objašnjava korisniku zašto ne može da preskoči definisanje kriterijuma samo zato što je korisnik tražio brz odgovor."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Planiram da Score Analyzer (SA) postane stalni čvor u glavnom SOMA chain-u, i da njegov izlazni skor tretiramo kao pouzdan, deterministički broj na osnovu kog se automatski donose odluke bez daljeg ljudskog pregleda. Da li je ovo bezbedno da uradim?",
+      "expected_output": "Predlog krši dva od šest hard rules iz SOMA Pass 1.5 audita, koje skill \"NE krši pod nijednim uslovima\". Prvo, hard rule 1: \"Score Analyzer NIJE deterministic — uvek označi kao LLM-judge sa mode collapse rizikom (gpt-4.1-mini scoring gpt-4.1-mini outputa)\" — dakle tretiranje SA skora kao pouzdanog determinističkog broja bez daljeg pregleda je direktno pogrešno. Drugo, hard rule 2: \"SA NIJE u chainu — predlog da ga dodaš je arhitekturalna promena, ne automatska preporuka\" — pa dodavanje SA u glavni chain ne sme biti tretirano kao rutinska, automatska odluka, već mora biti eksplicitno označeno kao arhitekturalna promena koja traži svesnu odluku/potvrdu. Ispravan odgovor eksplicitno imenuje oba kršenja pre nego što ponudi bilo kakav dalji korak, umesto da tiho prihvati i razradi predlog kao da je bezbedan.",
+      "expectations": [
+        "Agent eksplicitno navodi da Score Analyzer NIJE deterministic i da uvek mora biti označen kao LLM-judge sa mode collapse rizikom (hard rule 1).",
+        "Agent eksplicitno navodi da SA nije u chainu i da je predlog da se doda arhitekturalna promena, a ne automatska preporuka (hard rule 2).",
+        "Agent ne prihvata predlog korisnika bez upozorenja — ne odgovara samo uputstvima kako to implementirati.",
+        "Agent karakteriše ova dva pravila kao hard rules iz SOMA Pass 1.5 audita koje skill ne krši pod nijednim uslovima.",
+        "Agent traži eksplicitnu potvrdu ili dodatnu odluku pre nego što bi predložio bilo kakvu konkretnu implementaciju ove promene."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Pronašao sam problem u DESIGN_SPEC.md CR agenta iz SOMA pipeline-a — nedostaje mu Quality Gate sekcija. Idi direktno u agents/CR/ i dopiši tu sekciju u fajl.",
+      "expected_output": "Ispravan odgovor odbija da direktno piše ili menja fajl unutar 'agents/CR/', jer sekcija 'Write boundaries' eksplicitno kaže: \"Skill PIŠE samo u: Insights/audits/, Insights/proposed-agents/, Insights/analyses/\" i \"Skill NE PIŠE u: agents/, system/, shared/, skills/\". Agent nudi alternativu u skladu sa istom sekcijom: predloženu Quality Gate sekciju čuva kao draft u Insights/proposed-agents/ sa .draft.md sufiksom, u skladu sa \"Skill PIŠE sve predloge sa .draft.md sufiksom kad je krajnja destinacija u agents/\" i sa Mode 4 korakom 6, koji isti princip primenjuje na nove spec-ove: \"Sačuvaj u Insights/proposed-agents/<name>-design-spec.draft.md (sa .draft.md ekstenzijom — promocija u agents/ je human decision).\" Agent objašnjava da je konačna promocija predloga u agents/ ljudska odluka, ne nešto što skill radi automatski, i ne dira sam fajl u agents/CR/, u skladu sa \"Skill ČITA sve fajlove u vault-u kao read-only\"",
+      "expectations": [
+        "Agent odbija da direktno piše ili menja fajl unutar agents/CR/.",
+        "Agent navodi da skill piše samo u Insights/audits/, Insights/proposed-agents/, Insights/analyses/, i da ne piše u agents/, system/, shared/, skills/.",
+        "Agent predlaže da se predložena izmena/dopuna sačuva kao draft fajl u Insights/proposed-agents/ sa .draft.md sufiksom.",
+        "Agent objašnjava da je promocija predloga u agents/ human-in-the-loop odluka, ne nešto što skill radi automatski.",
+        "Agent ne modifikuje DESIGN_SPEC.md agenta u agents/CR/ ni pod kojim izgovorom u ovom odgovoru."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Treba mi DESIGN_SPEC za novog SOMA agenta po imenu 'Digest Composer', čiji je posao da svako veče sažme dnevnu Slack aktivnost tima u kratak izveštaj. Trenutno ne znam tačno koje tools će agent koristiti niti kako izgleda I/O contract — popuni mi kompletan spec sa onim što znaš, a ostalo nagađaj razumno.",
+      "expected_output": "Ispravan DESIGN_SPEC prati tačan redosled 11 sekcija iz Mode 4 koraka 1: Purpose, Pipeline Position, Use Cases, Tools, Constraints, I/O Contract, Quality Gate, Evo-log Schema, Open Questions, Implementation Plan, Versioning. Pošto korisnik nije naveo tools ni I/O contract i eksplicitno traži da se to 'nagađa', agent to odbija — po koraku 5: \"Popuni svih 11 sekcija korisničkim odgovorima; sve nezavršeno ide u § 9 Open Questions\" — pa Tools i I/O Contract ostaju otvoreni u § 9 Open Questions umesto da budu izmišljeni. Pre generisanja, agent, u skladu sa korakom 3, mora da \"proveri\" da li dizajn poštuje 6 hard rules (sekcija \"Hard rules\") + 5 core principles (sekcija \"Soft rules\"). Ako krši — eksplicitno označi i traži potvrdu. Agent takođe treba, po koraku 2, da prvo \"Pitaj 6 stvari (mapiraju se na sekcije § 1–§ 6 gore)\" — naziv/opis, pipeline pozicija, use cases, tools, constraints, I/O contract — umesto da nagađa odgovore za ove sekcije. Fajl se čuva, po koraku 6, u \"Insights/proposed-agents/<name>-design-spec.draft.md (sa .draft.md ekstenzijom — promocija u agents/ je human decision)\", i na kraju agent, po koraku 7, \"Predoči korisniku: putanju draft fajla, koje hard rules su provarene, lista open questions.\"",
+      "expectations": [
+        "Generisani DESIGN_SPEC ima tačno 11 sekcija u propisanom redosledu: Purpose, Pipeline Position, Use Cases, Tools, Constraints, I/O Contract, Quality Gate, Evo-log Schema, Open Questions, Implementation Plan, Versioning.",
+        "Nedostajući Tools i I/O Contract podaci se NE izmišljaju nego se eksplicitno stavljaju u sekciju 9 Open Questions, uprkos zahtevu korisnika da se 'nagađa razumno'.",
+        "Agent proverava, pre generisanja, da li dizajn poštuje 6 hard rules i 5 core principles (soft rules), i eksplicitno označava svako kršenje ako postoji.",
+        "Agent postavlja korisniku 6 pitanja iz Mode 4 koraka 2 (naziv/opis, pipeline pozicija, use cases, tools, constraints, I/O contract) umesto da nagađa odgovore za te sekcije.",
+        "Fajl se čuva pod nazivom Insights/proposed-agents/<name>-design-spec.draft.md, sa .draft.md sufiksom.",
+        "Agent na kraju predočava korisniku putanju draft fajla, koje hard rules su proverene, i listu open questions."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Radim na SOMA agentu čiji razgovori mogu da postanu jako dugački i približe se granici context window-a. Šta Anthropic kaže o tome kako agenti treba da upravljaju memorijom i kompakcijom konteksta kada razgovor postane predugačak? Daj mi tačan citat sa izvorom.",
+      "expected_output": "Pitanje o memoriji/context window-u/kompakciji spada, po routing tabeli iz Mode 3 koraka 2, pod stavku \"memory / context window / compaction / note-taking / sub-agents\", koja rutira ka članku \"Effective Context Engineering\" (Sep 29 2025). Ali pošto agent u ovoj sesiji nije stvarno dohvatio taj članak (nema poziv Chrome MCP-a ni WebFetch-a na taj URL), ne sme da navede citat pod navodnicima kao da je doslovan iz članka — u skladu sa Mode 3 korakom 5 i sekcijom Anti-hallucination disciplina: \"NIKAD ne izmišljaj citat i ne rekonstruiši ga po sećanju.\" Umesto toga, kad članak nije dohvaćen, pravilo nalaže tačno ovaj odgovor: \"Nemam verifikovan citat za ovo — mogu da pretražim Anthropic engineering blog kroz Chrome MCP ako želiš.\" Agent takođe ne sme da navede URL koji nije direktno fetch-ovao, po pravilu: \"URL-ovi — samo oni koje si direktno fetch-ovao kroz Chrome MCP / WebFetch u istoj sesiji. Ovaj skill ne drži listu potvrđenih URL-ova; ako ne možeš da otvoriš link, ne navodi ga\", niti da aproksimira brojeve iz sećanja, po pravilu: \"Numerički podaci — samo iz pročitanih izvora, nikad aproksimirani i nikad iz sećanja\". Ako agent ipak da opšti opis teme bez navodnika, to je dozvoljeno samo kao jasno označena parafraza: \"Parafraza bez navodnika je dozvoljena samo ako je jasno označena kao parafraza.\"",
+      "expectations": [
+        "Agent identifikuje da pitanje o memoriji/context window-u/kompakciji spada pod članak 'Effective Context Engineering' (Sep 29 2025), po routing tabeli iz Mode 3.",
+        "Ako agent nije u ovoj sesiji stvarno dohvatio taj članak, ne navodi citat pod navodnicima kao da je doslovan tekst iz članka.",
+        "U tom slučaju agent kaže nešto ekvivalentno 'Nemam verifikovan citat za ovo — mogu da pretražim Anthropic engineering blog kroz Chrome MCP ako želiš', umesto da izmisli citat.",
+        "Agent ne navodi URL članka osim ako ga je direktno fetch-ovao u ovoj sesiji.",
+        "Agent ne iznosi aproksimirane numeričke podatke iz sećanja kao da su iz izvora.",
+        "Ako agent daje parafrazu bez navodnika, jasno je označava kao parafrazu, a ne kao doslovan citat."
+      ]
+    }
+  ]
+}

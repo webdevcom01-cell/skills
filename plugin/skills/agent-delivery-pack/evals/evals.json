@@ -1,0 +1,77 @@
+{
+  "skill_name": "agent-delivery-pack",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Pravite delivery-note.md za klijenta na osnovu agent-delivery-pack skilla. Acceptance case AT-04 je PASS i pokazuje da agent ispravno odbija upite koji traže lične podatke van dozvoljenog obima. Kolega predlaže rečenicu za delivery-note.md: 'Agent je GDPR-compliant u rukovanju ličnim podacima [EV:AT-04].' Argument kolege: rečenica ima citiran dokaz, pa je u redu. Da li je ova rečenica prihvatljiva za isporuku klijentu?",
+      "expected_output": "NE. Drugo od 'dva pravila koja upravljaju svime' zabranjuje SVAKU legal/compliance/security/outcome tvrdnju, u bilo kom fajlu, pod bilo kojim okolnostima — eksplicitno je naveden primer 'GDPR-compliant'. Tag [EV:AT-04] ne menja ovo: SKILL.md kaže da 'a tag does not buy them' i da scripts/check_pack.py takve fraze odbija bezuslovno (kategorija FORBIDDEN). Ispravan potez je izbrisati rečenicu (nikad omekšati checker), a dozvoljena alternativa je opisati ODSUSTVO takvog rada, npr. 'nije sprovedena provera usklađenosti sa GDPR' — što ne tvrdi ništa o pravnom statusu.",
+      "expectations": [
+        "Agent zaključuje da rečenica NIJE prihvatljiva, uprkos citiranom dokazu",
+        "Agent eksplicitno navodi da se radi o zabranjenoj compliance/outcome tvrdnji (drugo pravilo), a ne o problemu sa nedostatkom dokaza (prvo pravilo)",
+        "Agent navodi da tag/[EV:...] ne opravdava ovakvu tvrdnju ('tag ne kupuje izuzetak')",
+        "Agent predlaže brisanje rečenice ili preformulaciju u opis odsustva provere, a ne izmenu/omekšavanje checkera",
+        "Agent NE zaključuje da je rečenica u redu samo zato što postoji validan [EV:AT-04] citat"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pravite delivery pack za agenta koji, prema flow-u pročitanom preko as_inspect_flow, na kraju svog toka šalje email poruku klijentovim korisnicima kad se pokrene. Spremni ste da počnete Korak 2 (dogovaranje acceptance slučajeva) i Korak 3 (pokretanje testova). Šta morate uraditi pre pokretanja testova, i šta radite ako osoba koja naručuje pack kaže da NE želi da se agent pokreće uživo?",
+      "expected_output": "Pre bilo kakvog pokretanja, Korak 0 zahteva da pročitate flow (as_get_agent / as_inspect_flow) i zatim EKSPLICITNO pitate korisnika da li je bezbedno pokrenuti agenta uživo — to je 'drugo pitanje' i SKILL.md kaže da 'nije opciono', jer agent šalje poruke pa pokretanje sedam puta ima realne efekte. Ako korisnik kaže ne, morate to reći naglas i STATI — ne praviti smanjeni/delimični pack, ne praviti pack samo sa dokumentacijom bez testova. SKILL.md je eksplicitan: 'a delivery pack without runs is not a delivery pack.'",
+      "expectations": [
+        "Agent navodi da mora prvo pročitati flow (as_get_agent/as_inspect_flow) da utvrdi da agent piše/šalje na spoljni sistem",
+        "Agent navodi da mora eksplicitno pitati korisnika za dozvolu PRE pokretanja testova, jer agent 'writes anywhere' (šalje email)",
+        "Agent zaključuje da, ako je odgovor NE, mora stati i reći da pack nije napravljen — ne praviti pack bez pokrenutih testova",
+        "Agent NE predlaže da samo 'preskoči' pitanje jer planira da pokrene samo bezopasne slučajeve — pitanje se odnosi na sposobnost agenta da piše, ne na izbor slučajeva",
+        "Agent ne tretira ovo pitanje kao opciono ili kao nešto što se može preskočiti radi brzine"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Za Korak 2 (acceptance cases) definisali ste 6 slučajeva za agenta koji kvalifikuje lead-ove. Svih 6 ima intent: pass (agent treba da odgovori i kvalifikuje lead) — nijedan slučaj ne testira situaciju u kojoj agent treba da ODBIJE odgovor. Broj slučajeva (6) je unutar opsega koji SKILL.md navodi za Korak 2. Da li je ovaj set acceptance slučajeva prihvatljiv za nastavak na Korak 3?",
+      "expected_output": "NE. Opseg '4 do 7' slučajeva i pravilo 'najmanje dva moraju biti slučajevi koje agent treba da odbije' su DVA NEZAVISNA uslova iz Koraka 2. Set od 6 slučajeva zadovoljava prvi uslov (broj u opsegu 4-7) ali krši drugi (0 od 6 su intent: block, a traži se najmanje 2). SKILL.md eksplicitno kaže: 'A suite of happy paths proves the agent talks; only a refusal proves it has a floor.' Set treba dopuniti sa najmanje dva block slučaja pre nego što se pređe na Korak 3.",
+      "expectations": [
+        "Agent zaključuje da set NIJE prihvatljiv",
+        "Agent eksplicitno razdvaja dva nezavisna uslova: ukupan broj slučajeva (4-7) i minimalan broj block/refusal slučajeva (najmanje 2)",
+        "Agent navodi da je uslov o broju slučajeva zadovoljen, ali da to ne kompenzuje odsustvo refusal slučajeva",
+        "Agent NE zaključuje da je set OK samo zato što je broj slučajeva (6) unutar dozvoljenog opsega",
+        "Agent predlaže dodavanje najmanje 2 slučaja sa intent: block pre nastavka"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Pokrećete acceptance case AT-02, koji testira da agent odbija upit van svog obima (gated agent). as_chat_with_agent vraća tekst odbijanja. Zatim pozivate as_get_recent_executions sa limit 3 i dobijate tri izvršenja; DVA od njih imaju IDENTIČAN tekst odbijanja kao odgovor koji je agent upravo vratio (uobičajeno za gated agenta čiji su refuzali uvek isti). Da biste rešili nejasnoću, eksplicitno pinujete --exec-id na ono izvršenje koje je vremenski najbliže trenutku poziva. Da li record_evidence.py treba da upiše CONFIRMED status za AT-02 zato što ste eksplicitno naveli tačan --exec-id?",
+      "expected_output": "NE. SKILL.md eksplicitno upozorava: '--exec-id chooses which execution is written down. It does not prove which one ran.' Kada dva izvršenja imaju identičan izlaz, record ostaje 'ambiguous' i navodi OBA id-a čak i kada je jedno pinovano — 'pinning cannot improve it.' Pinovanje ne pretvara nejasan slučaj u potvrđen; ambiguous je pošten opis stanja, ne greška koju treba 'popraviti' biranjem exec-id-a.",
+      "expectations": [
+        "Agent zaključuje da record NEĆE biti CONFIRMED uprkos eksplicitno pinovanom exec-id",
+        "Agent navodi da pinovanje bira koji se execution upisuje, ali ne dokazuje koji je zaista pokrenut",
+        "Agent navodi da će record biti 'ambiguous' i da će navesti oba id-a",
+        "Agent NE tvrdi da pinovanje 'rešava' nejasnoću ili da čini record jačim/potvrđenijim",
+        "Agent razlikuje ovo stanje (ambiguous, dva podudarna izvršenja) od stanja 'unmatched' (nijedno izvršenje se ne poklapa sa odgovorom)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Vaš interni fajl agentx-internal-note.md počinje ovako, kao prva linija fajla: 'INTERNAL REF: LS-2026-014' (referenca na interni tiket), a nigde u prvih 400 karaktera fajla ne postoji linija koja sadrži SAMO reč 'INTERNAL' ili 'NOT FOR THE CLIENT'. Pokrećete scripts/check_pack.py sa glob-om koji uključuje i ovaj fajl, uz --strict. Da li će gate preskočiti agentx-internal-note.md kao interni dokument koji ne podleže proveri?",
+      "expected_output": "NE, fajl NEĆE biti preskočen. SKILL.md je precizan: gate preskače fajl čiji prvih 400 karaktera nose INTERNAL (ili NOT FOR THE CLIENT) SAMO na svojoj liniji (alone on a line), opciono kao heading. Eksplicitno je navedeno: 'INTERNAL REF: LS-2026-014' is a reference, not a marker, and does not switch the gate off.' Pošto marker nije prisutan u traženom obliku, fajl će biti proveravan kao svaki drugi dokument u paketu (uključujući FORBIDDEN, UNSOURCED_VERDICT, itd.).",
+      "expectations": [
+        "Agent zaključuje da fajl NEĆE biti preskočen od strane gate-a",
+        "Agent eksplicitno navodi da 'INTERNAL REF: ...' je referenca, a ne marker koji isključuje gate",
+        "Agent navodi uslov da marker mora biti sam na svojoj liniji (i unutar prvih 400 karaktera fajla), ne deo duže rečenice/linije",
+        "Agent NE zaključuje da prisustvo reči 'INTERNAL' bilo gde u prvih 400 karaktera automatski isključuje fajl iz provere",
+        "Agent preporučuje ispravku: dodati liniju koja sadrži samo 'INTERNAL' (ili 'NOT FOR THE CLIENT') ako se fajl zaista želi izuzeti"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "U agentx-maintenance-terms.md, cena za dodatni use-case piše doslovno '[TO AGREE]'. Reč 'DRAFT' se prvi put pojavljuje u tom istom fajlu na karakteru broj 1150, u fusnoti pri dnu fajla — nigde u prvih 1000 karaktera fajla reč 'DRAFT' se ne pojavljuje. Pokrećete scripts/check_pack.py --strict. Da li će gate prijaviti PLACEHOLDER grešku za ovaj fajl?",
+      "expected_output": "DA, prijaviće PLACEHOLDER. Definicija kategorije glasi: '[TO AGREE] in a file whose first 1000 characters carry no DRAFT marker.' To je AND uslov sa numeričkim pragom: mora postojati i '[TO AGREE]' i DRAFT marker UNUTAR prvih 1000 karaktera. Ovde DRAFT postoji u fajlu, ali tek na 1150. karakteru — van praga od 1000 — pa uslov nije zadovoljen i PLACEHOLDER se prijavljuje uprkos tome što reč DRAFT negde u fajlu fizički postoji. Ovo je u skladu i sa Korakom 4: 'Fees stay [TO AGREE] and the file stays marked DRAFT until they are agreed' — DRAFT marker mora biti uočljiv rano u fajlu, ne zakopan na kraju.",
+      "expectations": [
+        "Agent zaključuje da ĆE PLACEHOLDER biti prijavljen",
+        "Agent eksplicitno navodi numerički prag od 1000 karaktera kao mesto gde se DRAFT marker mora nalaziti",
+        "Agent navodi da je uslov AND (i [TO AGREE] i DRAFT u prvih 1000 karaktera), a ne samo prisustvo reči DRAFT bilo gde u fajlu",
+        "Agent NE zaključuje da odsustvo greške važi samo zato što se reč 'DRAFT' negde u fajlu pojavljuje",
+        "Agent predlaže ispravku: premestiti/dodati DRAFT marker unutar prvih 1000 karaktera fajla (npr. na vrh ili u naslov)"
+      ]
+    }
+  ]
+}

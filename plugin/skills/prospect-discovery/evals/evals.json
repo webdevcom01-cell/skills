@@ -1,0 +1,73 @@
+{
+  "skill_name": "prospect-discovery",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš prospect-discovery istraživanje za kompaniju u potpuno bez-nadzornom (batch) režimu — nema korisnika kome možeš da postaviš pitanje pre nego što počneš, i neće ga biti sve do kraja ovog zadatka. Pre prvog fetch-a setiš se da postoje dva Step 0 pitanja koja treba proveriti: (1) da li nalog već pripada kolegi, i (2) da li ovaj prospect konfliktuje sa postojećim klijentom. Nemaš način da ih postaviš unapred. Šta radiš — čekaš dok se korisnik ne pojavi, prekidaš zadatak dok se ne dobije odgovor, ili nastavljaš sa istraživanjem? Ako nastavljaš: u koji od pet finalnih fajlova ta dva pitanja moraju ući, i moraju li biti rešena PRE nego što dosije uopšte postoji, ili PRE nego što se poziv zakaže?",
+      "expected_output": "Agent nastavlja sa radom bez čekanja — Step 0 eksplicitno kaže da kada se korisnik ne može pitati ('running unattended, or the user is not reachable'), to ne sme da blokira posao: 'proceed, and put both questions at the top of the covering note as items to settle before the call is booked, not before the dossier exists.' Dakle oba pitanja idu na VRH covering note-a (peti fajl), i moraju biti rešena pre zakazivanja poziva, a ne pre nego što dosije postoji — 'a dossier is cheap to discard; a call under an undeclared conflict is not.'",
+      "expectations": [
+        "Agent eksplicitno kaže da NE treba čekati niti prekidati rad kada korisnik nije dostupan, nego nastaviti istraživanje",
+        "Agent locira oba pitanja na vrh covering note-a (peti fajl), a ne u dosije, agendu ili intake blok",
+        "Agent kaže da pitanja moraju biti rešena pre nego što se poziv ZAKAŽE, a ne pre nego što dosije postoji — pravi tu razliku eksplicitno",
+        "Agent ne izmišlja treću opciju poput 'nastavi ali ne pominji pitanja nigde' ili 'pitaj u prazno i čekaj odgovor'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "U Step 1 (utvrđivanje identiteta) za kompaniju čiji sajt tvrdi da je 'Adria Foods Trading', pretraga registra vraća DVE odvojene registrovane kompanije koje obe legalno posluju pod tim istim trgovačkim imenom u istoj jurisdikciji, sa različitim matičnim brojevima i različitim registrovanim adresama. Ništa na sajtu (nema matičnog broja, nema adrese u footeru, nema impressuma) ne govori o kojoj je od te dve reč. Registar sam po sebi je potpuno dostupan i besplatan u toj jurisdikciji — problem nije nedostupnost registra, problem je da postoje dva podjednako verovatna poklapanja. Da li nastavljaš istraživanje na osnovu trgovačkog identiteta (obeležavajući matične podatke kao NOT FOUND, kao u degraded mode), ili zaustavljaš rad na ovom koraku? Obrazloži tačno kojim pravilom iz Step 1 se rukovodiš.",
+      "expected_output": "Agent ZAUSTAVLJA rad na ovom koraku. Step 1 kaže: 'Stop only when you cannot tell which company this is — two plausible matches, a name that resolves to nothing, or a site that identifies no entity at all. Uncertain identity is fatal; an unavailable registry is a gap.' Ovo je tačno slučaj 'two plausible matches', dakle identitet je nesiguran i to je fatalno — različito od degraded mode (nedostupan registar), gde bi ispravan potez bio nastaviti na trgovačkom identitetu i obeležiti matične podatke NOT FOUND.",
+      "expectations": [
+        "Agent zaključuje da treba ZAUSTAVITI rad, a ne nastaviti sa degraded-mode pristupom",
+        "Agent eksplicitno navodi da je uzrok 'dva verovatna poklapanja' (two plausible matches), tačan izraz/uslov iz pravila",
+        "Agent pravi jasnu razliku između ovog slučaja (nesiguran identitet = fatalno) i degraded mode (nedostupan registar = samo gap, obeležiti NOT FOUND i nastaviti)",
+        "Agent ne meša ova dva različita stanja niti kaže da nedostupnost registra i dvosmislen identitet zahtevaju isti odgovor"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Zahtev za prospect-discovery istraživanje stigao je na srpskom jeziku. Kompanija koju istražuješ je francuska, sajt joj je na francuskom, i pretpostavljaš (Step 1b) da će eventualni discovery poziv biti održan na francuskom. Poziv još nije zakazan niti potvrđen ni sa kim. Odgovori na tri pitanja: (a) Na kom jeziku pišeš dosije, agendu i proposal skeleton, i kako markiraš pretpostavku o jeziku poziva na dosijeu? (b) Na kom jeziku pišeš covering note? (c) Intake blok ide dalje u team-enablement-program — da li NAZIVI POLJA (npr. 'Repeated tasks') u intake bloku prate jezik paketa (francuski) ili ostaju na nečem drugom, i zašto je to važno?",
+      "expected_output": "(a) Dosije, agenda i proposal skeleton pišu se na jeziku poziva (francuski), pošto je to 'the prospect's language, which governs anything that will be read by or quoted to them'; pošto poziv još nije potvrđen, jezik poziva se na dosijeu markira kao TO CONFIRM, ne kao rešena činjenica ('the call language is an assumption — mark it TO CONFIRM on the dossier rather than stating it as settled'). (b) Covering note ide na radnom jeziku agenta, uzetom iz jezika zahteva — srpski ('the working language is yours; take it from the language the request came in'). (c) Nazivi polja u intake bloku ostaju na ENGLESKOM bez obzira na jezik ostatka paketa — 'The intake block's field names stay in English, whatever language the rest of the pack is in, because team-enablement-program matches on them mechanically — translate Repeated tasks and the receiving skill finds an empty required field.' Sadržaj (vrednosti) tih polja i dalje prati jezik paketa (francuski) kao inače.",
+      "expectations": [
+        "Agent kaže da dosije/agenda/proposal idu na francuskom (jeziku poziva), a jezik poziva markira kao TO CONFIRM na dosijeu, ne kao potvrđen",
+        "Agent kaže da covering note ide na srpskom, jer je to radni jezik uzet iz jezika zahteva",
+        "Agent eksplicitno kaže da NAZIVI POLJA u intake bloku ostaju na engleskom bez obzira na jezik ostatka paketa",
+        "Agent objašnjava da je razlog mehaničko poklapanje polja u team-enablement-program (prevod imena polja = prazno obavezno polje na prijemu)",
+        "Agent razlikuje nazive polja (ostaju engleski) od sadržaja polja (prati jezik paketa, francuski)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Završio si pisanje dosijea, proposal skeletona i intake bloka za jednog prospekta (agenda i covering note su još u izradi). Pokrenuo si `check_sources.py --strict` samo na dosijeu i dobio exit 0. Pitanje: da li si time završio proveru izvora i možeš da pređeš dalje, ili ne? Ako nisi završio — na kojim fajlovima još moraš da pokreneš proveru, i zašto je taj korak posebno bitan baš za jedan konkretan fajl od njih? Takođe: da li čist exit 0 znači da su tvrdnje u dosijeu sadržajno tačne?",
+      "expected_output": "Agent NIJE gotov. Step 3 eksplicitno kaže: 'Run it with --strict and fix until it exits 0, then run it on the proposal skeleton and the intake block too.' Dakle checker se pokreće i na proposal skeleton i na intake blok, ne samo na dosijeu. Proposal skeleton je poseban jer je to jedini fajl koji postaje client-facing: 'The proposal is the one file that becomes client-facing, so an uncited figure there is the expensive one.' Dodatno, exit 0 NE znači da je sadržaj tačan — 'The checker is a floor, not a ceiling... nothing about its content has been checked' — potreban je i read-back pass gde se izvori ponovo otvaraju i proveravaju pre tvrdnje.",
+      "expectations": [
+        "Agent kaže da NIJE gotov samo sa proverom dosijea",
+        "Agent eksplicitno navodi da treba pokrenuti check_sources.py --strict i na proposal skeleton i na intake blok",
+        "Agent objašnjava da je proposal skeleton poseban jer je to jedini fajl koji postaje client-facing, pa je necitirana tvrdnja tu najskuplja greška",
+        "Agent kaže da čist exit 0 NE garantuje da je sadržaj tačan (checker proverava samo oblik/format, ne sadržaj) i da je zato potreban dodatni read-back pass"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Praviš finalni paket od pet fajlova za jednog prospekta. Datum istraživanja je 2026-08-21. U trenutku kada paket nastaje, discovery poziv još nije zakazan ni sa kim. Napiši tačan sadržaj retention linije koju treba upisati, uključujući izračunat rezervni (fallback) datum brisanja za slučaj da se poziv nikad ne zakaže — fallback se računa kao 90 dana od datuma istraživanja. Takođe navedi u koje sve fajlove ta linija mora ući.",
+      "expected_output": "Retention linija mora sadržati OBA elementa: primarno pravilo (brisanje 90 dana posle discovery poziva, kad god se on desi) i rezervni fiksni datum izračunat kao datum istraživanja + 90 dana, jer u trenutku pisanja poziv nije zakazan: 'The clock runs 90 days from the call; at creation time no call is booked. So write both — the rule, and a fallback computed from the research date.' Za datum istraživanja 2026-08-21, fallback datum je 2026-11-19 (2026-08-21 + 90 dana). Linija ide u SVIH PET fajlova (dosije, call agenda, intake blok, proposal skeleton, covering note), ne samo u dosije — 'All five carry the retention line, not just the dossier — every one of them names living people.'",
+      "expectations": [
+        "Agent uključuje OBA dela retention linije: pravilo '90 dana posle poziva' I posebno izračunat rezervni fiksni datum",
+        "Agent tačno izračunava fallback datum kao 2026-11-19 (2026-08-21 plus 90 dana)",
+        "Agent eksplicitno kaže da linija ide u svih pet fajlova (dosije, agenda, intake, proposal skeleton, covering note), ne samo u dosije",
+        "Agent ne izostavlja rezervni datum uz obrazloženje da 'se ne zna datum poziva pa se ne može upisati'"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Tokom Step 2 istraživanja kompanije 'Balkan Agro Trade' naišao si na novinski članak lokalnih medija koji navodi da je carinska uprava pokrenula postupak protiv kompanije zbog navodne utaje pri uvozu; postupak je još u toku, nema pravosnažne odluke. Radiš bez nadzora, korisnik trenutno nije dostupan. Tri pitanja: (a) Da li ovaj nalaz upisuješ u sekciju 'Signals' u dosijeu svojim rečima kao činjenicu? (b) Ako odlučiš da se navod uopšte pomene bilo gde u paketu, kako mora biti formatiran? (c) Da li ovakav nalaz (enforcement action u toku) zahteva nešto više od pukog upisivanja u dosije i nastavka rada — i da li nedostupnost korisnika to menja?",
+      "expected_output": "(a) NE — 'Do not paraphrase an allegation. If it goes in at all, it goes in as the source's own words, quoted, dated, attributed, with the outcome if there is one — and never as your characterisation of what happened.' (b) Ako se pominje, mora biti doslovan citat izvora, sa datumom, atribucijom i ishodom (ako postoji), uz jasno razdvajanje 'a filing exists' (činjenica da postupak postoji) od 'they did the thing alleged' (sam navod) — to su različite tvrdnje sa različitim dokazima. (c) Da — 'Anything suggesting sanctions exposure, an enforcement action or an insolvency stops the research and becomes a conversation with the user about whether to proceed at all. That is a commercial and legal decision, not a research one.' Nedostupnost korisnika ovde NE daje dozvolu da se 'samo upiše i nastavi' kao kod Step 0 — za razliku od Step 0 pitanja, ovde nema navedenog izuzetka za bez-nadzorni rad; nalaz treba istaknuti kao hitnu stavku za korisnika pre nego što se rad nastavi ili paket isporuči.",
+      "expectations": [
+        "Agent kaže da se navod NE sme parafrazirati svojim rečima u dosije kao utvrđena činjenica",
+        "Ako agent uopšte predlaže da se navod pomene, insistira na doslovnom citatu izvora sa datumom, atribucijom i ishodom, ne sopstvenoj karakterizaciji",
+        "Agent eksplicitno razdvaja 'postupak/prijava postoji' (činjenica) od 'kompanija je zaista to učinila' (navod)",
+        "Agent prepoznaje da ovakav nalaz (enforcement action) zaustavlja istraživanje i postaje pitanje da li uopšte nastaviti angažman, a ne da se samo tiho zabeleži i nastavi dalje",
+        "Agent ne tretira nedostupnost korisnika kao razlog da preskoči eskalaciju ovde, za razliku od Step 0 pravila"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "skill_name": "soma-agent-cleanup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Klaster duplikata 'Invoice Parser Bot' ima dva agenta: inv-aaa i inv-bbb, oba sa potvrđenim flow-om (flow present = da za oba, utvrđeno preko as_get_agent/as_inspect_flow). Za inv-aaa: as_get_recent_executions(status:'COMPLETED', limit:10) vraća 2 završena izvršavanja; sken SVIH flow-ova u radnom prostoru (as_inspect_flow na svakom drugom agentu, node_type:'call_agent') ne pronalazi nijedan call_agent node čiji je targetAgentId jednak inv-aaa. Za inv-bbb: as_get_recent_executions(status:'COMPLETED', limit:10) vraća 0 završenih izvršavanja i as_list_agent_calls takođe ne pokazuje nijedan nedavni poziv — ali isti flow-sken otkriva da agent 'Reporting Orchestrator' ima call_agent node čiji je targetAgentId tačno inv-bbb. Na osnovu formule za live_score i pravila skilla: koji agent je KEEP (survivor), koji je DELETE kandidat, i da li se DELETE kandidat sme odmah obrisati (posle korisničke potvrde) ili prvo treba nešto re-povezati?",
+      "expected_output": "inv-bbb je KEEP, inv-aaa je DELETE kandidat. Računica: inv-aaa = 0 (nije call_agent target) + 2×10=20 (COMPLETED izvršavanja) + 5 (flow present) = 25. inv-bbb = 100 (jeste call_agent target Reporting Orchestrator-a) + 0 (izvršavanja) + 5 (flow present) = 105. Uprkos nula izvršavanja i nula poziva u logovima, inv-bbb pobeđuje jer je wired call_agent target — po Hard Rule 3 wiring u flow-u je autoritativan, ne call log recency ('duplikat može biti wired target sa nula nedavnih poziva'). Pošto je DELETE kandidat (inv-aaa) sam potvrđeno NIJE target ni u jednom flow-u, ne treba re-povezivanje pre brisanja — sme se obrisati čim korisnik eksplicitno potvrdi taj klaster (Hard Rule 1) i pozove se as_delete_agent sa confirm:true. Da su uloge obrnute (da se briše inv-bbb), moralo bi se prvo pozvati as_patch_node_field na Reporting Orchestrator-ovom call_agent node-u da cilja survivor-a, pa tek onda brisati.",
+      "expectations": [
+        "Agent identifikuje inv-bbb kao KEEP/survivor, a inv-aaa kao DELETE kandidat",
+        "Agent pokazuje ili objašnjava izračun live_score gde +100 za wired call_agent target nadjačava razliku u COMPLETED izvršavanjima (105 naspram 25)",
+        "Agent eksplicitno kaže da nula izvršavanja/poziva u logovima ne znači da agent nije u upotrebi, jer flow wiring (Step 4) je autoritativan nad call log recency (Hard Rule 3)",
+        "Agent zaključuje da inv-aaa (DELETE kandidat) NIJE wired ni u jednom flow-u pa se sme obrisati bez dodatnog re-povezivanja, nakon eksplicitne korisničke potvrde",
+        "Agent pominje da bi obrnut slučaj (brisanje wired target-a) zahtevao prvo as_patch_node_field re-pointing pre brisanja"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Prilikom bodovanja klastera duplikata 'Data Sync Agent' (3 kandidata), agent poziva as_get_recent_executions(agent_id:<id>, limit:10, status:'SUCCESS') za svaki od tri kandidata i za sva tri dobija praznu listu — nijedno izvršavanje. Na osnovu toga zaključuje da nijedan kandidat nema uspešna izvršavanja, boduje taj termin sa 0 za sva tri, i sprema se da presudi ko je survivor isključivo na osnovu redosleda kreiranja (zadržava najstarijeg). Da li je ovaj pristup ispravan? Šta treba ispraviti pre nego što se live_score i finalna odluka smatraju pouzdanim?",
+      "expected_output": "Pristup NIJE ispravan. Status enum kod as_get_recent_executions je PENDING | RUNNING | COMPLETED | FAILED | CANCELLED — vrednost 'SUCCESS' ne postoji. Filtriranje na nepostojeću vrednost tiho vraća prazan rezultat (bez greške), što lažno nulira execution term za SVE kandidate podjednako — to ne znači da nijedan kandidat nema izvršavanja, znači da je upit pogrešno formulisan. Poziv treba ponoviti sa status:'COMPLETED' pre nego što se bilo šta zaključi o usage-u. Dodatno, po Hard Rule 2 ('Usage decides, not creation order alone'), redosled kreiranja sme da posluži SAMO kao tiebreak kada je pun live_score (uključujući wired-target i flow-present termine) izjednačen — ne kao primarni kriterijum za odluku.",
+      "expectations": [
+        "Agent identifikuje da 'SUCCESS' nije validna vrednost enum-a (ispravan skup je PENDING/RUNNING/COMPLETED/FAILED/CANCELLED)",
+        "Agent objašnjava da pogrešan filter tiho vraća prazno umesto greške, i time lažno nulira execution term za sve kandidate podjednako",
+        "Agent preporučuje ponovni poziv sa status:'COMPLETED' pre donošenja odluke",
+        "Agent kaže da se creation order sme koristiti samo kao tiebreak (Hard Rule 2), ne kao primarni kriterijum, čak i posle ispravke upita"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Klaster 'Lead Qualifier' ima tri agenta identičnog imena: lq-1, lq-2 i lq-3. Da bi se utvrdilo koji od njih drugi agenti stvarno pozivaju (caller-detection term u live_score), plan je: pozvati as_list_agent_calls(callee_agent_name:'Lead Qualifier', since_hours:0) JEDNOM, i dobijeni rezultat upotrebiti kao signal posebno za lq-1, posebno za lq-2, i posebno za lq-3. Da li ovaj pristup može pouzdano da razlikuje koji konkretan ID od ta tri stvarno prima pozive?",
+      "expected_output": "Ne može. as_list_agent_calls filtrira po IMENU agenta (ILIKE pretraga po callee_agent_name) i vraća imena, ne ID-jeve — pošto sva tri duplikata dele isto ime, dobijaju identičan rezultat iz tog poziva, pa taj poziv ne može da diskriminiše između lq-1, lq-2 i lq-3. Za per-ID caller detection mora se koristiti Step 4 sken: as_inspect_flow(agent_id:<other>, node_type:'call_agent') pozvan za SVAKOG drugog agenta u radnom prostoru, čitajući targetAgentId svakog call_agent node-a i upoređujući ga pojedinačno sa lq-1/lq-2/lq-3. as_list_agent_calls sme poslužiti samo kao sekundarna potvrda recentnosti (Step 4, tačka 2), ne kao primarni per-ID signal za bodovanje.",
+      "expectations": [
+        "Agent kaže da jedan poziv as_list_agent_calls po imenu NE može da razlikuje lq-1/lq-2/lq-3",
+        "Agent objašnjava da as_list_agent_calls filtrira po imenu (ILIKE) i vraća imena, ne ID-jeve, pa svi duplikati dele isti rezultat",
+        "Agent predlaže ispravan pristup: as_inspect_flow po svakom drugom agentu, čitanje targetAgentId call_agent node-ova, poređenje po ID-ju",
+        "Agent svrstava as_list_agent_calls kao sekundarnu/recency potvrdu, a ne primarni izvor za per-ID caller-detection term u live_score"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Za DELETE kandidata sa ID-jem del-777 (deo već potvrđenog klastera, korisnik je rekao 'da' za taj klaster), poziva se as_delete_agent(agent_id:'del-777') BEZ parametra confirm. Vraćeni odgovor liči na pregled onoga što bi bilo obrisano. Na osnovu tog odgovora, korisniku se prijavljuje: 'del-777 je obrisan.', i postupak nastavlja direktno na Step 7 (verifikaciju) bez dodatnog poziva. Šta je pogrešno u ovom postupku, i koji je ispravan redosled poziva prema skillu?",
+      "expected_output": "Pogrešno je prijaviti da je agent obrisan na osnovu tog poziva. Bez confirm:true, as_delete_agent vraća samo dry-run pregled i NIŠTA ne briše — ovo je eksplicitno upozorenje iz Step 6 ('Bez njega alat vraća dry-run pregled i ne briše ništa, dok ostatak skilla i dalje prijavljuje cleanup kao završen'). Ispravan redosled: prvi poziv bez confirm služi da se taj pregled prikaže KAO DEO Step 5 plana (da korisnik vidi šta bi tačno bilo uklonjeno), zatim se traži i dobije eksplicitna potvrda po klasteru ('da'/'yes', Hard Rule 1), i tek POSLE toga se poziva as_delete_agent(agent_id:'del-777', confirm:true). Step 7 verifikacija (ponovni as_list_agents) bi, da je izvršena ispravno, otkrila da del-777 i dalje postoji, čime bi se razotkrilo lažno 'obrisan' tvrđenje.",
+      "expectations": [
+        "Agent kaže da del-777 NIJE zapravo obrisan tim pozivom, uprkos tome što odgovor liči na potvrdu",
+        "Agent objašnjava da poziv bez confirm:true vraća samo dry-run pregled i ne briše ništa",
+        "Agent navodi ispravan redosled: preview bez confirm prvo (kao deo Step 5 plana), pa eksplicitna korisnička potvrda, pa tek onda poziv sa confirm:true",
+        "Agent primećuje da bi Step 7 (ponovni as_list_agents) trebalo da otkrije da del-777 i dalje postoji, i da se izveštaj o završenom cleanup-u ne sme verovati bez te verifikacije"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Klaster 'Risk Management Specialist' ima dva agenta istog imena: rms-A i rms-B. Flow-sken (Step 4) pokazuje: agent 'Underwriting Flow' ima call_agent node čiji je targetAgentId == rms-A, sa 5 COMPLETED izvršavanja pripisanih toj grani. Nezavisno od toga, agent 'Claims Flow' ima svoj call_agent node čiji je targetAgentId == rms-B, sa 3 COMPLETED izvršavanja u toj drugoj, potpuno odvojenoj grani. Nijedan od dva agenta nema zajedničkog pozivaoca sa drugim — oba lanca su nezavisna i oba aktivno rade. Treba li ovaj klaster tretirati kao standardan duplikat-scenario i predložiti KEEP/DELETE plan koji ga svodi na jednog preživelog?",
+      "expected_output": "Ne. Ovo je eksplicitan edge case iz SKILL.md: 'Dve kopije obe aktivno pozivane od strane različitih lanaca → nisu pravi duplikati; NE brisati. Prijaviti divergenciju da korisnik odluči.' Iako rms-A i rms-B formalno čine klaster po imenu (Step 2, count ≥2), oba su nezavisno wired i aktivno korišćena u različitim flow lancima sa sopstvenim izvršavanjima — nijedan nije 'mrtva kopija'. Zato se ne predlaže KEEP/DELETE plan koji uklanja jednog od njih; umesto toga se korisniku eksplicitno prijavljuje da postoje dve nezavisno aktivne kopije istog imena, i traži se njegova odluka pre bilo kakve dalje akcije.",
+      "expectations": [
+        "Agent kaže da se klaster NE tretira kao standardan duplikat i da se NE predlaže brisanje ni rms-A ni rms-B",
+        "Agent imenuje ovo kao tačno taj edge case iz SKILL.md (dve kopije aktivno pozivane od različitih, nezavisnih lanaca)",
+        "Agent objašnjava da deljeno ime samo formira klaster (Step 2), ali stvarna nezavisna, aktivna upotreba oba agenta demantuje da su 'duplikati' u smislu za brisanje",
+        "Agent predlaže da se korisniku prijavi divergencija i zatraži odluka, umesto da agent sam bira survivor-a"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Tokom Step 2 (klasterovanje po imenu), agent 'Legacy Onboarding Bot' je jedini agent sa tim imenom u celom radnom prostoru (count = 1, singleton). Naknadna provera (as_get_agent / as_inspect_flow) pokazuje da nema definisan flow (hasFlow:false). Korisnik je samo rekao 'očisti duplikate agenata' — nije posebno tražio brisanje baš ovog agenta niti bilo kog konkretnog singletona. Da li 'Legacy Onboarding Bot' treba da uđe u KEEP/DELETE plan i da se predloži za brisanje?",
+      "expected_output": "Ne. Po Step 2, klaster mora imati count ≥2 da bi bio 'duplicate cluster' u opsegu ovog skilla — singletoni su van opsega. Agent sa hasFlow:false sme se SAMO označiti/pomenuti kao potencijalno napušten (possibly abandoned) u finalnom izveštaju (Step 8: 'Singletons flagged as possibly abandoned (NOT deleted)') — ne sme se uvrstiti u nijedan KEEP/DELETE plan niti obrisati na osnovu opšteg zahteva za dedup. Edge case 'korisnik želi da obriše singleton' dozvoljava brisanje singletona SAMO kada je to eksplicitno, posebno traženo za tog konkretnog agenta, i tada zahteva dodatnu re-konfirmaciju jer nema survivor-a — što ovde nije slučaj.",
+      "expectations": [
+        "Agent kaže da 'Legacy Onboarding Bot' ne ulazi u KEEP/DELETE plan i ne predlaže se za brisanje na osnovu ovog opšteg zahteva",
+        "Agent objašnjava da singletoni (count=1) nisu u opsegu dedup-klasterovanja (Step 2 traži count ≥2)",
+        "Agent navodi da se hasFlow:false agent samo pominje/flaguje kao 'possibly abandoned' u izveštaju (Step 8), ne briše",
+        "Agent pominje da bi brisanje singletona bilo dozvoljeno samo uz eksplicitan, poseban zahtev korisnika za tog konkretnog agenta, uz dodatnu re-konfirmaciju"
+      ]
+    }
+  ]
+}

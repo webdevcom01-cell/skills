@@ -1,0 +1,88 @@
+{
+  "skill_name": "soma-run",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Korisnik je poslao tačno jednu poruku: 'Pokreni soma-run, full pipeline — hoću da TI, HW i CR sve prođu.' Nije rekao ništa drugo, nije odgovorio ni na kakvo naknadno pitanje. Da li odmah pokrećeš pipeline_scope FULL i pozivaš TI, HW i CR redom, ili nešto drugo treba da se desi pre bilo kakvog agent poziva?",
+      "expected_output": "FULL se ne pokreće odmah. Po STEP 1 tabeli, eksplicitan zahtev za 'full pipeline'/'sve tri' mapira se na pipeline_scope='FULL', koji je označen kao 'blocked, requires confirmation'. Pravilo nalaže da se stane i postavi upozoravajuće pitanje (poruka koja objašnjava da bi FULL ponovo pozvao HW i CR koje je TI već pozvao server-side — HW dvaput, CR triput — sa referencom na odluku od 2026-06-19) i da se predloži scope TI. Nastavak sa traženim scope-om dozvoljen je 'only on an explicit da/yes'. Pošto korisnik u ovoj jedinoj poruci nije dao takvu eksplicitnu potvrdu (samo je izrazio želju, nije odgovorio na upit), agent ne sme pozvati nijednog agenta u FULL modu. Gate je fail-closed: silence/ambiguity/no answer → run 'TI'.",
+      "expectations": [
+        "Agent kaže da se FULL scope NE pokreće odmah, bez obzira što ga je korisnik eksplicitno tražio",
+        "Agent navodi da mora prvo postaviti upozoravajuće pitanje/potvrdu pre bilo kog poziva TI/HW/CR",
+        "Agent objašnjava da FULL izvršava HW dvaput i CR triput kao razlog za blokadu",
+        "Agent eksplicitno kaže da je gate fail-closed — potrebna je eksplicitna 'da'/'yes' potvrda, u suprotnom default je scope 'TI'",
+        "Agent ne tretira samu formulaciju zahteva ('full pipeline') kao dovoljnu potvrdu za pokretanje"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Korisnik traži: 'soma run — Anthropic je danas objavio nov model, 30% brže na benchmarku.' Ne pominje nijednu reč o scope-u (nema TI, HW, FULL ni CR u poruci). Koji pipeline_scope treba postaviti, i šta će tačno pisati u sekcijama za HW i CR u finalnom izveštaju ovog poziva skilla?",
+      "expected_output": "pipeline_scope = 'TI' — po STEP 1 tabeli, kada scope nije naveden default je uvek 'TI', jer TI interno poziva HW koji poziva CR server-side (auto-chain conflict), pa scope TI sam po sebi već proizvodi kompletan lanac. Međutim, u ovom pozivu skilla, STEP 5 (HW) i STEP 6 (CR) se eksplicitno preskaču ('Skip if pipeline_scope == \"TI\"'), STEP 4f (quality gate) se takođe preskače ('no HW run means no handoff needed'). Finalni izveštaj (STEP 9) će zato prikazati 'TI Quality → N/A (scope=TI)', HW → ⏭️ SKIPPED i CR → ⏭️ SKIPPED. Evo-logovi za HW i CR (STEP 7c/7d) i winners-log (STEP 8) se takođe preskaču jer su svi gated na 'HW was not run'. Agent mora jednom, u finalnom izveštaju, uključiti informativnu napomenu da je pokrenut scope TI i da je lanac ipak kompletan (server-side), uz upozorenje da bi FULL izvršio HW dvaput a CR triput.",
+      "expectations": [
+        "Agent postavlja pipeline_scope='TI' jer korisnik nije naveo scope",
+        "Agent kaže da će HW i CR sekcije u izveštaju biti SKIPPED, a TI Quality 'N/A (scope=TI)', a ne da će sadržati stvarne HW/CR podatke",
+        "Agent objašnjava da se STEP 5, STEP 6 i STEP 4f ovog poziva skilla eksplicitno preskaču kada je scope 'TI'",
+        "Agent navodi da HW evo-log, CR evo-log i winners-log neće biti upisani u ovom pozivu (gated na 'HW was not run')",
+        "Agent pominje jednokratnu informativnu poruku o tome da TI interno zove HW i CR pa je server-side lanac ipak kompletan"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Poslat je tačno jedan as_chat_with_agent poziv ka Trend Intelligence sa timeout_seconds=300. Nakon otprilike 60 sekundi alat vraća timeout grešku i nikakav odgovor nije primljen. Šta radiš u narednih nekoliko minuta, i šta izričito NE smeš da uradiš?",
+      "expected_output": "Timeout na ~60s je očekivan, ne predstavlja neuspeh runa — client transport cap je 60s dok server-side run traje 68-113s i nastavlja normalno. Pravilo iz STEP 4c je eksplicitno: kada dođe timeout, NE šalje se poruka ponovo ('do NOT send the message again — a second send is a second full chain'). Umesto toga: sačekati ~120s, zatim pozvati as_get_recent_executions(agent_name: 'Trend Intelligence', limit: 3), naći execution čiji je startedAt posle {exec_before} zabeleženog pre slanja, i sačekati da status izađe iz RUNNING. Ako se pojavi više od jednog novog execution-a, zadržati samo najraniji i ostale označiti DISCARD (retry gubi URL iz poruke — dokumentovano merenje 2026-07-29 gde su dva zahteva proizvela šest TI runova).",
+      "expectations": [
+        "Agent kaže da timeout NIJE failure i da run verovatno i dalje radi server-side",
+        "Agent eksplicitno kaže da se poruka NE sme ponovo poslati",
+        "Agent navodi čekanje od otprilike 120 sekundi pre poll-ovanja",
+        "Agent navodi as_get_recent_executions kao mehanizam provere, upoređujući startedAt sa {exec_before}",
+        "Agent pominje da bi ponovno slanje pokrenulo drugi kompletan server-side lanac (retry storm rizik)",
+        "Ako agent pomene da se pojavi više novih execution-a, kaže da treba zadržati najraniji i ostale označiti DISCARD"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "TI je vratio veoma dugačak output (nekoliko hiljada karaktera analize). Iz njega su izvučeni {ti_trend}, {ti_confidence} i {ti_angle}, quality_score je 1.0 (PASS). Da bi poruka ka Hook Writer-u bila kraća i preglednija, planira se da mu se pošalje samo strukturisani header (TREND/CONFIDENCE/ANGLE/PLATFORM_HINT/AUDIENCE_HINT/TIMING) bez celog originalnog TI outputa, pošto su ključni podaci već izvučeni u header. Da li je ovo ispravan pristup za {ti_handoff}?",
+      "expected_output": "Ne — ovo direktno krši eksplicitno navedeno hard pravilo: '{ti_handoff} must contain the complete {ti_output} verbatim in the <<SOMA_CONTEXT_START>> block — never send only the header.' Handoff mora sadržati I strukturisani header I kompletan verbatim {ti_output} između <<SOMA_CONTEXT_START>> i <<SOMA_HANDOFF_END>>, bez obzira na dužinu — STEP 4g dodatno naglašava 'Never truncate or summarize.' Skraćivanje radi preglednosti nije dozvoljeno ni kada su svi ključni podaci već izvučeni u header, jer HW i dalje treba pun kontekst iz <<SOMA_CONTEXT_START>> bloka.",
+      "expectations": [
+        "Agent kaže da NE treba slati samo header, bez obzira na razlog (dužina, preglednost, već izvučeni podaci)",
+        "Agent citira ili parafrazira hard pravilo da handoff mora sadržati kompletan verbatim ti_output u <<SOMA_CONTEXT_START>> bloku",
+        "Agent kaže da se {ti_output} ne sme skraćivati ni sumirati bez obzira na dužinu",
+        "Agent pominje da handoff mora imati oba dela: strukturisani header ISPRED i pun tekst u <<SOMA_CONTEXT_START>>...<<SOMA_HANDOFF_END>> bloku"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Iz TI outputa izvučeno je sledeće: {ti_trend} = 'GPT-5.5 Turbo najavljen' (dovoljno dugačko, neprazno). {ti_confidence} = 'srednji nivo pouzdanosti prema izvoru' — tekst ne sadrži nijedan ⭐ simbol. {ti_angle} = 'Za dev' (6 karaktera). Izračunaj quality_score po formuli iz skilla, odredi status (PASS/WARN/ABORT), i reci da li pipeline nastavlja ka HW i u kom obliku.",
+      "expected_output": "topic_present = True (ti_trend neprazan i len>5). confidence_present = False (nema ⭐). angle_present = False (6 karaktera, nije >10). quality_score = (1+0+0)/3 = 0.333... što zadovoljava prag '≥0.33' → status WARN: missing [confidence, angle] — NE ABORT, jer ABORT je striktno rezervisan za quality_score=0.0. Prema odluci logici iz STEP 4f, WARN znači 'proceed to 4g with \"not found\" for missing elements' — pipeline se NE zaustavlja. U {ti_handoff} CONFIDENCE i ANGLE polja treba popuniti sa 'not found', dok TREND ostaje realna izvučena vrednost.",
+      "expectations": [
+        "Agent tačno računa quality_score = 1/3 ≈ 0.33 (jedan od tri elementa prisutan)",
+        "Agent klasifikuje status kao WARN, ne kao ABORT i ne kao PASS",
+        "Agent eksplicitno kaže da pipeline NASTAVLJA ka HW uprkos WARN statusu, ne zaustavlja se",
+        "Agent kaže da nedostajući elementi (confidence, angle) dobijaju oznaku 'not found' u handoff-u umesto stvarne vrednosti",
+        "Agent ne meša ovaj slučaj sa ABORT granom, koja važi samo kada je quality_score tačno 0.0"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "HW output sadrži skorove: LI:19 X:17 YT:16 IG:17 TT:14. Pobednička platforma (najviši skor) je LinkedIn sa 19/20. Koliko unosa treba upisati u winners-log za ovaj run, i za koje tačno platforme?",
+      "expected_output": "Tri unosa — za LinkedIn (19), X (17) i Instagram (17). Constraints Summary eksplicitno kaže: 'Winners threshold | Score ≥ 17/20 per platform — not just the overall winner', a STEP 8a ponavlja 'For each platform in {hw_scores}: If score ≥ 17 → this platform qualifies.' Svaka platforma se proverava nezavisno prema pragu 17, ne samo ona sa najvišim skorom. YouTube (16) i TikTok (14) su ispod praga i ne upisuju se. Svaki kvalifikovan unos ide kao poseban red u formatu '{date} | {ti_trend} | {platform} | {hook_text} | {score}/20 | {hook_pattern}'.",
+      "expectations": [
+        "Agent kaže da treba upisati 3 unosa, ne samo 1 za overall winnera",
+        "Agent imenuje tačno LinkedIn, X i Instagram kao kvalifikovane platforme",
+        "Agent isključuje YouTube (16) i TikTok (14) jer su ispod praga 17",
+        "Agent eksplicitno pominje da se svaka platforma proverava nezavisno prema pragu ≥17, ne samo ukupni pobednik",
+        "Agent ne predlaže upisivanje samo jednog reda za LinkedIn kao pobednika"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "CR output ne sadrži nijedan LI:\\d+ X:\\d+ YT:\\d+ IG:\\d+ TT:\\d+ obrazac, pa je {cr_scores_raw} = 'UNSCORED'. Ceo CR output je pretražen i string 'quality_flags' se nigde ne pojavljuje — ni kao prazna lista, ni kao popunjena, ni u bilo kom obliku. Koji {cr_flag} treba postaviti, i da li se ovaj slučaj tretira isto kao kada CR vrati quality_flags: []?",
+      "expected_output": "{cr_flag} = 'WARN', i ovo NIJE isto što i slučaj quality_flags: []. Pravilo iz STEP 6e pravi jasnu razliku: ako je scores UNSCORED I quality_flags: [] pronađeno u CR outputu → flag 'none' (PASS signal — prazna lista = nema kršenja). Ali ako je UNSCORED I quality_flags NIJE pronađeno uopšte (ni prazna ni popunjena) → flag 'WARN' ('unable to determine pass/fail — manual review needed'). Odsustvo bilo kakvog pominjanja quality_flags nije dokaz čistog prolaza i ne sme se protumačiti kao 'none'.",
+      "expectations": [
+        "Agent postavlja {cr_flag} = 'WARN', ne 'none'",
+        "Agent eksplicitno razlikuje 'quality_flags: [] pronađeno u outputu' (→ none) od 'quality_flags string uopšte nije pronađen' (→ WARN)",
+        "Agent kaže da WARN znači 'nemoguće utvrditi pass/fail, potreban ručni pregled', ne kaže da je run automatski čist",
+        "Agent ne tretira odsustvo teksta 'quality_flags' kao ekvivalent eksplicitnoj praznoj listi"
+      ]
+    }
+  ]
+}

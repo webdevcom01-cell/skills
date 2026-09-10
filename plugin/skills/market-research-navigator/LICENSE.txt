@@ -1,0 +1,19 @@
+Copyright (c) 2026 buky <webdevcom01@gmail.com>
+
+All rights reserved.
+
+This skill and its bundled reference files are proprietary. No licence, express or
+implied, is granted to copy, modify, distribute, sublicense or make derivative works
+of any part of it, except with the prior written permission of the copyright holder.
+
+Permission is granted to the copyright holder's own installations of Claude and
+Claude Code to load, read and execute this skill for the copyright holder's own use.
+
+THE SKILL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SKILL OR ITS USE.
+
+Market and financial figures produced by this skill are research estimates, not
+advice. Verify every figure against its cited primary source before relying on it.

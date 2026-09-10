@@ -1,0 +1,73 @@
+{
+  "skill_name": "soma-score-analyzer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Skoriraš CR run za trend 'AI agenti u 2026'. Rubrika je uredno učitana iz HW KB. Skorovi po platformi ispadnu: LinkedIn 17/20, X 19/20, YouTube 16/20, Instagram 14/20, TikTok 17/20. Pobednička platforma po najvišem skoru je X (19/20). Koje platforme treba upisati u winners-log i zašto?",
+      "expected_output": "Winners-log prag je EKSPLICITNO per-platform ≥17/20 (Hard rule 3 u SKILL.md), a ne 'samo overall pobednik'. Zato tri platforme kvalifikuju za winners-log — LinkedIn (17), X (19) i TikTok (17) — svaka kao svoj red u winners-log-u, dok YouTube (16) i Instagram (14) ne kvalifikuju jer su ispod praga. Prag je inkluzivan (≥, ne >), pa tačno 17 broji kao pogodak. Pisanje samo jednog reda za X (jer je 'pobednik') bilo bi pogrešno.",
+      "expectations": [
+        "Agent identifikuje LinkedIn, X i TikTok kao platforme koje kvalifikuju za winners-log (sve su ≥17/20)",
+        "Agent eksplicitno kaže da je prag ≥17/20 po platformi, nezavisan od toga koja je platforma 'overall' pobednik",
+        "Agent isključuje YouTube (16) i Instagram (14) uz obrazloženje da su ispod praga od 17",
+        "Agent NE predlaže upis samo jednog winners-log reda (za X kao pobednika) umesto tri odvojena reda",
+        "Agent tretira 17 kao granični slučaj koji ipak kvalifikuje (prag je ≥17, ne >17)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Treba da skoriraš CR output. Pokušaš da sastaviš scoring rubriku iz Hook Writer knowledge baze — pokreneš sve tri preporučene pretrage (scoring dimenzije, gate/banned phrases, DESIGN_SPEC scoring), ali sve tri vrate prazne ili potpuno nekorisne rezultate — ništa što liči na dimenzije bodovanja ili poene. Šta radiš dalje: da li skoriraš na osnovu opšteg znanja o tome šta čini dobar hook, ili nešto drugo?",
+      "expected_output": "Hard rule 1 ('Never invent the rubric') nalaže STOP kad rubrika ne može da se sastavi iz KB — skill eksplicitno zabranjuje pad na opšte znanje ili pogađanje. Ispravna reakcija je da se korisniku javi tačno definisana poruka (STOP poruka iz Step 1) i traže dimenzije/bodovi od korisnika, ili da korisnik doda jasnu rubriku u HW KB (as_add_kb_text) — jer izmišljena rubrika tiho korumpira ceo downstream learning loop (winners-log, evolution advisor).",
+      "expectations": [
+        "Agent eksplicitno odbija da skorira na osnovu opšteg/pretpostavljenog znanja o dobrim hookovima",
+        "Agent zaustavlja proces i traži od korisnika da navede dimenzije i bodove, ili da doda rubriku u KB",
+        "Agent pominje da izmišljena/pogađena rubrika korumpira downstream učenje (winners-log / evolution advisor)",
+        "Agent ne prelazi na Step 2 (prikupljanje sadržaja) ili Step 3 (skorovanje) pre nego što je rubrika rešena"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "CR run za trend 'Local LLM hosting' vratio je postove samo za LinkedIn, X, YouTube i Instagram — TikTok post nedostaje u izlazu (Content Repurposer ga uopšte nije generisao). Rubrika je uredno učitana. Kako treba da postupiš sa TikTok platformom pri skorovanju, i da li TikTok može da uđe u winners-log?",
+      "expected_output": "Hard rule 2 ('Score only real content') zahteva da se TikTok označi kao MISSING, a ne da mu se proceni/pogodi skor — svaki skor mora da se prati do stvarnog teksta u CR/HW izlazu. Pošto TikTok nema numerički skor, on automatski ne može da zadovolji prag ≥17/20 iz Step 6, pa se isključuje iz winners-log-a — ne zato što je 'loš', nego zato što nema šta da se skorira. Ostale četiri platforme (LI, X, YT, IG) se skoriraju normalno i nezavisno proveravaju protiv praga.",
+      "expectations": [
+        "Agent označava TikTok kao MISSING umesto da mu dodeli procenjeni/izmišljeni broj",
+        "Agent eksplicitno navodi da svaki skor mora da se prati do stvarnog teksta u CR/HW izlazu",
+        "Agent isključuje TikTok iz winners-log-a uz obrazloženje da nema skor za poređenje sa pragom, a ne prećutno ga ignoriše",
+        "Agent i dalje skorira preostale četiri platforme (LinkedIn, X, YouTube, Instagram) nezavisno od TikTok-a"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "HW evo-log već ima liniju za trend 'Voice AI startups' sa vrednošću UNSCORED za taj datum. Upravo si završio skorovanje tog istog run-a i imaš prave brojeve. Korisnik ti nije rekao ništa posebno o načinu upisa — samo je tražio da skoriraš i upišeš rezultat u evo-log. Kako treba da upišeš novu, skorovanu liniju?",
+      "expected_output": "Hard rule 5 ('Append, never overwrite') i Step 5b kažu da je DEFAULT ponašanje append, ne overwrite — obsidian_update_note u append modu ne može da izmeni postojeću liniju, pa se dodaje NOVA skorovana linija čije notes/flags polje glasi 'supersedes UNSCORED entry {date}'; stara UNSCORED linija ostaje netaknuta u istoriji, a najnovija linija je merodavna. Prepisivanje cele beleške (mode:'replace') dozvoljeno je SAMO ako korisnik eksplicitno traži da se istorija prepiše — što ovde nije slučaj.",
+      "expectations": [
+        "Agent dodaje (append) novu liniju umesto da briše ili prepisuje staru UNSCORED liniju",
+        "Nova linija sadrži referencu tipa 'supersedes UNSCORED entry {date}' u notes/flags polju",
+        "Agent NE koristi mode:'replace' bez eksplicitnog zahteva korisnika da se istorija prepiše",
+        "Agent objašnjava da append mod ne može da izmeni postojeću liniju, što je razlog zašto je supersede-by-append podrazumevano ponašanje"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Korisnik je eksplicitno tražio da prepišeš staru UNSCORED liniju u CR evo-log-u umesto da dodaješ novu (želi 'čistu' istoriju bez duplih linija). Kad pozoveš obsidian_read_note na taj evo-log fajl sa podrazumevanim parametrima, dobiješ 300 linija sadržaja, has_more:true, total_lines:640. Koji koraci su obavezni pre nego što uopšte pozoveš obsidian_update_note sa mode:'replace'?",
+      "expected_output": "Step 5b eksplicitno kaže da 'read the whole note' nije jedan poziv: prvi read sa podrazumevanim parametrima vraća samo prvu stranicu (limit 300, has_more:true), pa je obavezno: (1) pozvati sa line_offset=0, line_limit=500; (2) dok je has_more==true, ponavljati pozive sa line_offset=next_line_offset i nadovezivati svaki body; (3) proveriti da sabran broj linija odgovara total_lines (640) — ako ne odgovara, STATI i ne pisati; (4) sačuvati sabran originalni sadržaj u sestrinsku belešku (npr. <path>.bak) pre pisanja, kako bi loš replace bio oporavljiv; i na kraju potvrditi diff sa korisnikom pre pisanja. Pisanje replace-a na osnovu samo prve stranice od 300 linija bi uništilo ostatak beleške.",
+      "expectations": [
+        "Agent prepoznaje da je prvi read od 300 linija nepotpun (has_more:true) i nastavlja paginaciju koristeći next_line_offset dok has_more ne postane false",
+        "Agent proverava da sabran broj linija odgovara total_lines (640) pre nego što nastavi, i eksplicitno kaže da bi stao ako se brojevi ne poklapaju",
+        "Agent pravi backup (sestrinsku belešku, npr. <path>.bak) sa punim sabranim originalnim sadržajem pre poziva replace",
+        "Agent potvrđuje diff sa korisnikom pre samog pisanja",
+        "Agent NE poziva mode:'replace' koristeći samo prvih 300 linija"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Skoriraš CR output za trend 'Edge AI chips'. Kad pogledaš svih pet platform postova, hook linija (prva rečenica/red) je bukvalno identična reč-za-reč na LinkedIn, X, YouTube, Instagram i TikTok postu — izgleda da je Content Repurposer prosto kopirao isti hook svuda umesto da ga prilagodi po platformi. Skorovi po dimenzijama ipak blago variraju (LI 17, X 18, YT 16, IG 17, TT 18) jer ostatak posta zavisi od platforme. Šta radiš sa flags poljem, i da li ovi skorovi i dalje idu u winners-log?",
+      "expected_output": "Step 4 eksplicitno definiše: kad su sve pet platformi identičan hook tekst → flag = SINGLE_HOOK_BUG. Ovaj flag se upisuje u {flags} i mora se pojaviti i u evo-log linijama (5a/5c) i u finalnom Step 7 izveštaju — ne sme se prijaviti 'none'. Flag je nezavisan mehanizam od numeričkog praga za winners-log: SKILL.md ne kaže da SINGLE_HOOK_BUG blokira upis u winners-log, pa se pravilo ≥17/20 po platformi (Hard rule 3) i dalje primenjuje nezavisno — LI (17), X (18), IG (17) i TT (18) kvalifikuju, YT (16) ne kvalifikuje — dok se bug odvojeno flaguje kao vidljiv problem koji treba rešiti uzvodno.",
+      "expectations": [
+        "Agent postavlja flags na SINGLE_HOOK_BUG jer je hook tekst identičan na svih pet platformi",
+        "Agent upisuje taj flag i u evo-log linije i u finalni izveštaj (Step 7), a ne samo pominje uzgred",
+        "Agent NE prijavljuje flags kao 'none' uprkos identičnim hook tekstovima",
+        "Agent i dalje primenjuje nezavisno pravilo ≥17/20 po platformi za winners-log (LI, X, IG, TT kvalifikuju; YT ne), umesto da meša flag i numerički prag u jedno pravilo"
+      ]
+    }
+  ]
+}

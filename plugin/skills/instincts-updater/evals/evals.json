@@ -1,0 +1,71 @@
+{
+  "skill_name": "instincts-updater",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Agent 'Hook Writer' ima evo-log sa tačno 2 unosa: 2026-04-01 (čist, bez flag-a) i 2026-04-03 (sadrži QUALITY_VIOLATION: 'iskorišćena zabranjena fraza change the game'). Da li treba analizirati ovaj evo-log za obrasce i predložiti instinkt na osnovu flagovanog unosa od 2026-04-03?",
+      "expected_output": "Ne. Agent ima samo 2 unosa, što je ispod minimalnog praga od 3 unosa iz STEP 2a ('An agent with fewer than 3 entries in its evo-log is below the analysis threshold'). Analiza obrazaca i flagova se ne izvodi za ovog agenta u ovoj rundi — treba ga preskočiti i zabeležiti napomenu u formatu 'Skipped — 2 entries, need ≥3 before pattern extraction.' Ne sme se predložiti nijedan instinkt, bez obzira što jedan od dva unosa sadrži flag, jer provera broja unosa ima prioritet nad bilo kakvom analizom flagova/obrazaca.",
+      "expectations": [
+        "Zaključuje da agent treba biti preskočen jer 2 < 3 (minimalni prag iz STEP 2a)",
+        "Navodi da napomena o preskakanju treba biti oblika 'Skipped — N entries, need ≥3 before pattern extraction' ili ekvivalentno",
+        "Ne predlaže nijedan instinkt uprkos prisustvu flagovanog unosa od 2026-04-03",
+        "Objašnjava da prag broja unosa mora biti proveren pre bilo kakve analize sadržaja flagova, ne posle"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "U evo-logu agenta Trend Intelligence postoji 5 unosa. Tačno jedan od njih, datiran 2026-03-10, sadrži flag: '⚠️ FLAG: fabricated a growth percentage not present in source data.' Nijedan drugi unos ne deli isti uzrok (root cause). Kolega tvrdi: 'Pošto STEP 4d kaže da confidence za pojedinačnu pojavu (occurrences=1) ne sme preći 0.5, možemo predložiti instinkt sa confidence=0.5 i oznakom TENTATIVE.' Da li je ovo ispravno prema pravilima instincts-updater skilla?",
+      "expected_output": "Ne, tvrdnja kolege je pogrešna. Prema STEP 4a, pojedinačna pojava (single occurrence) je 'one-off' — uključuje se u izveštaj, ali se za nju NE predlaže instinkt jer nema dovoljno signala. Guard od 0.5 u STEP 4d je eksplicitno opisan kao 'a safety net for edge cases' — bezbednosna mreža za granične slučajeve, a ne dozvola da se ipak napravi predlog na osnovu jedne pojave ('Single-occurrence patterns are informational only — they do not generate proposals anyway'). Anti-hallucination pravilo #2 to potvrđuje: 'Never infer patterns from a single occurrence. A single flagged entry is informational only — not enough for an instinct.' Ispravna radnja: zabeležiti flagovani unos u izveštaju kao informativan, bez izračunavanja confidence score-a i bez predloga instinkta.",
+      "expectations": [
+        "Prepoznaje da jedna pojava (occurrences=1) predstavlja 'one-off' i da se za nju NE generiše predlog instinkta (STEP 4a)",
+        "Objašnjava da je guard od 0.5 u STEP 4d samo sigurnosna mreža za granične slučajeve, a ne dozvola za predlaganje instinkta na osnovu jedne pojave",
+        "Poziva se na anti-hallucination pravilo #2 (pojedinačan flag je isključivo informativan, nedovoljan za instinkt)",
+        "Zaključuje da se za ovaj slučaj ne izračunava confidence score niti pravi ikakav predlog instinkta"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "U evo-logu agenta Hook Writer isti uzrok — 'double-called the auto-chain to Content Repurposer' — pojavljuje se u tačno 2 flagovana unosa (2026-02-01 i 2026-02-15). Nakon poslednjeg flagovanog unosa (2026-02-15), zabeleženo je 18 čistih (neflagovanih) run-ova za tog agenta pre kraja posmatranog perioda. Prema formuli iz STEP 4d, koji confidence score i koju oznaku (label) treba dodeliti ovom obrascu, i da li obrazac uopšte kvalifikuje za predlog instinkta?",
+      "expected_output": "occurrences=2, clean_after=18. Sirova vrednost = occurrences/(occurrences+clean_after) = 2/20 = 0.1. Formula zahteva confidence = max(0.3, min(0.9, round(0.1,1))) = max(0.3, 0.1) = 0.3 — donji prag (floor) podiže vrednost na 0.3. Dakle confidence = 0.3, oznaka TENTATIVE, emoji ⚪ (opseg 0.3–0.4 iz tabele u STEP 4d). Pošto occurrences=2 ≥ 2, ovo JE 'recurring pattern' po STEP 4a, pa predlog instinkta jeste opravdan (za razliku od slučaja sa samo jednom pojavom).",
+      "expectations": [
+        "Izračunava sirovi odnos kao 2/(2+18) = 0.1",
+        "Eksplicitno primenjuje donji prag (floor) max(0.3, ...) i dolazi do finalne vrednosti confidence = 0.3, a ne 0.1",
+        "Dodeljuje oznaku TENTATIVE sa ⚪ emojijem prema tabeli confidence interpretacije (opseg 0.3–0.4)",
+        "Prepoznaje da obrazac ISPUNJAVA uslov za predlog instinkta jer occurrences=2 ≥ 2 (STEP 4a), za razliku od pojedinačne pojave"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Isti uzrok — 'fabricated a statistic not present in source data' — pojavljuje se kao rekurentan obrazac (≥2 pojave svaki) i u Trend Intelligence i u Content Repurposer evo-logovima. U Hook Writer evo-logu isti uzrok se takođe pojavljuje, ali samo JEDNOM (pojedinačna pojava). Nijedan drugi agent ne pokazuje ovaj uzrok. Da li ovaj obrazac treba promovisati u globalni instinkt (upisati u shared/global-instincts.md), pored (ne umesto) instinkata po pojedinačnim agentima?",
+      "expected_output": "Ne, obrazac ne treba globalno promovisati. STEP 4b zahteva da se isti root cause pojavi u ≥3 agenta SA ≥2 pojave U SVAKOM od njih — dva nezavisna uslova koja moraju biti ispunjena istovremeno ('If the same root cause appears in ≥3 agents with ≥2 occurrences each'). Ovde samo 2 agenta (Trend Intelligence i Content Repurposer) ispunjavaju prag od ≥2 pojave; Hook Writer ima samo 1 pojavu, što po STEP 4a ne kvalifikuje ni za predlog na nivou samog tog agenta (informativno je, one-off). Ukupno kvalifikuju samo 2 agenta, ne 3 — uslov za globalnu promociju NIJE ispunjen. Ispravna radnja: predložiti instinkte za Trend Intelligence i Content Repurposer pojedinačno (svaki nezavisno ispunjava rekurentni prag), dok Hook Writer-ova pojedinačna pojava ostaje samo informativna — bez predloga i bez upisa u shared/global-instincts.md.",
+      "expectations": [
+        "Prepoznaje da STEP 4b zahteva DVA nezavisna uslova istovremeno: ≥3 agenta I ≥2 pojave unutar svakog od tih agenata",
+        "Ispravno broji da samo 2 agenta (Trend Intelligence, Content Repurposer) ispunjavaju prag od ≥2 pojave, jer Hook Writer-ova 1 pojava ne dostiže taj prag",
+        "Zaključuje da NE treba pisati u shared/global-instincts.md jer uslov ≥3 agenta nije ispunjen",
+        "Navodi da instinkti za Trend Intelligence i Content Repurposer ipak treba da budu predloženi pojedinačno, dok se Hook Writer-ova pojava ne predlaže"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Winners-log agenta Hook Writer ima 25 validnih unosa (nakon filtriranja unosa čija P-code kolona sadrži tekst '[not ...]', npr. '[not preserved]') raspoređenih kroz 6 odvojenih run-ova. P-code 'P4' se pojavljuje kao pobednički tip hook-a u samo 2 od tih 25 validnih unosa (8%). Nijedan flagovani unos u Hook Writer evo-logu ne pominje P4 niti objašnjava zašto se retko koristi. Prema STEP 3b, šta instincts-updater treba da uradi u vezi sa P4?",
+      "expected_output": "Oba numerička uslova iz STEP 3b su ispunjena: frekvencija P4 je 8%, što je ispod praga od 20%, I broj run-ova je 6, što je ≥5 ('A P-code that appears in fewer than 20% of valid entries across ≥5 runs may indicate the agent is underutilizing that pattern'). Ovo znači da P4 kvalifikuje za napomenu o mogućem underutilization-u — ALI, prema eksplicitnom izuzetku u istom pravilu, ispunjavanje oba uslova samo po sebi NIJE dovoljno da se automatski predloži instinkt ('note this for the user but do not auto-propose an instinct — not enough signal unless there's also a flagged entry explaining why'). Pošto ovde ne postoji prateći flagovani unos koji objašnjava nisko korišćenje P4, instinkt se NE predlaže. Ispravna radnja: zabeležiti napomenu za korisnika o niskom korišćenju P4 (8% kroz 6 run-ova), bez predloga instinkta.",
+      "expectations": [
+        "Potvrđuje da su oba numerička uslova STEP 3b ispunjena: frekvencija <20% (8%) i broj run-ova ≥5 (6)",
+        "Objašnjava da ispunjavanje oba uslova samo pokreće napomenu za korisnika, a ne automatski predlog instinkta",
+        "Ispravno primenjuje izuzetak: predlog bi bio opravdan samo UZ prateći flagovani unos koji objašnjava uzrok, a takav unos ovde ne postoji",
+        "Zaključuje: napomena u izveštaju da, predlog instinkta ne"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "U evo-logu agenta Score Analyzer identifikovan je rekurentan obrazac (3 pojave, isti uzrok) sa tekstom flaga: 'the retry counter reset unexpectedly after a network timeout mid-run.' Nijedna ključna reč iz domain taksonomije u STEP 4e (za tagove tone, sourcing, format, orchestration, scoring, input-handling) ne pojavljuje se u ovom tekstu. Korisnik pregleda predlog instinkta, ali ne odgovara na pitanje o domenu — pređe na druge teme bez biranja taga. Šta instincts-updater treba da uradi?",
+      "expected_output": "Pošto nijedna ključna reč iz taksonomije ne odgovara tekstu flaga, prema STEP 4e Step 3 domen se klasifikuje kao UNKNOWN — ne sme se pogađati ili nagađati tag ('Do NOT guess. Surface to user in STEP 6 for manual selection'). Sistem mora prikazati korisniku 'Domain: [UNKNOWN — please select: tone | sourcing | format | orchestration | scoring | input-handling | cross-agent]' i, prema edge case sekciji, eksplicitno ponovo pitati korisnika da izabere tag pre upisa ('Before writing, ask once more'). Pošto korisnik nije odgovorio niti izabrao tag, instinkt se NE SME upisati u vault sa 'domain: UNKNOWN' ni pod kojim uslovima — ovo pravilo se ponavlja na više mesta u skillu (STEP 4e, STEP 6, STEP 7e, anti-hallucination pravilo #10, edge case sekcija). Predlog treba označiti u finalnom rezimeu kao 'Skipped — domain not resolved.'",
+      "expectations": [
+        "Potvrđuje da nijedan od 6 tagova iz taksonomije ne odgovara tekstu flaga, pa se domen mora klasifikovati kao UNKNOWN, a ne pogađati",
+        "Navodi da se instinkt ne sme upisati u vault sa 'domain: UNKNOWN' ni pod kojim okolnostima",
+        "Opisuje ispravnu proceduru: eksplicitno ponovo pitati korisnika da izabere tag pre upisa, po edge case sekciji",
+        "Pošto korisnik nije odgovorio, zaključuje da se predlog označava kao 'Skipped — domain not resolved' u finalnom rezimeu, ne upisuje se bez taga niti se tiho odbacuje"
+      ]
+    }
+  ]
+}

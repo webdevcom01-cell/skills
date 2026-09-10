@@ -1,0 +1,71 @@
+{
+  "skill_name": "soma-agent-debugger",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Debagujem agenta po imenu 'TrendScout'. Zastareo audit dokument iz prošlog meseca tvrdi da sistem prompt tog agenta sadrži instrukciju: 'Uvek dodaj disclaimer X na kraju svakog outputa.' Upravo sam pozvao as_get_agent na live agentu i vraćeni sistem prompt NIGDE ne sadrži tu disclaimer instrukciju — očigledno je uklonjena u nekom trenutku, a audit dokument nije ažuriran. Koji izvor tretiraš kao istinu za investigaciju, i šta se dešava sa tvrdnjom iz audita?",
+      "expected_output": "Live state (as_get_agent output) je izvor istine, ne audit — po Hard Rule #3 ('Live state IS source of truth') i Forensic Protocol koraku 3 ('Cross-reference svaki raniji nalaz sa live state-om. Ako se ne slažu — live je istina, a vault ide na listu za ispravku, ne u dokaze'). Tvrdnja iz audita se NE uvodi u Evidence sekciju investigacionog izveštaja kao činjenica — ide na listu 'za ispravku' (vault fix kandidat).",
+      "expectations": [
+        "Agent eksplicitno kaže da live state (as_get_agent) ima prednost nad audit dokumentom",
+        "Agent NE uvodi tvrdnju iz audita kao dokaz (evidence) u investigaciju",
+        "Agent označava sam audit dokument kao nešto što treba ispraviti (vault fix), ne kao validan nalaz",
+        "Agent se poziva na Hard Rule #3 i/ili Forensic Protocol cross-reference korak"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Upravo sam završio Investigation Report za agenta 'Hook Writer 2' — uključuje root cause, dokaze sa file:line citatima, i odbačene hipoteze. Još uvek ti nisam rekao da li se slažem sa zaključkom o root cause-u. Da li sada treba direktno da preskočiš na generisanje Mode 2 fix plana i Claude Code prompta, ili ti nešto treba od mene pre toga?",
+      "expected_output": "Ne — mora da se ČEKA eksplicitna potvrda korisnika o root cause-u pre prelaska na Mode 2 (Plan Fix). Ovo je eksplicitan STOP point na kraju Mode 1: 'Ne idi na fix bez korisnikove potvrde root cause-a.'",
+      "expectations": [
+        "Agent kaže da NE treba odmah da pređe na Plan Fix / Mode 2",
+        "Agent eksplicitno traži potvrdu root cause-a od korisnika pre nastavka",
+        "Agent se poziva na STOP point iz Mode 1 (potvrda root cause-a je uslov pre fix-a)",
+        "Agent ne pretpostavlja odobrenje samo zato što izveštaj 'izgleda kompletno' ili 'izgleda tačno'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Napravili smo Mode 3 quality-gate validator za node koji generiše sadržaj. Output objekat ima tri polja: title, body i hook. Validator-ova provera zabranjenih fraza radi samo new RegExp(phrase, 'i').test(input.title) — nikad ne proverava input.body ni input.hook. U test slučaju, zabranjena fraza se pojavljuje ISKLJUČIVO unutar input.hook (title i body su čisti). Da li ovaj validator ispravno hvata taj prekršaj? Šta je tačno ili netačno ovde po pravilima skilla?",
+      "expected_output": "Validator je NETAČAN/nekompletan. Po Critical lessons pravilu iz Mode 3, match pool mora da kombinuje SVA relevantna polja (title + body + hook), ne samo jedno — provera nad jednim poljem daje false positive/negative. Pošto je zabranjena fraza samo u input.hook, ovaj validator je NEĆE uhvatiti (false negative), što krši eksplicitno pravilo da match pool treba da bude npr. [input.title, input.body, input.hook].filter(Boolean).join(' ') pre regex provere.",
+      "expectations": [
+        "Agent identifikuje validator kao neispravan/nekompletan",
+        "Agent objašnjava da će nastati false negative (propušta prekršaj u hook polju)",
+        "Agent eksplicitno navodi pravilo da match pool mora da kombinuje SVA relevantna polja, ne samo jedno",
+        "Agent predlaže popravku: spojiti title+body+hook (ili ekvivalentno) pre regex provere"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Treba da promenim samo jedno polje na jednom node-u unutar flow-a agenta — samo 'temperature' vrednost na konkretnom LLM node-u, ništa drugo u flow-u ne sme da se promeni. Koji AgentStack MCP alat treba koristiti za ovo, i postoje li posebne mere predostrožnosti pre poziva?",
+      "expected_output": "Koristi se as_patch_node_field, NE as_update_flow, za izmenu jednog polja — as_update_flow zamenjuje CEO flow i nema undo, pa je pogrešan (rizičniji) alat za izmenu jednog polja. as_patch_node_field prima agent_id, agent_name, field_name, field_value, node_id; ako je nova temperature vrednost numerička (npr. 0.7), field_value se šalje kao običan broj, ne kao citirani JSON string. Ako bi zadatak stvarno zahtevao as_update_flow (npr. restruktuiranje više node-ova/edge-ova), mora se prvo pozvati dry_run pre pravog poziva, jer nema undo.",
+      "expectations": [
+        "Agent preporučuje as_patch_node_field, ne as_update_flow, za izmenu jednog polja",
+        "Agent objašnjava zašto: as_update_flow menja ceo flow i nema undo",
+        "Agent tačno navodi da se numerička vrednost šalje kao običan broj, ne kao citirani string, u field_value",
+        "Ako agent uopšte pominje as_update_flow, navodi da dry_run mora ići prvi"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Post-deploy smoke test rezultati za agenta su: Korak A (deploy correctness) = PASS, commit hash-evi se poklapaju. Korak B (baseline) = 120 zapisa pre testa. Korak C (pipeline run) = PASS, chain je završen. Korak D (DB verifikacija): nova entry JESTE kreirana, šema JE ispravna, ali postoji tačno jedan duplikat zapis među novim entry-jima (sve ostale provere prolaze). Kako ovo treba klasifikovati u celini, i koja je preporučena sledeća akcija?",
+      "expected_output": "Pošto ključni deploy i pipeline koraci prolaze, a otkazuje samo jedna konkretna provera unutar Koraka D (duplikat), ovo je 'Mali FAIL' — treba prijaviti kao ⚠️ WARN / rollback candidate, ne odmah kao urgent rollback. Ovo se razlikuje od 'Veliki FAIL' (npr. sam pipeline ne radi, nijedna entry nije kreirana, ili velika šema greška), što bi zahtevalo urgent rollback + debug. Izveštaj treba da označi proveru 'no duplicates' unutar Koraka D kao ❌, dok OVERALL ostaje WARN/rollback candidate, ne automatski pun FAIL/urgent rollback.",
+      "expectations": [
+        "Agent klasifikuje ukupan ishod kao WARN / 'rollback candidate' (Mali FAIL nivo), ne 'urgent rollback + debug' (Veliki FAIL nivo)",
+        "Agent objašnjava razliku između Mali FAIL i Veliki FAIL iz skillovog risk-assessment pravila",
+        "Agent i dalje označava konkretnu 'no duplicates' proveru kao FAIL/❌ unutar Koraka D, ne prelazi preko nje ćutke",
+        "Agent ne prijavljuje OVERALL kao čist ✅ PASS uprkos duplikatu"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Kolega želi pomoć da dizajnira potpuno novog AgentStack agenta od nule — nema postojećeg agenta, nema production problema, samo želi da mu se od specifikacije napravi sistem prompt i flow arhitektura za sasvim nov agent. Da li ovaj skill (debug/fix/deploy workflow skill) treba koristiti za ovaj zadatak, ili postoji drugi skill koji bolje odgovara?",
+      "expected_output": "Ne — ovaj skill eksplicitno isključuje dizajn novog agenta od nule ('Za design novog agenta (koristi agent-architect skill)' u sekciji 'Kada NE koristiti'). Dizajn potpuno novog agenta je van opsega; treba koristiti agent-architect skill umesto ovog.",
+      "expectations": [
+        "Agent kaže da ovaj skill NE treba koristiti za dizajn novog agenta od nule",
+        "Agent imenuje agent-architect kao ispravan skill za ovaj zadatak",
+        "Agent se poziva na eksplicitnu 'Kada NE koristiti' listu iz skilla",
+        "Agent ne pokušava da pokrene Investigate/Plan Fix/Build Validator/Verify Deploy mode za ovaj zadatak"
+      ]
+    }
+  ]
+}

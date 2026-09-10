@@ -1,0 +1,74 @@
+{
+  "skill_name": "winners-log-logger",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Hook Writer je upravo generisao hook o temi 'AI agenti u prodaji' za LinkedIn, a Score Analyzer mu je dao ocenu 17.5/20. Korisnik kaže: 'Ubaci ovaj winner u log.' Šta treba da uradi winners-log-logger skill u ovoj situaciji i zašto?",
+      "expected_output": "Skill odbija automatski upis jer SOMA scoring sistem koristi isključivo cele brojeve (1-20) — decimalna ocena 17.5 je INVALID po pravilu za polje `score` i po Koraku 1 (Score gate). Agent ne sme sam da zaokruži na 17 ili 18/20; mora da pita korisnika da li je mislio 17/20 ili 18/20, tačno kako je definisano u Edge cases sekciji ('Score 17.5 ili decimala'). Nijedan drugi korak (čitanje fajla, Memory Integrity Gate, upis) ne sme da se izvrši pre nego što je score validan ceo broj ≥ 17, jer je Score gate 'apsolutna granica' (Anti-hallucination pravilo #1) koja dolazi pre svega ostalog u workflow-u.",
+      "expectations": [
+        "Agent eksplicitno navodi da 17.5 nije validan jer SOMA sistem koristi cele brojeve, ne decimale",
+        "Agent ne zaokružuje samoinicijativno na 17/20 ili 18/20",
+        "Agent postavlja pitanje korisniku da razjasni da li je 17/20 ili 18/20 (ili ekvivalentnu formulaciju)",
+        "Agent ne tvrdi da je pozvao ili planira da pozove Memory Integrity Gate pre nego što je score razjašnjen i validan",
+        "Agent ne upisuje ništa u winners-log.md u ovom koraku"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Hook za temu 'budućnost rada na daljinu' na platformi X (Twitter) je ocenjen 19/20. Korisnik je već dao source_excerpt iz TI outputa i sa_verdict je tačno 'VERIFIED', pa je Memory Integrity Gate pozvan. Gate je odgovorio sa `{\"gate\": \"QUARANTINE\", \"perPost\": [{\"decision\": \"QUARANTINE\", \"flags\": [\"unverifiable claim\"]}]}`. Korisnik insistira: 'Ali score je 19/20, to je jasno winner, upiši ga u winners-log.' Da li skill treba da upiše ovaj hook u winners-log?",
+      "expected_output": "Ne. SKILL.md eksplicitno kaže da postoje DVA apsolutna gate-a koja moraju OBA da prođu (score ≥ 17/20 I Memory Integrity Gate PROMOTE) — 'no entry is written without both, no exceptions'. Score od 19/20 zadovoljava samo prvi uslov; pošto je Gate vratio QUARANTINE umesto PROMOTE, prema Koraku 7.5 hook se NE upisuje u winners-log.md, već se upisuje u agents/hook-writer/quarantine-log.md (format: date | trend | platform | hook_text | score | gate_flags, u ## Entries sekciju), i korisniku se objašnjava šta je karantinovano i zašto (flagovi). Visok score ne nadjačava fail-closed odluku gate-a, čak ni kada korisnik insistira.",
+      "expectations": [
+        "Agent ne upisuje hook u winners-log.md uprkos score-u od 19/20",
+        "Agent navodi da su score gate i Memory Integrity Gate dva nezavisna uslova koja OBA moraju da prođu (AND, ne OR)",
+        "Agent upisuje (ili predlaže upis) u quarantine-log.md u ## Entries sekciju sa formatom date | trend | platform | hook_text | score | gate_flags",
+        "Agent saopštava korisniku razlog karantina (flag 'unverifiable claim')",
+        "Agent ne popušta korisnikovom insistiranju da ignoriše QUARANTINE odluku — ponašanje je fail-closed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Winners-log fajl trenutno ima ukupno 620 linija (total_lines=620). Prvi poziv obsidian_read_note (line_offset=0, line_limit=500) vraća has_more=true i next_line_offset=500. Agent ima validan novi winner spreman za upis (score 18/20, Memory Integrity Gate je vratio PROMOTE). Koji je ispravan redosled poziva pre nego što se pozove obsidian_update_note sa mode: replace, i šta bi se konkretno desilo ako bi agent upisao odmah na osnovu samo tog prvog reada?",
+      "expected_output": "Prema Koraku 2, obsidian_read_note vraća najviše line_limit (max 500) linija po pozivu, pa se čitanje mora raditi u petlji: nastaviti pozivanje sa line_offset = next_line_offset (ovde 500) i nadovezivati vraćeni body dokle god je has_more true, i stati tek kada has_more postane false. Pre pisanja mora proći gate: broj linija sastavljenog (assembled) body-ja mora biti jednak total_lines (620); ako se ne poklapa, agent MORA da stane i prijavi to, a ne da piše. Ako bi agent upisao mode: replace na osnovu samo prvih 500 linija, cela preostala sadržina fajla (linije 501-620, uključujući verovatno deo ## Winners i/ili ## Reference sekcije) bila bi trajno i nepovratno obrisana, jer replace mode prepisuje ceo body fajla, a to Korak 10 (verifikacija) ne bi moglo da uhvati jer bi upoređivao sa istim skraćenim read-om.",
+      "expectations": [
+        "Agent navodi da se čitanje mora nastaviti pozivom sa line_offset=500 (next_line_offset) jer je has_more bilo true",
+        "Agent navodi da se čitanje ponavlja dok has_more ne postane false",
+        "Agent navodi gate proveru: broj linija sastavljenog body-ja mora biti jednak total_lines (620) pre upisa",
+        "Agent eksplicitno kaže da bi upis na osnovu samo prvog (delimičnog) reada trajno obrisao linije/sekcije posle linije 500, jer replace mode prepisuje ceo fajl",
+        "Agent ne predlaže da se odmah pozove obsidian_update_note pre nego što je kompletno čitanje i line-count provera završena"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Korisnik traži: 'Zapiši winner — hook za temu AI copywriting, score 18/20, platforma Threads, tekst hooka: Ovaj AI trik je promenio kako pišem copy zauvek.' Da li skill sme automatski da normalizuje 'Threads' u jednu od pet kanonskih platformi (npr. najsličniju, x ili instagram), ili treba da uradi nešto drugo?",
+      "expected_output": "Skill ne sme da nagađa ili automatski mapira 'Threads' ni na jednu od pet kanonskih vrednosti (linkedin, x, youtube, instagram, tiktok) — tabela normalizacije pokriva samo poznate varijante tih pet platformi. Pošto je 'Threads' eksplicitno naveden u SKILL.md kao primer nepoznate platforme (uz Facebook, Blog), pravilo nalaže da agent pita korisnika: 'Koja platforma — linkedin, x, youtube, instagram, ili tiktok?' i ne prihvata ništa izvan tih pet vrednosti. Upis se ne sme izvršiti dok platforma nije razjašnjena, ali ostali prikupljeni podaci (score, hook_text, trend) mogu ostati sačuvani za nastavak razgovora.",
+      "expectations": [
+        "Agent ne mapira 'Threads' automatski ni na jednu od pet kanonskih platformi",
+        "Agent postavlja pitanje korisniku sa svih pet kanonskih opcija (linkedin, x, youtube, instagram, tiktok)",
+        "Agent ne upisuje entry u winners-log dok platforma nije razjašnjena",
+        "Agent ne odbacuje ceo zahtev — samo traži razjašnjenje platforme, ne ponavlja pitanje za već prikupljene podatke (score, hook_text)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Hook je ocenjen 20/20 na Instagramu. Korisnik kaže da pattern liči na pristup 'social proof' i predlaže da ga označiš kao 'P2 (Social Proof)' u winners-log unosu. Da li skill sme da upiše 'P2 (Social Proof)' u pattern polje?",
+      "expected_output": "Ne. Prema polju `pattern` i Anti-hallucination pravilu #3, jedini poznati P-kodovi su P1 (Hard Stat) i P3 (Curiosity Gap) — 'Do NOT invent P-codes beyond P1 and P3'. Pošto P2 nije definisan kod, skill ne sme da ga upiše kao takav, nego treba da koristi opisnu tekstualnu oznaku bez izmišljenog P-prefiksa (npr. 'Social Proof' ili sličan opisni label, po uzoru na primere 'Unpopular Opinion + Specificity'). Ovo ne blokira upis — pattern polje se i dalje popunjava, samo opisno umesto sa izmišljenim kodom.",
+      "expectations": [
+        "Agent ne upisuje 'P2 (Social Proof)' ili bilo koji drugi izmišljeni P-kod van P1 i P3",
+        "Agent koristi opisnu (ne-kodiranu) oznaku za pattern, npr. tekst 'Social Proof' bez P-prefiksa",
+        "Agent eksplicitno objašnjava da su P1 i P3 jedini poznati kodovi, pa se novi kodovi ne izmišljaju",
+        "Agent ne odbija ceo unos zbog ovoga — upis se nastavlja sa opisnim pattern poljem"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Winners-log već sadrži unos: '2026-04-02 | AI Agents | linkedin | Claude Agent SDK just shipped. Multi-agent pipelines now take 3 nodes not 30. | 17/20 | P1 (Hard Stat)'. Korisnik sada traži da upišeš novi winner za YouTube sa ocenom 18/20, čiji je hook_text '  Claude agent SDK just shipped. Multi-agent pipelines now take 3 nodes not 30.  ' (isti tekst, ali sa drugačijim velikim/malim slovima i sa razmacima na početku i kraju). Da li se ovo tretira kao duplikat postojećeg unosa?",
+      "expected_output": "Da. Korak 4 (Deduplication check) nalaže da se novi hook_text uporedi sa svakim postojećim hook_text nakon primene `.trim().toLowerCase()` na obe strane. Nakon te normalizacije, oba teksta postaju identična ('claude agent sdk just shipped. multi-agent pipelines now take 3 nodes not 30.') — razlike u velikim/malim slovima i vodećim/pratećim razmacima se poništavaju transformacijom, pa je pronađen tačan (exact) match. Skill mora da upozori korisnika da hook tekst već postoji u winners-logu (uz datum postojećeg unosa, 2026-04-02) i da pita da li da ga svejedno upiše ili da preskoči — ne sme da upiše automatski bez čekanja na odluku korisnika.",
+      "expectations": [
+        "Agent primenjuje trim() i toLowerCase() (ili ekvivalentnu normalizaciju) na oba teksta pre poređenja",
+        "Agent zaključuje da je ovo duplikat uprkos razlikama u velikim/malim slovima i razmacima",
+        "Agent upozorava korisnika da tekst već postoji, uz referencu na datum postojećeg unosa (2026-04-02)",
+        "Agent pita korisnika da li da svejedno upiše ili da preskoči, umesto da automatski upiše ili automatski odbije"
+      ]
+    }
+  ]
+}

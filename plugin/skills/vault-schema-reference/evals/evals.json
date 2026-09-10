@@ -1,0 +1,60 @@
+{
+  "skill_name": "vault-schema-reference",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Pišeš novi soma-ops skill koji treba da doda `## Quality Gate Failures` sekciju u `instincts.md` za Trend Intelligence agenta, jer si upravo otkrio novi root-cause pattern za taj agent. Trend Intelligence trenutno nema tu sekciju. Da li treba da kopiraš metadata skeleton (version: + Changelog) iz Score Analyzer-a, i da li treba da kopiraš i njegov body skeleton (`## Scoring Calibration` / `## Confidence Rating Guide`) da bi bio konzistentan?",
+      "expected_output": "Metadata skeleton (frontmatter `version:` + `## Changelog` tabela) je već zajednički za sva 4 agenta od 2026-08-22 — TI ga već ima, ne treba ga dodavati niti kopirati odnekud. Body skeleton je EKSPLICITNO NE-konvergiran po dizajnu — Score Analyzer-ov `## Scoring Calibration`/`## Confidence Rating Guide`/`## Common Edge Cases` opisuje scoring agenta, ne generacioni agent kao TI, i nameravano nije nametnut ostalima. Nova `## Quality Gate Failures` sekcija za TI treba da prati house style koji već koriste Hook Writer/Content Repurposer (`### <emoji> Run N — date — title` / `What happened` / `Root cause` / `Fix`), ne Score Analyzer-ov format, jer referenca eksplicitno kaže da je to house style 'going forward if this is revisited'.",
+      "expectations": [
+        "Agent NE predlaže kopiranje metadata skeleta iz Score Analyzer-a jer TI ga već ima (konvergirano 2026-08-22)",
+        "Agent eksplicitno kaže da se body skeleton NE konvergira po dizajnu, ne po propustu",
+        "Agent predlaže da nova QGF sekcija prati Hook Writer/Content Repurposer format (Run N / What happened / Root cause / Fix), ne Score Analyzer format",
+        "Agent ne tretira odsustvo QGF sekcije kod TI kao grešku koju treba retroaktivno popraviti dodavanjem prazne sekcije"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Debug-uješ 'file not found' grešku: neki skill je pokušao da pročita `system/soma-rules.md` iz vaulta i dobio je grešku da fajl ne postoji. Referenca (vault-schema-reference, sekcija `system/`) kaže da je taj fajl 'Confirmed. Exists.' Da li to znači da je referenca pogrešna, ili treba nešto drugo da proveriš pre nego što zaključiš da je referenca zastarela?",
+      "expected_output": "Referenca eksplicitno upozorava (u opisu i u 'Do NOT use as a substitute...' delu) da dokumentuje POZNATU/nameravanu šemu, ne live snapshot — 'Confirmed' se odnosi na proveru urađenu 2026-08-22, ne na trenutni momenat. Pre zaključka da je referenca zastarela ili pogrešna, treba pozvati `obsidian_read_note` ili `obsidian_list_folders`/`obsidian_search_notes` uživo da se proveri stvarno trenutno stanje vaulta — moguće je da je fajl u međuvremenu premešten/obrisan, da je greška u putanji koju je pozivajući skill koristio, ili da je konekcija/permission problem, a ne da referenca laže. Referenca sama kaže da treba da se ažurira 'in the same session' ako se otkrije da stvarnost više ne odgovara, ali to ažuriranje dolazi POSLE live provere, ne umesto nje.",
+      "expectations": [
+        "Agent NE zaključuje odmah da je referenca pogrešna/zastarela samo na osnovu jedne greške",
+        "Agent eksplicitno predlaže live proveru (obsidian_read_note ili obsidian_list_folders/search_notes) pre donošenja zaključka",
+        "Agent prepoznaje da 'Confirmed' u referenci nosi datum provere (2026-08-22), ne garanciju za sav budući trenutak",
+        "Agent razmatra alternativna objašnjenja (pogrešna putanja, permission, fajl premešten/obrisan u međuvremenu) pre nego što okrivi referencu"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Pišeš skill koji treba da pročita `format-templates.md` da bi znao format izlaza za soma-distribution. Gde u Obsidian vaultu (koja putanja pod `agents/`, `Insights/`, `shared/` ili `system/`) se taj fajl nalazi?",
+      "expected_output": "`format-templates.md` NIJE vault fajl uopšte — nalazi se u Content Repurposer-ovoj Agent Studio Knowledge Base i učitava se preko `as_search_knowledge_base` MCP poziva, ne preko bilo koje Obsidian putanje. Referenca ovo eksplicitno navodi u sekciji 'Explicitly out of scope' baš zato da se ne bi pogrešno pretpostavilo da je vault fajl. Skill koji treba ovaj format treba da koristi Agent Studio KB search, ne `obsidian_read_note` ni bilo koju vault putanju.",
+      "expectations": [
+        "Agent zaključuje da format-templates.md NIJE vault fajl i ne predlaže nijednu vault putanju (agents/, Insights/, shared/, system/) za njega",
+        "Agent eksplicitno pominje da se nalazi u Content Repurposer-ovoj Knowledge Base",
+        "Agent predlaže as_search_knowledge_base (Agent Studio MCP), ne obsidian_read_note, kao način pristupa",
+        "Agent ne izmišlja verovatnu vault putanju (npr. 'shared/format-templates.md') umesto da prizna da fajl nije u vaultu"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Ručno praviš `winners-log.md` za Trend Intelligence agenta jer misliš da bi mu koristio isti kalibracioni mehanizam kao Hook Writer-u. Da li ovo odgovara postojećoj šemi vaulta?",
+      "expected_output": "Ne odgovara direktno postojećoj šemi — referenca eksplicitno kaže da `winners-log.md` 'Only exists for hook-writer today', dakle ovo bi bio potpuno nov fajl/koncept za TI, ne popunjavanje postojeće šeme. Pre nego što se to napravi ručno, treba proveriti da li TI uopšte ima analogan koncept 'pobedničkog' izlaza (Hook Writer ima score-ovane hook-ove sa pragom >=17/20 — TI možda nema direktan ekvivalent), i imati na umu da referenca preporučuje da se nove agent-scaffolder-generisane stvari prave kroz `agent-scaffolder`, ne ručno — a i da ako se šema vaulta stvarno menja (nov fajl tip za novog agenta), referenca kaže da 'ako promeniš stvarnu strukturu vaulta... ažuriraj ovaj fajl u istoj sesiji'.",
+      "expectations": [
+        "Agent prepoznaje da winners-log.md trenutno postoji SAMO za Hook Writer, ne i za TI",
+        "Agent ne tretira ovo kao 'popunjavanje praznine u šemi' nego kao potencijalno proširenje šeme koje zahteva svesnu odluku",
+        "Agent pominje da bi trebalo prvo proveriti da li TI uopšte ima analogan 'pobednički' koncept pre kopiranja Hook Writer šeme",
+        "Agent pominje da referenca treba ažurirati ako se vault šema stvarno promeni na ovaj način"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Pišeš novi skill koji treba da čita `system/config.md` za 'Primary niche' polje. Da li treba da pretpostaviš da to polje uvek postoji, i šta radiš ako ga nema?",
+      "expected_output": "Referenca navodi da `system/config.md` čita `pipeline-input-validator` upravo tražeći 'Primary niche:' polje, ALI sa 'eksplicitnim fallback-om na \"AI/tech\" i warning porukom ako fajl ili polje nedostaje' — dakle ne treba pretpostaviti da polje uvek postoji niti hard-fail-ovati ako ga nema. Novi skill treba da prati isti obrazac (fallback vrednost + warning), a ne da baci grešku ili prećutno koristi undefined/None. Takođe treba imati na umu da referenca dokumentuje samo POZNATU šemu — pre pisanja koda vredi proveriti stvarni trenutni sadržaj `system/config.md` preko `obsidian_read_note` da se potvrdi da polje i dalje postoji u očekivanom formatu.",
+      "expectations": [
+        "Agent NE pretpostavlja da 'Primary niche' polje uvek postoji bez provere",
+        "Agent predlaže fallback vrednost i/ili warning umesto hard-fail kada polje/fajl nedostaje, po uzoru na pipeline-input-validator",
+        "Agent pominje da treba proveriti live sadržaj fajla (obsidian_read_note) pre nego što se osloni na dokumentovanu šemu kao garanciju",
+        "Agent ne izmišlja drugo default ponašanje (npr. baci exception) suprotno dokumentovanom fallback obrascu"
+      ]
+    }
+  ]
+}

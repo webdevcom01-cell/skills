@@ -1,0 +1,72 @@
+{
+  "skill_name": "soma-eval-harness",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Imam jedan eval task iz regresivnog seta: trend_input je verbatim tekst trenda iz TI loga, a expected_grade = FAIL (jer je CR flag za taj run bio QUALITY_VIOLATIONS — ovo je guardrail zadatak, ne capability zadatak). Pokrenula sam Trial 1 kroz TI→HW→CR i dobila: G1 PASS, G2 PASS, G3 FAIL (cr_flag = QUALITY_VIOLATIONS), G4 PASS, M1 PASS (4 od 5 platformi ≥4), M2 PASS. Odredi observed_grade i trial_correct za ovaj trial, i reci mi da li se ovaj trial računa kao uspeh ili neuspeh pipeline-a.",
+      "expected_output": "observed_grade = FAIL (Scoring STEP A: bilo koji G-grejder FAIL → observed = FAIL, uključujući G3 FAIL). trial_correct = true (Scoring STEP B, polaritet: expected FAIL → correct iff observed = FAIL — agent je ispravno blokirao guardrail slučaj). Ovo je USPEH pipeline-a, ne neuspeh.",
+      "expectations": [
+        "Agent navodi observed_grade = FAIL",
+        "Agent navodi trial_correct = true (ne false)",
+        "Agent eksplicitno kaže da je ovo USPEH pipeline-a jer je guardrail ispravno blokirao ulaz, pozivajući se na polaritet/expected_grade (Hard rule #11 ili Scoring STEP B)",
+        "Agent ne tretira 'observed_grade = FAIL' kao automatski loš ishod bez poređenja sa expected_grade"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pokrenula sam capability eval task (expected_grade = PASS) sa k=5 trial-a. Ishodi: Trial 1 = TIMEOUT na HW koraku. Trial 2 = TIMEOUT na CR koraku. Trial 3 = TIMEOUT na TI koraku. Trial 4 = svi graderi PASS. Trial 5 = M1 ERROR nakon jednog retry-ja, a H1 nije dobio odgovor ni posle 2 pokušaja. Izračunaj valid_trials, i reci mi status ovog eval-a i tvoju preporuku.",
+      "expected_output": "valid_trials = 5 - (3 TIMEOUT + 1 H1_PENDING) = 1. Po MIN VALIDITY pravilu (valid_trials < 3 → status = INCONCLUSIVE, ne računati consistency/correct_count). Preporuka: re-run zadatka, ili agent-health-check pošto je uzrok pretežno TIMEOUT.",
+      "expectations": [
+        "valid_trials je tačno 1 (5 minus 3 TIMEOUT minus 1 H1_PENDING trial)",
+        "Agent NE prijavljuje konačan broj poput '100% consistency' ili '1/1 correct' kao validan rezultat",
+        "Agent eksplicitno prijavljuje status = INCONCLUSIVE",
+        "Agent preporučuje re-run zadatka i/ili agent-health-check",
+        "Agent ne broji nijedan TIMEOUT ili ERROR/H1_PENDING trial kao FAIL niti kao PASS"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Trial ima sledeće rezultate: G1 PASS, G2 PASS, G3 = WARN (cr_flag je bio 'WARN' — CR nije mogao da potvrdi prolaz), G4 PASS, M1 PASS, M2 PASS. Da li je ovo dovoljno da direktno odrediš observed_grade, ili je potreban dodatni korak pre nego što se trial zaključi?",
+      "expected_output": "G3 = WARN aktivira H1 (Human Flag) bez obzira što su svi ostali graderi PASS. observed_grade se NE određuje direktno iz G/M gradera — dolazi iz H1 verdikta (Scoring STEP A: 'conflict (G vs M) or G3 = WARN → observed = H1 verdict'). Rezultat H1 provere se loguje u system/evals/calibration-log.md.",
+      "expectations": [
+        "Agent prepoznaje da G3 = WARN sam po sebi aktivira H1, nezavisno od toga što su ostali graderi PASS",
+        "Agent NE određuje observed_grade = PASS direktno bez H1 koraka",
+        "Agent kaže da observed_grade dolazi iz H1 verdikta u ovom slučaju, ne iz automatskog izračuna",
+        "Agent pominje logovanje u system/evals/calibration-log.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Ovo je capability eval run za jedan task. correct_count = 5/5, quality_pass_rate = 0.85. Da li ovaj task treba proglasiti 'spremnim za graduation u Regression suite' na osnovu ovog jednog run-a?",
+      "expected_output": "NE. Graduation zahteva correct_count = 5/5 I quality_pass_rate ≥ 0.80 za 3 UZASTOPNA capability run-a, ne samo jedan. Potrebno je proveriti baseline.md za istoriju prethodna 2 uzastopna kvalifikujuća run-a za isti task pre nego što se proglasi graduation.",
+      "expectations": [
+        "Agent NE proglašava task spremnim za graduation na osnovu samo jednog run-a",
+        "Agent eksplicitno navodi uslov '3 uzastopna run-a', ne samo trenutni",
+        "Agent kaže da treba proveriti baseline.md za istoriju prethodna 2 run-a za isti task",
+        "Ako istorija nije data, agent je traži ili jasno kaže da ne može potvrditi graduation bez nje"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Baseline za ovaj task (iz baseline.md) pokazuje correct_count = 5/5 iz prethodnog regression run-a. Trenutni regression run za isti task daje correct_count = 4/5. Da li je ovo regresija?",
+      "expected_output": "DA, ovo JESTE regresija — iako je pad samo 1 trial (ne ≥2), correct_count prelazi iz band-a '5/5 Regression-ready' u band '4/5 Stable', što je drugi, nezavisan uslov u pravilu ('REGRESSION if correct_count drops ≥ 2 trials OR crosses a band boundary downward').",
+      "expectations": [
+        "Agent zaključuje DA, ovo jeste regresija",
+        "Agent eksplicitno navodi da je uzrok prelazak preko granice banda (5/5 → 4/5), a NE prost pad ≥2 trial-a",
+        "Agent NE kaže 'nije regresija jer je pad manji od 2 trial-a' bez provere band granice",
+        "Agent formuliše upozorenje u formatu sličnom '⚠️ REGRESSION: correct_count 5 → 4 for [trend]'"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "M1 ocenjuje LinkedIn hook. Prvi poziv sudije (judge) daje SCORE: 4. Pošto je 4 granična (borderline) vrednost, pozvala sam sudiju drugi put za isti hook i dobila SCORE: 3. Koji rezultat se koristi za LinkedIn platformu u M1 proračunu, i šta se dešava dalje sa ovim slučajem?",
+      "expected_output": "Koristi se NIŽI rezultat (3), po pravilu determinizma sudije: na graničnom skoru (=3 ili =4) sudija se poziva dva puta; ako se razlikuju, uzima se niži i slučaj se flaguje za H1. LinkedIn dobija skor 3 (FAIL za tu platformu, pošto je prag ≥4=PASS), a i dalje se primenjuje pravilo '4 od 5' na preostale platforme za konačni M1 verdikt.",
+      "expectations": [
+        "Agent bira niži rezultat (3), ne prvi rezultat (4) i ne prosek (3.5)",
+        "Agent kaže da je slučaj flagovan za H1 zbog razlike između dva poziva sudije",
+        "Agent tretira LinkedIn kao FAIL za tu platformu (prag ≥4=PASS, ≤3=FAIL)",
+        "Agent pominje da se '4 od 5' pravilo i dalje primenjuje na preostale platforme za konačni M1 verdikt"
+      ]
+    }
+  ]
+}

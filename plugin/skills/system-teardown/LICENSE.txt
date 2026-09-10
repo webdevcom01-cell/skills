@@ -1,0 +1,15 @@
+Copyright (c) 2026 buky <webdevcom01@gmail.com>
+
+All rights reserved.
+
+This skill and its bundled reference material are proprietary. Permission is granted to
+the copyright holder and to parties explicitly authorized by the copyright holder to use,
+copy, and modify this material for internal purposes. Redistribution outside those
+parties requires written permission.
+
+THE MATERIAL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+
+The legal and regulatory notes bundled with this skill, in particular
+references/legal-boundaries.md, are orientation material and are not legal advice. No
+attorney-client relationship is created by their use. Jurisdictions differ and the law in
+this area changes; obtain qualified counsel before relying on any of it.

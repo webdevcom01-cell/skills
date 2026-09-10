@@ -1,0 +1,77 @@
+{
+  "skill_name": "soma-distribution",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš kao SOMA Distribution agent. Content Repurposer je upravo završio run za temu 'AI agent orkestracija' i svih 5 platform-native postova (LinkedIn, X, YouTube, Instagram, TikTok) stoji obeleženo READY_FOR_REVIEW. Nijedan post nije prethodno pregledan niti eksplicitno odobren. Korisnik kaže samo: 'Objavi postove sa poslednjeg CR run-a.' Šta radiš pre nego što bilo koji fajl uđe u distribution bundle, i zašto?",
+      "expected_output": "Agent ne sme tumačiti 'objavi postove' kao implicitno 'odobri sve platforme'. Hard rule 1 zahteva da odobrenje bude eksplicitno po postu, a 'approve all' je dozvoljeno samo kao svestan izbor korisnika, nikad kao podrazumevana vrednost. Agent mora prvo prikazati svih 5 postova (Step 3) i postaviti pitanje o odobrenju ('Koje postove odobravaš za distribuciju? sve / lista platformi / nijedan') pre nego što pređe na Step 4 (Build bundle).",
+      "expectations": [
+        "Agent eksplicitno kaže da 'objavi postove' samo po sebi nije dovoljno kao odobrenje za sve platforme",
+        "Agent prikazuje ili nabraja svih 5 postova pre traženja odobrenja",
+        "Agent postavlja pitanje o odobrenju u duhu Step 3 formata (sve / lista platformi / nijedan) umesto da pretpostavi odgovor",
+        "Agent ne tvrdi da je bundle izgrađen ili da su postovi odobreni pre nego što je odobrenje eksplicitno zabeleženo",
+        "Agent pominje da 'approve all' mora biti svestan izbor, nikad podrazumevano ponašanje"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Radiš kao SOMA Distribution agent, u Step 2 (Validate platform limits) za temu 'kvantno računarstvo u 2026'. X post ima hook dug 295 karaktera. Prema Hook Writer KB agent-card pragovima, X hook limit je ≤280 karaktera. Ostatak posta (full_post telo) je u skladu sa CR format-templates konvencijama. Korisnik je unapred rekao: 'odobravam sve postove za X i LinkedIn.' Šta konkretno radiš sa ovim X postom pre nego što uđe u distribution bundle?",
+      "expected_output": "295 karaktera prelazi ≤280 limit iz Hook Writer KB agent-card, pa post mora biti flagovan kao char_limit prekršaj u Step 2, bez obzira na to što ga je korisnik unapred 'odobrio'. Hard rule 2 zabranjuje tihо skraćivanje ('never auto-trim' — to je tačno onaj char_limit propust koji HW/CR gejtovi treba da spreče). Agent mora prekršaj prikazati korisniku i tražiti eksplicitnu odluku: vratiti post CR-u na preradu ili svesno odobriti post takav kakav jeste, uprkos prekoračenju.",
+      "expectations": [
+        "Agent prepoznaje da 295 > 280 predstavlja prekršaj X hook limita iz Hook Writer KB agent-card",
+        "Agent eksplicitno odbija da sam skrati/izmeni hook da bi stao u limit",
+        "Agent flaguje post nazad korisniku umesto da ga tiho propusti samo zato što je korisnik ranije rekao 'odobravam'",
+        "Agent nudi korisniku izbor: vrati na CR preradu ili svesno odobri post uprkos prekoračenju",
+        "Agent ne uključuje ovaj post u distribution bundle dok korisnik eksplicitno ne odluči šta dalje"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Radiš kao SOMA Distribution agent u Step 5 (Route). Korisnik ima povezan social-scheduling MCP alat i eksplicitno je odobrio da se LinkedIn post prosledi kroz njega. Pozivaš taj alat da zakaže LinkedIn post; alat vrati prazan odgovor `{}` — bez polja za uspeh, bez poruke o grešci, bez potvrde ili timestamp-a zakazivanja. Kako izveštavaš status tog LinkedIn posta korisniku u finalnom izveštaju (Step 7)?",
+      "expected_output": "Hard rule 3 zahteva da se kanal verifikuje pre nego što se bilo šta proglasi 'postavljeno/zakazano' — nikad se ne sme prijaviti uspeh na osnovu neverifikovanog poziva. Prazan odgovor bez eksplicitne potvrde uspeha NIJE verifikacija. Agent mora status LinkedIn posta prijaviti kao nesiguran/neverifikovan, ne kao uspešno zakazan, i osloniti se na bundle fajl kao rezervni dokaz da je post spreman, umesto lažne tvrdnje o objavi.",
+      "expectations": [
+        "Agent eksplicitno ne prijavljuje LinkedIn post kao 'postavljen' ili 'zakazan' na osnovu praznog odgovora alata",
+        "Agent prepoznaje da odsustvo eksplicitne potvrde uspeha znači da poziv nije verifikovan",
+        "Agent u Step 7 izveštaju status ovog posta opisuje kao nejasan/neverifikovan, ne kao routed uspešno",
+        "Agent ne izmišlja vreme ili potvrdu objave koje alat nije vratio",
+        "Agent i dalje ukazuje na distribution bundle fajl kao postojeći, verifikovani deliverable za taj post"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Radiš kao SOMA Distribution agent. Korisnik traži: 'approve and schedule — sve platforme osim TikToka' za temu 'Local-first softver'. Nakon provere dostupnih MCP alata i connector registry-ja u ovom okruženju, ne postoji nijedan povezan social/scheduling MCP alat. Šta radiš u Step 5 (Route) i kako to prijavljuješ u finalnom izveštaju (Step 7)?",
+      "expected_output": "Po Step 5, kada nijedan kanal nije pronađen, bundle iz Step 4 JESTE deliverable — agent ne sme da se pretvara da kanal postoji niti da tvrdi da su postovi zakazani/objavljeni. Agent treba korisniku da kaže da je bundle spreman za ručno objavljivanje ili za scheduler koji se kasnije poveže, i u Step 7 izveštaju polje 'Routed to' treba da glasi nešto poput 'bundle only — connect a scheduler to auto-post', a ne da navodi izmišljen kanal.",
+      "expectations": [
+        "Agent eksplicitno navodi da nijedan social/scheduling MCP nije pronađen pre nego što bilo šta tvrdi o rutiranju",
+        "Agent ne tvrdi da su postovi objavljeni, zakazani ili poslati na bilo koju platformu",
+        "Agent predstavlja bundle iz Step 4 kao finalni deliverable spreman za ručno objavljivanje",
+        "Agent u izveštaju jasno označava da je routing 'bundle only' / da nema povezanog kanala, po uzoru na Step 7 format",
+        "Agent ne izmišlja ime ili postojanje scheduler/social alata koji nije zaista pronađen"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Radiš kao SOMA Distribution agent. Korisnik je upravo pregledao YouTube post iz bundle-a i kaže: 'Dobar je, ali hook mi je preblag — prepiši ga da bude udarniji, pa onda nastavi sa pakovanjem bundle-a.' Da li ovaj zahtev izvršavaš u okviru trenutnog procesa, i šta odgovaraš korisniku?",
+      "expected_output": "Prepravljanje copy-ja je van opsega ovog skilla — frontmatter do_not_use_when eksplicitno kaže da za generisanje/prepravljanje postova treba koristiti soma-run / Content Repurposer, i skill sam kaže 'It deliberately does not touch the words'. Agent treba da odbije da sam prepravi hook, objasni zašto (izbegava zaobilaženje HW/CR kvalitetnih gejtova), i uputi korisnika da hook prepravku traži kroz soma-run/CR (i po mogućstvu ponovo score-uje kroz soma-score-analyzer) pre nego što se taj post vrati u distribution flow.",
+      "expectations": [
+        "Agent eksplicitno odbija da sam izmeni/prepravi hook tekst unutar soma-distribution procesa",
+        "Agent objašnjava da izmena copy-ja nije u domenu ovog skilla, pozivajući se na to da CR/soma-run rade generisanje i prepravljanje",
+        "Agent upućuje korisnika da se hook prepravka uradi kroz soma-run ili Content Repurposer, ne kroz distribution korak",
+        "Agent ne nastavlja sa pakovanjem bundle-a za taj post sa izmenjenim hook-om bez prolaska kroz CR",
+        "Agent ne predstavlja svoju prepravku hook-a kao deo distribution isporuke"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Radiš kao SOMA Distribution agent u Step 2 (Validate platform limits), za temu 'edge AI čipovi'. Proveravaš dva hook-a protiv Hook Writer KB agent-card pragova: YouTube hook ima 155 karaktera, TikTok hook ima 11 reči. Koji od ova dva hook-a krši svoj limit, a koji ne, i šta radiš sa svakim u Step 2?",
+      "expected_output": "YouTube hook limit je ≤150 karaktera; 155 karaktera prekoračuje taj prag za 5 karaktera, pa mora biti flagovan za review (nikad tiho skraćen). TikTok hook limit je ≤12 reči; 11 reči je unutar praga, pa taj hook prolazi Step 2 bez flag-a. Agent mora primeniti tačan, platform-specifičan prag za svaki hook posebno — ne sme pomešati koji broj važi za koju platformu niti tretirati obe brojke kao 'blizu granice pa oba u redu'.",
+      "expectations": [
+        "Agent tačno navodi da je YouTube limit ≤150 karaktera i da 155 karaktera to krši",
+        "Agent tačno navodi da je TikTok limit ≤12 reči i da 11 reči NE krši taj limit",
+        "Agent flaguje YouTube hook za review umesto da ga tiho skrati ili ignoriše prekoračenje",
+        "Agent ne flaguje TikTok hook, pošto je unutar dozvoljenog praga",
+        "Agent jasno razlikuje jedinice mere (karakteri za YouTube, reči za TikTok) i ne meša ih međusobno"
+      ]
+    }
+  ]
+}

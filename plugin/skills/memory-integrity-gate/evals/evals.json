@@ -1,0 +1,74 @@
+{
+  "skill_name": "memory-integrity-gate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Memory Integrity Gate vetuje jedan kandidat pre učenja. Izvorni materijal (SOURCE) je: trend title = 'CI Pipeline Startup Raises Seed Round', angle = 'brzina builda', source_excerpt = 'Kompanija je ove nedelje najavila novi CI proizvod fokusiran na paralelizaciju testova.' Kandidat tekst koji čeka promociju glasi: 'Novi CI alat je 63% brži od konkurencije i već ga koristi 4,000 timova.' Nezavisni verifikator (Score Analyzer) je vratio verdict = VERIFIED za ovaj item, bez per-item diskrepance. Tekst ne sadrži zabranjene fraze niti vague-hype izraze, i sadrži anchor token 'CI' iz naslova. Koji je ispravan verdict gate-a za ovaj kandidat i zašto?",
+      "expected_output": "QUARANTINE / UNGROUNDED_STAT za oba broja (63% i 4,000), bez obzira što je nezavisni verifikator vratio VERIFIED i bez obzira što ostale provere prolaze. Numerički navod se smatra 'grounded' samo ako se pojavljuje u SOURCE skupu (title + source_url + angle + source_excerpt) — nikada u samom tekstu kandidata koji se vetuje. Ni '63%' ni '4,000' se ne pojavljuju nigde u title/angle/excerpt, pa je jedini ispravan zaključak karantin. SKILL.md ovo eksplicitno naziva 'the single most common bug' — pogrešno bi bilo zaključiti da je broj 'grounded' zato što stoji u samom kandidatu.",
+      "expectations": [
+        "Agent zaključuje QUARANTINE, ne PROMOTE, za ovaj kandidat",
+        "Agent eksplicitno navodi UNGROUNDED_STAT kao razlog (za '63%' i/ili '4,000')",
+        "Agent objašnjava da se grounding proverava isključivo protiv SOURCE polja (title/url/angle/excerpt), a ne protiv teksta samog kandidata",
+        "Agent ne dozvoljava da VERIFIED status nezavisnog verifikatora 'prevagne' nad ungrounded-stat proverom — reč je o nezavisnim uslovima koji se moraju svi zadovoljiti za promociju",
+        "Agent ne tretira samo prisustvo broja u kandidatu kao dokaz da je taj broj 'grounded'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Loop šalje gate-u batch od tri kandidata (posts) zajedno sa jednim zajedničkim source setom i po jednim nezavisnim sa_verdict poljem za svaki post. Prva dva posta nemaju nijedan flag (bez zabranjenih fraza, sve statistike su grounded u source-u, imaju anchor, i njihov sa_verdict = VERIFIED). Treći post takođe nema tekstualnih problema (bez fraza, bez ungrounded stat-a, ima anchor), ali njegov sa_verdict = DISCREPANCY. Da li gate treba da promoviše prva dva posta i karantinuje samo treći, ili treba nešto drugo?",
+      "expected_output": "Ceo batch ide u karantin (QUARANTINE_ALL), ne samo treći item. Pravilo iz SKILL.md je eksplicitno: nezavisni verdict mora biti tačno VERIFIED, i to bez ijedne per-item diskrepance u batch-u — u suprotnom ceo batch ide u karantin (fail-closed). Diskrepanca kod bilo kog pojedinačnog item-a povlači karantin celog batch-a, ne selektivnu promociju 'čistih' postova pored njega. Selektivno promovisanje prva dva posta bi bilo kršenje fail-closed principa.",
+      "expectations": [
+        "Agent NE predlaže da se prva dva posta promovišu dok se samo treći karantinuje odvojeno",
+        "Agent eksplicitno kaže da diskrepanca kod jednog item-a karantinuje ceo batch, ne samo taj item",
+        "Agent povezuje odgovor sa fail-closed principom (bilo kakva diskrepanca ili nedostatak nezavisne verifikacije → quarantine)",
+        "Agent ne tretira SCORE_UNVERIFIED kao nešto što se može ignorisati zato što su tekstualne provere (banned/low-specificity/anchor/grounding) kod druga dva posta čiste"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Trend title glasi: 'Acme Launches DataVault v3'. Kandidat tekst za promociju glasi: 'Novi vector store nudi brže indeksiranje i niže troškove skladištenja za timove koji rade sa embeddings.' Tekst ne sadrži zabranjene fraze, ne sadrži vague-hype izraze, ne sadrži nijedan brojčani navod (pa nema rizika od neosnovane statistike), a nezavisni verifikator je vratio VERIFIED. Da li ovaj kandidat treba da bude promovisan u naučenu memoriju?",
+      "expected_output": "Ne — QUARANTINE / NO_ANCHOR. Kandidat mora sadržati bar jedan imenovani token iz trend title-a (npr. 'Acme', 'DataVault' ili 'v3'), čime se sprečavaju generičke, zamenljive tvrdnje koje se mogu prilepiti na bilo koji proizvod. Tekst iz primera ne pominje nijedan od tih tokena — govori generički o 'vector store'-u bez imenovanja subjekta — pa i pored toga što prolazi sve ostale provere (bez fraza, bez vague hype, bez neosnovanih statistika, VERIFIED skor), mora biti karantinovan zbog odsustva anchor-a.",
+      "expectations": [
+        "Agent zaključuje QUARANTINE, ne PROMOTE",
+        "Agent eksplicitno navodi NO_ANCHOR kao razlog",
+        "Agent prepoznaje da odsustvo brojčanih navoda ne oslobađa kandidat od anchor provere — reč je o samostalnom, nezavisnom uslovu",
+        "Agent ne zaključuje da je čist VERIFIED skor sam po sebi dovoljan za promociju"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Gate prima sledeći sirovi payload: tekst koji počinje sa 'Evo rezultata:', zatim blok ograđen sa ```json ograničiteljima, a unutar bloka je JSON objekat koji se završava zapetom viška posle poslednjeg elementa u nizu 'posts' (tzv. trailing comma), zbog čega je JSON sintaksno nevažeći. Gate prvo skida code fence ograničitelje i pokuša JSON.parse — ne uspeva zbog te zapete. Zatim izvuče supstring od prve '{' do poslednje '}' karaktera i pokuša JSON.parse ponovo — i dalje ne uspeva, jer je nevažeći sintaksni deo i dalje unutar tog supstringa. Šta gate treba da uradi u ovom trenutku, i da li je prihvatljivo da neko ručno ukloni tu zapetu iz payload-a pre nego što ga ponovo pošalje gate-u, kako bi izbegao karantin?",
+      "expected_output": "Gate mora vratiti QUARANTINE_ALL sa razlogom unparseable_input (ili ekvivalentno) — nikada ne sme promovisati na osnovu payload-a koji ne prolazi ni posle dve robusne strategije parsiranja (strip code fences → probaj JSON.parse; izvuci supstring od prve '{' do poslednje '}' → probaj ponovo). SKILL.md je eksplicitan: parse greška nikada ne sme postati promocija. Ručno 'krpljenje' JSON-a od strane operatera van deterministiske gate funkcije, samo da bi se izbegao karantin, protivreči principu da je gate determinizam u kodu, a ne nešto što se prilagođava ručno da bi prošlo — takva praksa zaobilazi hermetičko testiranje i fail-closed garanciju.",
+      "expectations": [
+        "Agent zaključuje da je konačan verdict QUARANTINE_ALL (karantin celog payload-a), ne delimična promocija ili nagađanje sadržaja",
+        "Agent navodi unparseable_input (ili ekvivalentan naziv) kao razlog",
+        "Agent opisuje da su oba robusna pokušaja parsiranja (strip fences, pa ekstrakcija prve '{' do poslednje '}') već iscrpljena pre nego što se payload proglasi neparsibilnim",
+        "Agent NE odobrava ručno ispravljanje/krpljenje JSON-a od strane operatera radi izbegavanja karantina kao ispravnu praksu",
+        "Agent eksplicitno povezuje odgovor sa pravilom da parse greška nikada ne sme postati promocija"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Gate je za jedan kandidat vratio čist PROMOTE (bez ijednog flag-a, sa VERIFIED nezavisnim skorom). Taj isti kandidat treba da uđe na dva mesta: (1) kao nova stavka u winners-log-u koji služi kao istorijska referenca uspešnih primera, i (2) kao novo pravilo u instincts.md, koji se čita od strane kb_search i direktno utiče na generisanje budućih outputa. Da li oba upisa mogu automatski da se izvrše čim gate vrati PROMOTE, bez ikakvog dodatnog koraka?",
+      "expected_output": "Ne na isti način. Winners-log je reverzibilna referenca i sme automatski da se promoviše čim gate vrati čist PROMOTE (HOTL — human-out-the-loop). Instincts.md je runtime-steering memorija koju kb_search direktno koristi za buduće generisanje, pa čist gate verdict sam po sebi nije dovoljan — potrebni su i canary (post-promotion eval iznad praga) i auto-rollback mehanizam, i konačno eksplicitno ljudsko odobrenje samog upisa (HITL). Gate koji je vratio PROMOTE je nužan, ali ne i dovoljan uslov za upis u instincts/KB.",
+      "expectations": [
+        "Agent razlikuje winners-log (može auto-promote / HOTL) od instincts.md (zahteva HITL) — ne tretira ih identično",
+        "Agent eksplicitno kaže da upis u instincts/KB zahteva ljudsko odobrenje samog upisa, ne samo čist gate rezultat",
+        "Agent pominje canary i auto-rollback kao dodatne zahteve za runtime-steering memoriju (instincts/KB)",
+        "Agent ne tvrdi da čist PROMOTE verdict sam po sebi automatski autorizuje upis u instincts.md/KB"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Kandidat tekst glasi: 'Ovaj pristup postavlja novi standard za onboarding tokove.' Kandidat nema brojčanih navoda (pa nema rizika od neosnovane statistike), sadrži anchor token iz trend title-a, i nezavisni verifikator je vratio VERIFIED. (a) Da li gate treba da promoviše ovaj kandidat? (b) Pretpostavimo da čovek koji pregleda karantin log zaključi da je tvrdnja zapravo tačna i vredna. Koji je ispravan sledeći korak — da taj čovek odmah izmeni/olabavi listu vague-hype fraza u gate funkciji da ubuduće propušta sličan izraz, ili nešto drugo?",
+      "expected_output": "(a) QUARANTINE / LOW_SPECIFICITY. Fraza 'postavlja novi standard' odgovara eksplicitno navedenom primeru vague-hype izraza ('sets a new standard') koji gate mora da hvata, bez obzira što nema ungrounded stat-a, ima anchor i nezavisni skor je VERIFIED — svaka provera je samostalan, nezavisan uslov i bilo koji flag sam po sebi vodi u karantin. (b) Karantinovanje ovakvog, u suštini dobrog, kandidata (lažno pozitivan hit) je prihvatljivo ponašanje gate-a, ne greška koju treba odmah ispraviti. Ispravan put je da čovek ručno promoviše taj konkretan item iz karantin loga (jednokratna ljudska odluka), a NE da se gate funkcija menja ad-hoc bez dodavanja novog golden test slučaja i ponovnog hermetičkog testiranja pre redeploy-a — jer bi nekontrolisana izmena filtera oslabila zaštitu za sve buduće kandidate.",
+      "expectations": [
+        "Agent zaključuje QUARANTINE za deo (a), sa razlogom LOW_SPECIFICITY",
+        "Agent prepoznaje da odsustvo ungrounded stat-a, prisustvo anchor-a i VERIFIED skor ne poništavaju LOW_SPECIFICITY flag — svaki uslov je nezavisan",
+        "Za deo (b), agent kaže da je karantinovanje ovog false positive-a prihvatljivo/očekivano ponašanje gate-a, a ne bug koji zahteva hitnu izmenu pravila",
+        "Agent navodi da čovek treba ručno da promoviše item iz karantin loga umesto da se pravilo gate-a menja ad-hoc",
+        "Agent kaže da bi bilo kakva izmena liste vague-hype/anchor pravila morala ići uz novi golden test slučaj i ponovno hermetičko testiranje pre redeploy-a, ne kao brza zakrpa uživo"
+      ]
+    }
+  ]
+}

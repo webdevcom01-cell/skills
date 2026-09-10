@@ -1,0 +1,61 @@
+{
+  "skill_name": "agent-dependency-mapper",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Radiš agent-dependency-mapper analizu nad jednim AgentStack sistemom. Za agenta 'invoice-formatter' prikupljeni podaci pokazuju: in-degree = 0 (nijedan drugi agent ga ne zove, ni statički ni u runtime logu), out-degree = 0 (ne poziva nijednog drugog agenta), i as_inspect_flow pokazuje da agent IMA definisan, neprazan flow (čvorovi: read_file → format_template → write_output), samo što nijedan čvor nije tipa call_agent. Da li je invoice-formatter kandidat za brisanje (orphan/empty-shell) ili je nešto drugo? Obrazloži zaključak.",
+      "expected_output": "invoice-formatter NIJE kandidat za brisanje. On je 'standalone leaf' — ima radni, neprazan flow koji naprosto ne zove druge agente — što skill eksplicitno tretira kao normalno stanje, ne kao anomaliju. Kandidat za brisanje (orphan/empty-shell) zahteva in=0 I out=0 I prazan flow; ovde flow nije prazan, pa taj treći uslov nije ispunjen.",
+      "expectations": [
+        "Zaključak je da invoice-formatter NIJE deletion candidate / orphan",
+        "Agent eksplicitno koristi termin 'standalone leaf' (ili ekvivalentan opis: ima flow, ali ne zove druge agente) za ovaj slučaj",
+        "Agent objašnjava da je za orphan/empty-shell potreban treći uslov — prazan (empty) flow — pored in=0 i out=0, ne samo in=0 i out=0",
+        "Agent ne meša standalone leaf sa orphan/empty-shell samo na osnovu in=0 i out=0"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mapiraš zavisnosti agenata. Poziv as_list_agents za agenta 'legacy-notifier' vraća hasFlow=false. Šta je ispravan sledeći korak za ovog agenta u algoritmu mapiranja — da li pozivaš as_inspect_flow da bi utvrdio njegove izlazne (outgoing) grane, ili radiš nešto drugo? Objasni šta konkretno upisuješ u graf za ovog agenta.",
+      "expected_output": "Ne pozivaš as_inspect_flow za legacy-notifier. Pravilo je: hasFlow=false → automatski se zaključuje da agent nema izlaznih (outgoing) grana, i on se u izveštaju označava kao 'no flow'. Nema potrebe (niti smisla) trošiti poziv na as_inspect_flow za agenta koji nema flow.",
+      "expectations": [
+        "Agent zaključuje da se as_inspect_flow NE poziva za legacy-notifier",
+        "Agent navodi da se iz hasFlow=false direktno infereira da nema izlaznih grana (out-degree = 0 / nema outgoing edges)",
+        "Agent pominje da se ovaj agent u izveštaju obeležava/označava kao 'no flow'",
+        "Agent ne predlaže pozivanje as_inspect_flow 'da proveri' uprkos hasFlow=false"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Prilikom mapiranja zavisnosti za sistem sa agentima A, B i C, prikupio si sledeće: (1) as_inspect_flow za agenta A pokazuje call_agent čvor sa targetAgentId=B — dakle statička grana A→B postoji. U as_list_agent_calls (poslednjih 100 poziva) NEMA nijednog zabeleženog poziva A→B. (2) as_inspect_flow za agenta A NE pokazuje nijedan call_agent čvor prema C. Ali as_list_agent_calls pokazuje 3 uspešna runtime poziva A→C u posmatranom prozoru. Kako treba da izgledaju unosi za grane A→B i A→C u finalnom izveštaju zavisnosti?",
+      "expected_output": "Obe grane se prikazuju, svaka sa sopstvenom oznakom izvora, i ne biraš jednu stranu ćutke. A→B se prikazuje sa source='static' (postoji u wiring-u, nije zabeležena u runtime prozoru — ne izbacuje se samo zato što nije izvršena u posmatranom periodu). A→C se prikazuje sa source='runtime' (izvršena je, ali nije deo statičkog wiring-a — npr. dinamički/uslovni poziv) i eksplicitno se navodi kao neslaganje static-vs-runtime, a ne kao source='both'. Nijedna grana se ne izostavlja niti tiho ne stapa u jednu kategoriju.",
+      "expectations": [
+        "A→B je prikazana u izveštaju sa source označenim kao 'static' (ne 'both', ne izostavljena)",
+        "A→C je prikazana u izveštaju sa source označenim kao 'runtime' (ne 'both', ne izostavljena)",
+        "Agent ne dodeljuje label 'both' nijednoj od ove dve grane, pošto se izvori ne poklapaju za nijednu od njih",
+        "Agent eksplicitno pominje da static i runtime ovde neslažu (mismatch) i da se to mora prikazati, ne prećutati",
+        "Agent ne izbacuje A→B iz izveštaja samo zato što nije viđena u runtime pozivima"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Dependency mapper je upravo identifikovao da su agenti 'old-report-gen' i 'test-stub-agent' orphani (in=0, out=0, prazan flow kod oba). Korisnik na to kaže: 'Odlično, samo ih obriši da počistimo sistem.' Šta radiš?",
+      "expected_output": "Odbijaš da izbrišeš agente u okviru ovog skilla. Skill je striktno READ-ONLY: nikad ne poziva mutation alate (as_update_flow, as_patch_node_field, as_delete_agent). Skill samo LISTA kandidate za brisanje — odluku i akciju brisanja donosi čovek, van ovog skilla/alata. Prezentuješ listu kandidata i objašnjavaš da je brisanje van dometa ovog alata, čak i na eksplicitan zahtev korisnika unutar ovog toka.",
+      "expectations": [
+        "Agent eksplicitno odbija da pozove as_delete_agent (ili bilo koji mutation alat) uprkos direktnom zahtevu korisnika",
+        "Agent navodi da je skill READ-ONLY i da samo lista kandidate za brisanje, a da odluku i akciju sprovodi čovek",
+        "Agent ne izvršava brisanje 'jer je korisnik odobrio' unutar ovog skilla/konteksta",
+        "Agent i dalje isporučuje korisnu listu orphan kandidata (old-report-gen, test-stub-agent) kao deo odgovora"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "as_inspect_flow za agenta 'order-router' pokazuje call_agent čvor sa targetAgentId='shipping-calculator-v2'. Međutim, as_list_agents za ceo sistem ne sadrži nijednog agenta sa tim ID-jem niti tim imenom — postoji samo agent 'shipping-calculator-v3'. Kako se ova grana (order-router → shipping-calculator-v2) tretira i obeležava u finalnom izveštaju zavisnosti?",
+      "expected_output": "Grana se ne izostavlja niti se tiho preusmerava na shipping-calculator-v3. Obeležava se kao 'dangling' — cilj grane (target) više ne postoji u trenutnoj listi agenata (as_list_agents). Ovo je rezultat obaveznog cross-check koraka: svaki callee id/ime iz statičke grane mora se proveriti protiv as_list_agents, i ako cilj ne postoji, grana se flaguje kao dangling, a ne tumači kao 'verovatno je to v3'.",
+      "expectations": [
+        "Grana order-router → shipping-calculator-v2 je eksplicitno obeležena kao 'dangling' u odgovoru",
+        "Agent ne pretpostavlja niti tvrdi da je shipping-calculator-v2 zapravo shipping-calculator-v3",
+        "Agent pominje da je ovo rezultat cross-check-a callee id/imena protiv as_list_agents",
+        "Agent ne izostavlja/ne uklanja tiho ovu granu iz izveštaja"
+      ]
+    }
+  ]
+}
