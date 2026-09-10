@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: blocks a commit if plugin/skills/ has drifted from the
+# 01-08 phase folders. Read-only check — never runs --apply on its own.
+#
+# Installed by symlink from .git/hooks/pre-commit, so `git commit --no-verify`
+# still works as git's normal escape hatch if you ever need to bypass it.
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if [ ! -f "06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py" ]; then
+  # Script itself isn't present (e.g. a shallow clone) — don't block on
+  # something that can't run.
+  exit 0
+fi
+
+if ! python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py; then
+  echo ""
+  echo "❌ Commit blokiran: plugin/skills/ nije usklađen sa izvornim 01-08 fazama (vidi gore)."
+  echo "   Pokreni: python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py --apply"
+  echo "   pa dodaj rezultat u ovaj commit (ili git commit --no-verify da preskočiš)."
+  exit 1
+fi
