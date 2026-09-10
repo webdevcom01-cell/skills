@@ -1,0 +1,112 @@
+{
+  "expectations": [
+    {
+      "text": "The produced skill content contains zero ticket, PR, or issue number references",
+      "passed": true,
+      "evidence": "Independently grepped outputs/SKILL.md myself (not trusting the transcript's claim): `grep -nE '4821|5012|6034|7001|7002|7003'` returned no matches, and a broader `grep -nE '#[0-9]+|PR ?#?[0-9]+|[Ii]ssue [0-9]+'` also returned no matches. No engineer names (Marcus/Priya/Webb/Anand) appear either. The SKILL.md body (rule, race explanation, anti-pattern, fix, checklist, verification method, scope/open-questions) is entirely free of ticket/PR/issue residue."
+    },
+    {
+      "text": "The core rule (invalidate cache before writing to shared state, not after) is present and stated as a general rule, not tied to a specific incident narrative",
+      "passed": true,
+      "evidence": "SKILL.md '## The rule' section states: 'invalidate the cache entry for that key **before** the write to the underlying store commits — never after. Getting this backward is what causes stale reads under concurrent load...' Framed entirely in general terms (any 'code path', any 'shared data store'), with no reference to the specific incident, ticket, or people who found it."
+    },
+    {
+      "text": "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+      "passed": true,
+      "evidence": "Ran `python3 scripts/lint_skill.py outputs` myself against the produced outputs/ directory (not relying on the transcript's claim) and got: 'No advisory findings.' (exit code 0). This matches the transcript's reported result exactly."
+    },
+    {
+      "text": "If the raw transcript content were bundled unmodified instead of being distilled, scripts/lint_skill.py would report an incident-log-shape finding on it — confirming the check has real detection power, not just a clean pass by default",
+      "passed": true,
+      "evidence": "Independently reproduced this rather than trusting the transcript's assertion: copied outputs/raw-slack-transcript.md to a scratch dir as SKILL.md and ran `python3 scripts/lint_skill.py <scratch-dir>`. Got: '[WARN] incident-log-shape — SKILL.md: 19 ticket/PR/issue references, density 4.47/1000 chars (threshold: 4+ refs AND 0.5+/1000 chars)...'. This is a real WARN finding with concrete numbers (19 refs, 4.47/1000 chars), matching the transcript's reported output exactly — not just an unverified assertion that it would fire."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 6,
+      "Write": 4,
+      "Bash": 8,
+      "Edit": 1,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 19,
+    "total_steps": 17,
+    "errors_encountered": 1,
+    "output_chars": 6140,
+    "transcript_chars": 11784
+  },
+  "timing": {
+    "executor_duration_seconds": 331.524,
+    "total_duration_seconds": 331.524
+  },
+  "claims": [
+    {
+      "claim": "outputs/SKILL.md is 6140 chars, matching metrics.json's output_chars",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`wc -c outputs/SKILL.md` = 6140, exact match to metrics.json."
+    },
+    {
+      "claim": "with_skill/transcript.md is 11784 chars, matching metrics.json's transcript_chars",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`wc -c transcript.md` = 11784, exact match to metrics.json."
+    },
+    {
+      "claim": "check_verbatim_overlap.py against the distilled output is clean (no 15+-word verbatim runs from the raw transcript)",
+      "type": "process",
+      "verified": true,
+      "evidence": "Independently re-ran `python3 scripts/check_verbatim_overlap.py outputs/raw-slack-transcript.md outputs` and got 'No verbatim runs >= 15 words found.' — matches transcript's claim."
+    },
+    {
+      "claim": "The raw Slack transcript is a synthesized/fictional artifact, not a real conversation, and is disclosed as such",
+      "type": "factual",
+      "verified": true,
+      "evidence": "outputs/raw-slack-transcript.md opens with an explicit provenance note: 'This transcript was synthesized for this exercise... It is not a real conversation or a real incident... No real system, person, or company is depicted.'"
+    },
+    {
+      "claim": "No references/, scripts/, or assets/ subfolders were warranted for this skill given the single-topic source",
+      "type": "quality",
+      "verified": true,
+      "evidence": "outputs/ contains only SKILL.md (plus the raw transcript and metrics.json, which are eval artifacts, not skill files). SKILL.md at 6140 chars is a reasonably-scoped single file covering rule, race mechanics, anti-pattern, fix, checklist, verification, and scope/open-questions — consistent with the single-topic, single-conversation source. Judgment call is reasonable and not contradicted by any evidence."
+    },
+    {
+      "claim": "The task's packaging deviation (flat outputs/SKILL.md instead of outputs/cache-invalidation-ordering/SKILL.md) was an explicit, intentional deviation per task instructions rather than an oversight",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript explicitly flags this as a 'Deviation from normal packaging, per this task's explicit instructions' and explains the spec would normally require a matching folder name. Consistent with the eval harness's with_skill/outputs/ convention (contrast: the without_skill run for the same eval nested its output under outputs/cache-invalidation-ordering/, i.e. different runs handled this differently, but this run's choice was explained rather than silent)."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [
+      "lint_skill.py only reads '<path>/SKILL.md' with no arbitrary-file mode, so to test it against the raw transcript the executor copied the raw transcript's content into a scratch directory as a stand-in SKILL.md rather than modifying the script.",
+      "An `rm -rf` cleanup of that scratch copy was denied by the sandbox's destructive-command permission check; the executor left it as-is since it's outside all deliverable paths."
+    ]
+  },
+  "eval_feedback": {
+    "blindness_check": {
+      "verdict": "PASS — no evidence of expectation leakage found",
+      "explicit_non_reading_statement": "Present in two places: (1) a 'Scope note (read first)' at the top of the transcript stating 'No file named `eval_metadata.json` was read, referenced, or searched for. No `ls ..`, no upward `find`, no exploration outside the explicitly given paths.'; (2) a closing confirmation: 'Confirmed: at no point was `eval_metadata.json` read, searched for, or referenced, and no parent directory of the skill or the output workspace was listed, globbed, or explored.'",
+      "internal_leakage_evidence_search": "Searched the transcript for verbatim quotes of the four expectations, or references like 'the four expectations' / 'the expectations list' — found none. The transcript does refer to 'this task's required check #1' and 'this task's required check #2' when running lint_skill.py against the output and then against the raw transcript, with a quoted phrase 'to confirm the check actually fires on the untouched incident-shaped text' that conceptually overlaps with expectation 4's rationale ('confirming the check has real detection power, not just a clean pass by default'). This is not a verbatim match, and there is a fully innocent explanation for it: the skill's own SKILL.md/quality-checks.md (read by the executor in Step 1, before any output was produced) already instructs running lint_skill.py as a mechanical check, and running a linter against both a case that should pass and a case that should fire is a standard, obvious way to validate a linter's detection power — something any competent engineer would think to do once handed a script that claims to detect 'incident-log-shape' text, without needing to see a hidden expectations file. The parallel without_skill/transcript.md for the same eval (checked for comparison) shows the same base task framing minus the lint-script instructions, since no skill was loaded there — consistent with 'required check #1/#2' being either an explicit harness/task-wrapper instruction specific to the with_skill run, or the executor's own reasonable initiative from reading the skill's workflow, rather than something read out of eval_metadata.json's expectations array.",
+      "conclusion": "The blindness claim holds up: explicit denial is present, and no smoking-gun evidence (verbatim expectation quotes, 'the N expectations' phrasing, or exact-wording matches to expectations.text) was found. The closest thing to a flag — conceptual overlap between the executor's stated rationale for check #2 and expectation 4's rationale — is adequately explained by the skill's own built-in workflow guidance and is not treated as a failure of blindness."
+    },
+    "suggestions": [
+      {
+        "reason": "Expectation 3 and 4 as worded only require lint_skill.py to report (or not report) an incident-log-shape finding — they would be satisfied even if the executor merely asserted the result without actually running the script. This run happened to show real command invocations and real, distinctive output (specific WARN text, 19 refs, 4.47/1000 chars density) that I was able to independently reproduce byte-for-byte, which is exactly the kind of evidence that makes the assertion discriminating. But a weaker run could fabricate a plausible-looking 'No advisory findings.' or WARN line without ever invoking the script, and expectations 3/4 alone wouldn't catch that. Consider making it explicit in the eval that graders must reproduce the lint_skill.py invocation independently (which I did here) rather than trust the transcript, since the wording alone doesn't force it."
+      },
+      {
+        "reason": "None of the four expectations check that the distilled skill's rule is actually *correct* and *complete* relative to the source (e.g. that it captures the write-then-invalidate race and doesn't just happen to be free of ticket numbers by being vague or wrong). A skill that stripped all ticket numbers but also garbled or oversimplified the technical rule would still pass all four expectations. This run's SKILL.md happens to be technically solid (correctly explains the race window, correctly identifies the mutex-only fix as insufficient, includes a verification method) — but that quality wasn't actually being checked by any expectation, only observed incidentally by me while grading."
+      }
+    ],
+    "overall": "All four expectations pass with strong, independently-reproduced evidence (not just transcript trust) — grep on SKILL.md found zero ticket/PR/issue references, and both lint_skill.py invocations were re-run by me and produced identical output to what the transcript claimed. The blindness check for this re-run also passes: explicit non-reading confirmations are present at both ends of the transcript, and no verbatim expectation leakage was found, though the eval could be tightened to force graders to reproduce script output rather than trust transcript claims, and to add a correctness/quality check on the distilled rule itself rather than only checking for absence of ticket numbers and presence of a lint pass."
+  }
+}

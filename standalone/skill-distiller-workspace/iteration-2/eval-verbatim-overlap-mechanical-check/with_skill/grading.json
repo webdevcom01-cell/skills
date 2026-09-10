@@ -1,0 +1,93 @@
+{
+  "expectations": [
+    {
+      "text": "Running scripts/check_verbatim_overlap.py with the source saved to a file against the produced skill folder (threshold 15) reports no findings",
+      "passed": true,
+      "evidence": "Independently ran: `cd /Users/buda007/moji_skillovi/standalone/skill-distiller && python3 scripts/check_verbatim_overlap.py outputs/source.txt outputs` (paths resolved to the eval's with_skill/outputs). Exact output: 'No verbatim runs >= 15 words found.', exit code 0 — matches the transcript's claimed output verbatim. Also read the script's implementation directly: it tokenizes SKILL.md + references/*.md into lowercase word tokens and flags any run of >= threshold (default 15) consecutive matching tokens against the source tokens — this is a real substring/run-length check, not a stub. Sanity-checked the script has real teeth with a positive control: copying the exact source sentence into a dummy SKILL.md in a scratch folder and re-running the same script correctly flagged a 52-word verbatim run and exited 1, proving the tool can and does fire when overlap exists. Also ran the real check at --threshold 8 (still 'No verbatim runs >= 8 words found.') and --threshold 3 (found only trivial 3-word runs like 'separate package registry', 'clone and update' — expected phrase reuse, not sentence-level copying), confirming the threshold-15 clean result isn't an artifact of a broken or silently-passing script. Grading is against the documented threshold-15 behavior per instructions, which is unambiguously clean."
+    },
+    {
+      "text": "The distilled output still conveys the core idea (git as both transport and version control, no separate registry/build/publish step) even though the exact wording differs from the source",
+      "passed": true,
+      "evidence": "outputs/SKILL.md 'Core idea' section: 'A version-control system already solves two hard problems at once: moving a set of files to another machine, and tracking how that set of files changed over time... a bundle of artifacts... can often be distributed by simply living in a VCS repository — with no registry, no build step, and no separate publish pipeline layered on top.' This restates the source's 'git is both the transport and the versioning system, with no separate package registry, no build or publish step' in materially different wording and structure. The skill also adds a verb-mapping table (publish->commit+push, install->clone, update->pull/fetch+merge) that generalizes the source's 'distribution is a push, installation is a clone, and update is a pull' without reproducing its sentence structure. Confirmed via the verbatim-overlap check above that no 15-word run is shared, so the restatement is genuinely reworded, not a near-copy with cosmetic edits."
+    },
+    {
+      "text": "The skill still passes scripts/lint_skill.py and quick_validate.py",
+      "passed": false,
+      "evidence": "lint_skill.py: independently re-ran `python3 scripts/lint_skill.py outputs` from the skill-distiller directory -> 'No advisory findings.', exit 0, matching the transcript. This part holds. quick_validate.py: FAILS. Ran it two ways to control for a directory-naming confound (outputs/ vs. the skill's declared name): (1) directly against outputs/ -> fails immediately with 'Directory name \"outputs\" must match skill name \"vcs-native-distribution\"...'; (2) copied SKILL.md into a correctly-named scratch folder `vcs-native-distribution/` and re-ran, including the exact invocation form the skill-distiller's own Step 8 specifies (`python -B -m scripts.quick_validate <path>`, run from the skill-creator-pro directory) -> still fails: 'Description is too long (1086 characters). Maximum is 1024 characters.' Directly measured the SKILL.md frontmatter description field length: 1086 characters, confirming the tool's report. Verified the 1024-char rule is real and stable (not a fluke of one copy of the script) by diffing the quick_validate.py used against the canonical copy at ~/.claude/skills/skill-creator-pro/scripts/quick_validate.py — byte-identical, both hard-code `if len(description) > 1024`. Also confirmed the skill-distiller's own references/quality-checks.md (which the transcript says was read in full in step 2) explicitly documents 'Stay within roughly 1,024 characters — this is the one frontmatter constraint enforced in code' — so the produced description violates a rule the executor's own transcript claims to have read and applied. Because one of the two named checks fails on a genuine, independently-reproduced structural defect (not a scoring artifact), the conjunctive expectation ('passes lint_skill.py AND quick_validate.py') is not met."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.67
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 6,
+      "Write": 4,
+      "Bash": 5,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 15,
+    "total_steps": 11,
+    "errors_encountered": 0,
+    "output_chars": 5544,
+    "transcript_chars": 8940
+  },
+  "timing": {
+    "executor_duration_seconds": 189.675,
+    "total_duration_seconds": 189.675
+  },
+  "claims": [
+    {
+      "claim": "Ran scripts/check_verbatim_overlap.py against outputs/source.txt and outputs/, with exact output 'No verbatim runs >= 15 words found.'",
+      "type": "process",
+      "verified": true,
+      "evidence": "Independently re-ran the identical command; output matched character-for-character, exit code 0."
+    },
+    {
+      "claim": "Ran scripts/lint_skill.py against outputs/, with exact output 'No advisory findings.'",
+      "type": "process",
+      "verified": true,
+      "evidence": "Independently re-ran the identical command; output matched, exit code 0. Also read lint_skill.py's source: it checks incident-log-shape, references-sprawl, and body budget only — it does not check description length, so this pass is not in tension with the quick_validate.py failure found below."
+    },
+    {
+      "claim": "source.txt = 324 bytes/chars, SKILL.md = 5544 bytes/chars (metrics.json)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -c on both files returned 324 and 5544 respectively, matching metrics.json's output_chars and the transcript's stated source.txt size. transcript.md = 8940 bytes also matches metrics.json's transcript_chars."
+    },
+    {
+      "claim": "The description follows the description-quality rules from quality-checks.md (third person, states what/when, concrete trigger phrasing, explicit 'Do NOT use for X' line)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The structural/content rules are followed (third-person voice, 'Use when...' trigger phrasing, an explicit 'Do NOT use for general package-manager or registry design...' line are all present in the description). However, the same quality-checks.md the transcript says it read also documents a hard ~1024-character ceiling on the description field ('the one frontmatter constraint enforced in code'), and the produced description is 1086 characters — 62 over. So the claim of following 'the description-quality rules' is only partially true; the one machine-enforced rule in that same list was missed, and this is exactly what caused the quick_validate.py failure above."
+    },
+    {
+      "claim": "Used the single-skill shape (no references/ directory), consistent with Step 0",
+      "type": "process",
+      "verified": true,
+      "evidence": "outputs/ contains only SKILL.md, source.txt, metrics.json — no references/ subdirectory. Matches the transcript's stated Step 0 shape decision."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "The skill-distiller's own SKILL.md Step 8 ('Validate structurally, then lint') explicitly instructs running BOTH quick_validate.py and lint_skill.py before considering the draft done, and explains quick_validate.py specifically catches 'name format, frontmatter shape, description/compatibility length' — exactly the defect present here. The executor's transcript explicitly declined to run quick_validate.py, reasoning that the skill-creator-pro directory was 'not among the paths this task was scoped to.' That skipped step is precisely what would have caught the 1086-character description before hand-off. No expectation currently checks whether the executor actually ran the validation step its own workflow requires (as opposed to whether the artifact happens to pass if a grader runs it after the fact) — worth adding an expectation or transcript check for 'the executor ran or attempted to run quick_validate.py per Step 8', since silently skipping a documented gating step is itself a process failure distinct from the artifact's mechanical pass/fail."
+      },
+      {
+        "assertion": "The skill still passes scripts/lint_skill.py and quick_validate.py",
+        "reason": "This assertion did its job well here — it's discriminating and caught a real, non-obvious defect (description length) that none of the other two expectations would have surfaced. No weakness to flag; noted only because it's the assertion that actually failed."
+      }
+    ],
+    "overall": "Two of three expectations pass with strong, independently-reproduced evidence. The third fails on a genuine, confirmed defect: the produced SKILL.md's description field is 1086 characters against quick_validate.py's hard 1024-character limit — a limit documented in the very reference file (quality-checks.md) the transcript claims to have read. The transcript's own account is otherwise accurate about what it ran and what those tools printed; the gap is that it explicitly chose not to run the one check that would have caught this, rationalizing it as out of scope, and the final response to the user does not flag any uncertainty about structural validation despite skipping it."
+  }
+}

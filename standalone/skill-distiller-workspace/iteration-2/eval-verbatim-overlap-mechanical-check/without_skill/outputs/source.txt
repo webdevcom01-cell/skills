@@ -1,0 +1,1 @@
+A profile distribution packages a git repository that bundles personality, skills, cron jobs, MCP connections, and config together, and git is both the transport and the versioning system, with no separate package registry, no build or publish step, so distribution is a push, installation is a clone, and update is a pull.

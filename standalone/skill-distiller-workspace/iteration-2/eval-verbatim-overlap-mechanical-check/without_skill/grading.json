@@ -1,0 +1,90 @@
+{
+  "expectations": [
+    {
+      "text": "Running scripts/check_verbatim_overlap.py with the source saved to a file against the produced skill folder (threshold 15) reports no findings",
+      "passed": false,
+      "evidence": "The transcript explicitly states the executor 'had no verbatim-overlap checking tool available, so I relied on manual paraphrase discipline instead' (transcript.md, Task section) and outputs/ contains no scripts/ directory or check_verbatim_overlap.py of any kind (only source.txt, SKILL.md, metrics.json were produced). This is the without_skill baseline condition, which does not ship the skill's scripts/. There is no evidence the script was run, so this expectation fails for lack of evidence. Independently (outside what the baseline executor could access), I ran python3 /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/check_verbatim_overlap.py outputs/source.txt outputs --threshold 15 myself for my own verification only, and it reported 'No verbatim runs >= 15 words found.' That result is NOT credited to the baseline — it only confirms expectation 2 (below) independently. This failure is an expected/known limitation of the without_skill condition, not a quality problem with the produced skill; see eval_feedback."
+    },
+    {
+      "text": "The distilled output still conveys the core idea (git as both transport and version control, no separate registry/build/publish step) even though the exact wording differs from the source",
+      "passed": true,
+      "evidence": "outputs/SKILL.md's 'The core move' section states: 'A version-control tool already combines transport and history into one piece of software, so building anything on top of it is frequently pure overhead' and the lifecycle-mapping table explicitly maps 'Package registry / index' -> 'The shared remote itself...', 'Build step' -> 'Skipped — the checked-in files already are the runnable artifact', 'Release / publish' -> 'Committing, then sending that commit to the shared remote'. The core idea (git/version-control as both transport and version history, no separate registry/build/publish step) is clearly conveyed. Independently ran `python3 /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/check_verbatim_overlap.py outputs/source.txt outputs --threshold 15` against this baseline's own outputs (source.txt vs SKILL.md) as an independent verification tool: result was 'No verbatim runs >= 15 words found.' Manual spot-check of the source's distinctive 15+-word spans ('packages a git repository that bundles personality, skills, cron jobs, MCP connections, and config together', 'git is both the transport and the versioning system, with no separate package registry, no build or publish step', 'distribution is a push, installation is a clone, and update is a pull') confirms none appear as a contiguous run in SKILL.md; each is paraphrased (e.g. the bundled-items list becomes 'an agent's persona, its skill definitions, any scheduled or cron-style jobs, its external tool/connector wiring, and its configuration values' in the checklist, and the push/clone/pull triad becomes separate table-cell phrases like 'Committing, then sending that commit to the shared remote' / 'A full checkout of the repo' / 'Fetching and merging upstream changes')."
+    },
+    {
+      "text": "The skill still passes scripts/lint_skill.py and quick_validate.py",
+      "passed": false,
+      "evidence": "Ran both scripts independently against the produced artifact. `python3 /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/lint_skill.py outputs` -> 'No advisory findings.' (exit 0) — PASSES. `python3 .../skill-creator-pro/scripts/quick_validate.py outputs` -> 'Directory name 'outputs' must match skill name 'transport-native-distribution'. Rename the directory, or change the `name` field, so the two agree.' (exit 1) — FAILS, because this baseline wrote SKILL.md flat at outputs/SKILL.md rather than outputs/transport-native-distribution/SKILL.md. To isolate whether this is a content defect vs. a directory-naming artifact, I copied the identical SKILL.md into a directory named 'transport-native-distribution' and re-ran quick_validate.py: 'Skill is valid!' (exit 0) — the frontmatter itself (name, description, kebab-case naming, length limits, allowed keys) is fully valid. Since the expectation names both scripts conjunctively and quick_validate.py fails against the artifact as actually produced, the expectation fails per the no-partial-credit rule. See eval_feedback — this failure is caused by an output-directory-naming convention issue, not a defect in the skill's content."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 2,
+    "total": 3,
+    "pass_rate": 0.33
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 4,
+      "Bash": 6,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 10,
+    "total_steps": 8,
+    "errors_encountered": 0,
+    "output_chars": 5975,
+    "transcript_chars": 6413,
+    "files_created": ["source.txt", "SKILL.md", "transcript.md", "metrics.json"]
+  },
+  "timing": {
+    "executor_duration_seconds": 254.771,
+    "total_duration_seconds": 254.771,
+    "total_tokens": 125640
+  },
+  "claims": [
+    {
+      "claim": "source.txt and SKILL.md are 324 and 5651 characters respectively, 5975 combined",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -c confirms: source.txt = 324 bytes, SKILL.md = 5651 bytes, sum = 5975 — matches metrics.json's output_chars: 5975 exactly."
+    },
+    {
+      "claim": "transcript.md metrics (transcript_chars: 6413) accurately reflect the actual transcript file",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Filesystem listing shows without_skill/transcript.md is exactly 6413 bytes, matching metrics.json's transcript_chars field."
+    },
+    {
+      "claim": "No 15-or-more-word run from the source sentence appears verbatim anywhere in the produced SKILL.md",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Independently confirmed via check_verbatim_overlap.py (threshold 15): 'No verbatim runs >= 15 words found.' plus manual inspection of the source's three distinctive spans, none of which recur as contiguous runs in SKILL.md."
+    },
+    {
+      "claim": "The skill is a well-formed, valid SKILL.md (frontmatter, naming, structure)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "quick_validate.py reports 'Skill is valid!' when run against the identical content placed in a correctly-named directory; lint_skill.py reports 'No advisory findings.' against the actual outputs/ folder. The only failure mode found is the outputs/-vs-skill-name directory mismatch, which is about output placement, not the SKILL.md content itself."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Running scripts/check_verbatim_overlap.py ... reports no findings",
+        "reason": "This assertion cannot be satisfied by the without_skill baseline by construction: the baseline condition has no access to scripts/check_verbatim_overlap.py (it only ships with the skill), so the executor has no way to run it. This is an expected/known limitation of the without_skill condition, not a quality signal about the distillation itself — it will fail for every without_skill run regardless of how good the paraphrase is. Consider either (a) not scoring this expectation for the without_skill condition at all, or (b) shipping the checking script as part of the eval harness itself (not only inside the skill package) so it can be run uniformly in both conditions for a fair with/without comparison."
+      },
+      {
+        "assertion": "The skill still passes scripts/lint_skill.py and quick_validate.py",
+        "reason": "quick_validate.py enforces that the containing directory name must equal the skill's frontmatter `name` (here 'transport-native-distribution'), but this eval harness's baseline convention (seen consistently across sibling eval folders in this workspace, e.g. eval-prompt-injection-resistance/without_skill/outputs/SKILL.md, eval-knowledge-base-shape-multi-topic-source/without_skill/outputs/SKILL.md) writes SKILL.md flat at outputs/SKILL.md rather than outputs/<skill-name>/SKILL.md. Only one sibling run in this workspace (eval-incident-log-shape-cache-invalidation) happened to nest it under a correctly-named subdirectory. Because of this inconsistency, the quick_validate.py half of this assertion is largely incidental to skill quality — I confirmed the identical SKILL.md content passes quick_validate.py cleanly once placed in a correctly-named directory. Consider either standardizing the harness to always write outputs/<skill-name>/SKILL.md, or having this assertion run quick_validate.py against a renamed/staged copy so it actually measures content well-formedness rather than the harness's output-folder convention."
+      }
+    ],
+    "overall": "1/3 expectations passed under strict, no-partial-credit grading, but both failures trace to eval-harness/scripts-availability artifacts rather than defects in the distilled skill itself. The actual paraphrase quality is strong: the core idea is clearly conveyed, no 15+-word verbatim run from the source survives (independently verified), and the SKILL.md content is well-formed (lint_skill.py clean; quick_validate.py clean once given a correctly-named directory). Recommend the eval author either exempt/adjust expectations 1 and 3's quick_validate.py check for the without_skill condition, or fix the underlying harness/script-availability gaps described above so the pass/fail signal reflects distillation quality rather than baseline plumbing."
+  }
+}

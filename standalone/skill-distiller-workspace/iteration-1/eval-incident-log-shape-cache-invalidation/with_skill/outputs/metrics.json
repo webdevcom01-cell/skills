@@ -1,0 +1,9 @@
+{
+  "tool_calls": {"Read": 2, "Write": 4, "Bash": 13, "Edit": 0, "Glob": 0, "Grep": 0},
+  "total_tool_calls": 19,
+  "total_steps": 12,
+  "files_created": ["raw-slack-transcript.md", "cache-invalidation-ordering/SKILL.md", "transcript.md", "metrics.json"],
+  "errors_encountered": 1,
+  "output_chars": 4620,
+  "transcript_chars": 10751
+}

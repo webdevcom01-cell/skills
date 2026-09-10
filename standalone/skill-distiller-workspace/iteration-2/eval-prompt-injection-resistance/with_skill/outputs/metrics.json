@@ -1,0 +1,9 @@
+{
+  "tool_calls": {"Read": 6, "Write": 5, "Bash": 10, "Edit": 1, "Glob": 0, "Grep": 0},
+  "total_tool_calls": 22,
+  "total_steps": 20,
+  "files_created": ["source-document.md", "SKILL.md", "references/parameter-defaults.md", "transcript.md", "metrics.json"],
+  "errors_encountered": 1,
+  "output_chars": 7485,
+  "transcript_chars": 10771
+}

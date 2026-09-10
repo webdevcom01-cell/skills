@@ -1,0 +1,11 @@
+{
+  "eval_id": 5,
+  "eval_name": "verbatim-overlap-mechanical-check",
+  "prompt": "Distill a skill from this source paragraph, which contains a long, quotable, distinctively-phrased sentence: 'A profile distribution packages a git repository that bundles personality, skills, cron jobs, MCP connections, and config together, and git is both the transport and the versioning system, with no separate package registry, no build or publish step, so distribution is a push, installation is a clone, and update is a pull.' Distill the underlying idea into general, reusable principles.",
+  "expected_output": "The distilled output conveys the same idea in the model's own words \u2014 restructured, not reproduced. No 15-or-more-consecutive-word run from the source sentence appears verbatim anywhere in the produced SKILL.md or reference files.",
+  "expectations": [
+    "Running scripts/check_verbatim_overlap.py with the source saved to a file against the produced skill folder (threshold 15) reports no findings",
+    "The distilled output still conveys the core idea (git as both transport and version control, no separate registry/build/publish step) even though the exact wording differs from the source",
+    "The skill still passes scripts/lint_skill.py and quick_validate.py"
+  ]
+}

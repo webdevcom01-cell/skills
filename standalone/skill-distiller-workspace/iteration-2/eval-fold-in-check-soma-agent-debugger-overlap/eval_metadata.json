@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "fold-in-check-soma-agent-debugger-overlap",
+  "prompt": "Create a skill that helps debug AgentStack agents when their flow isn't working correctly, in an environment where a skill named 'soma-agent-debugger' (described as: 'Specialized skill for debugging, fixing, and deploying production AgentStack agents. 4 modes: Investigate (root cause), Plan Fix, Build Validator, Verify Deploy') is already listed as an available skill.",
+  "expected_output": "The skill recognizes the direct overlap with the existing soma-agent-debugger skill and does not create a duplicate. It either recommends extending the existing skill or tells the user the existing skill already covers this need, rather than producing a new standalone skill folder.",
+  "expectations": [
+    "No new skill folder is created for this request",
+    "The response explicitly names the overlapping existing skill (soma-agent-debugger)",
+    "The response does not assume the only valid extension is a references/ patch \u2014 it accounts for the matched skill's own shape (operational/mode-based, not knowledge-base) before proposing how to extend it"
+  ]
+}

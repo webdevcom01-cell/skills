@@ -1,0 +1,12 @@
+{
+  "eval_id": 4,
+  "eval_name": "incident-log-shape-cache-invalidation",
+  "prompt": "Distill a skill from this source: a raw Slack thread transcript where two people discuss a production incident, referencing ticket numbers #4821, PR #5012, issue 6034, PR#7001, #7002, and #7003, and conclude that a cache invalidation must happen before a shared-state write, not after, to avoid stale reads under concurrent load.",
+  "expected_output": "The distilled skill states the cache-invalidation-before-write rule in general terms, with no ticket numbers, PR references, or incident-specific narrative \u2014 the rule stands on its own without needing the incident's details attached. Note: a single run of this eval has limited power to show skill value on its own, since a capable model may clean this up unprompted in any individual attempt \u2014 this eval is most informative when run multiple times per configuration (skill-creator-pro's default), comparing consistency rather than single-shot success.",
+  "expectations": [
+    "The produced skill content contains zero ticket, PR, or issue number references",
+    "The core rule (invalidate cache before writing to shared state, not after) is present and stated as a general rule, not tied to a specific incident narrative",
+    "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+    "If the raw transcript content were bundled unmodified instead of being distilled, scripts/lint_skill.py would report an incident-log-shape finding on it \u2014 confirming the check has real detection power, not just a clean pass by default"
+  ]
+}

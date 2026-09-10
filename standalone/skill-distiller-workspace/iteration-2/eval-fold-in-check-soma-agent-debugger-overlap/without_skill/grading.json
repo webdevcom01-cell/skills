@@ -1,0 +1,90 @@
+{
+  "expectations": [
+    {
+      "text": "No new skill folder is created for this request",
+      "passed": true,
+      "evidence": "Transcript Step 1 confirms the target output directory was checked and was empty; Step 3 states the explicit decision: 'Decided not to create a new skill folder. Wrote a markdown recommendation instead.' A filesystem search of the entire eval directory tree (`find ... -type f -iname \"SKILL.md\"`) returns no matches, and outputs/ contains only recommendation.md and metrics.json — no skill folder or SKILL.md was produced anywhere."
+    },
+    {
+      "text": "The response explicitly names the overlapping existing skill (soma-agent-debugger)",
+      "passed": true,
+      "evidence": "outputs/recommendation.md names 'soma-agent-debugger' by name repeatedly, including in the title ('Do NOT create a new \"AgentStack flow debugger\" skill'), the overlap section ('A skill named soma-agent-debugger is already present...'), and the final decision ('a recommendation to use the existing soma-agent-debugger skill for this task')."
+    },
+    {
+      "text": "The response does not assume the only valid extension is a references/ patch — it accounts for the matched skill's own shape (operational/mode-based, not knowledge-base) before proposing how to extend it",
+      "passed": true,
+      "evidence": "recommendation.md explicitly reasons about soma-agent-debugger's 4-mode operational structure before proposing anything: it maps the task onto 'Investigate' mode specifically, and separately describes how 'Plan Fix', 'Build Validator', and 'Verify Deploy' modes would carry a fix through to production ('For \"AgentStack agent flow isn't working\" requests, invoke soma-agent-debugger in Investigate mode... If the flow turns out to need a code change, that same skill's Plan Fix mode produces a structured fix prompt; Build Validator and Verify Deploy cover the regression-gate and post-deploy smoke test'). The concrete extension it proposes is a one-line addition to the skill's trigger list ('add agent flow broken, flow not working, flow isn't working, broken flow to soma-agent-debugger's trigger list') — i.e. a frontmatter/trigger-surface patch appropriate to an operational, mode-routed skill — not a references/ knowledge-base file. No references/ patch is proposed anywhere in the output."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 3,
+      "Bash": 3,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 6,
+    "total_steps": 6,
+    "errors_encountered": 0,
+    "output_chars": 5771,
+    "transcript_chars": 4575
+  },
+  "timing": {
+    "executor_duration_seconds": 107.504,
+    "total_duration_seconds": 107.504
+  },
+  "claims": [
+    {
+      "claim": "A new skill was not created; only outputs/recommendation.md was produced as the deliverable",
+      "type": "factual",
+      "verified": true,
+      "evidence": "outputs/ contains only recommendation.md and metrics.json; no SKILL.md or skill directory exists anywhere in the eval tree."
+    },
+    {
+      "claim": "The AgentStack MCP server available in this environment ships flow-specific diagnostic tools: as_find_broken_flows, as_inspect_flow, as_get_recent_executions, as_get_agent_call_log, as_diagnose_models, as_health_check, as_get_heartbeat_status",
+      "type": "factual",
+      "verified": true,
+      "evidence": "All seven tool names are present verbatim in this session's own deferred-tools list under the mcp__93684bab-d0b0-4789-8373-bfb68ad65c95__ prefix, confirming the executor's environment claim is accurate rather than fabricated."
+    },
+    {
+      "claim": "soma-agent-debugger is already listed under three names/namespaces: soma-agent-debugger, soma-skills:soma-agent-debugger, anthropic-skills:soma-agent-debugger",
+      "type": "factual",
+      "verified": true,
+      "evidence": "All three exact entries appear in this session's available-skills listing."
+    },
+    {
+      "claim": "None of soma-agent-debugger's stated triggers literally contain the phrase 'flow isn't working' or 'flow is broken'",
+      "type": "factual",
+      "verified": true,
+      "evidence": "eval_metadata.json's prompt quotes the skill's own trigger list ('debug agent, fix agent, audit agent, agent ne radi, agent broken, production broken, build quality gate, smoke test agent, verify deploy, popravi agent, audituj agent, pukla produkcija, hocu validator, validate deploy') — no entry contains 'flow' at all, confirming the claimed gap is real."
+    },
+    {
+      "claim": "soma-agent-debugger's Investigate mode is defined to do exactly this (root-cause debugging of a broken AgentStack agent flow)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The eval_metadata.json prompt's own description of soma-agent-debugger states mode 1 is 'Investigate (root cause)', which matches the task's request to debug a flow that 'isn't working correctly' — the mapping is a reasonable, well-justified reading of the given description rather than a stretch."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No new skill folder is created for this request",
+        "reason": "This assertion alone would also pass for a lazy or confused executor that simply produced nothing and gave up, without any overlap analysis. It is only discriminating in combination with expectations 2 and 3, which is fine here since all three are being checked together, but if this assertion were ever graded in isolation it would not distinguish 'did the right analysis' from 'did nothing.'"
+      }
+    ],
+    "overall": "The three expectations work well together: expectation 1 checks the outcome, and expectations 2-3 force genuine engagement with the specific overlapping skill and its structure, which prevents a shallow 'something else exists, done' response from passing. Expectation 3 in particular is a good discriminating check — it would have caught a response that mechanically suggested a references/ knowledge-base patch (a pattern this eval's title suggests was a known failure mode) instead of reasoning about the matched skill's mode-based shape. No changes needed."
+  }
+}

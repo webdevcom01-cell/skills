@@ -1,0 +1,150 @@
+{
+  "expectations": [
+    {
+      "text": "The output chooses the knowledge-base shape (SKILL.md plus multiple reference files under references/), not a single-file shape",
+      "passed": true,
+      "evidence": "outputs/ contains SKILL.md plus a real references/ subdirectory with 4 topic files: references/manifest-design.md, references/data-ownership-separation.md, references/secrets-exclusion.md, references/unsolved-risks-checklist.md (confirmed via `find outputs/ -type f`). Note: the grading task's methodology guidance assumed this run had been forced to save reference files flat as siblings of SKILL.md (no references/ subfolder) as a workaround for a since-fixed viewer bug. That premise did not hold for this run's actual filesystem output — a genuine references/ subfolder exists, exactly as the expectation literally requires — so this expectation is satisfied on the strictest reading, not just on the 'grade the substance' fallback reading. SKILL.md's own '## References' section (lines 72-91) also treats these as load-on-demand topic files rather than inlining their content, consistent with a real knowledge-base shape rather than a single-file shape with extra decoration."
+    },
+    {
+      "text": "The SKILL.md body stays within roughly 500 lines / 5000 tokens despite the source being much larger — this is the sharpest with-skill/without-skill differentiator in this eval, since a capable model asked to 'make a skill from this' may split into multiple files on its own, but is much less likely to independently apply a strict body budget discipline without explicit instruction",
+      "passed": true,
+      "evidence": "Independently parsed SKILL.md: body (everything after the closing frontmatter '---') is 88 lines / 4829 characters, i.e. ~1207 tokens by the char/4 heuristic the skill's own lint_skill.py uses. That is well under the 500-line / 5000-token soft budget, despite the synthesized source document being 306 lines / 18,830 characters (~4700 tokens) covering 5 ecosystems across 4 major topics. The transcript's own claim in section 9 ('90 lines, ~1,207 tokens') is consistent with my independent count (minor 2-line discrepancy is immaterial, likely a counting-method difference, e.g. whether the closing '---' itself is counted)."
+    },
+    {
+      "text": "Reference files are organized by topic, not by chapter number or session",
+      "passed": true,
+      "evidence": "The four reference filenames are manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, unsolved-risks-checklist.md — each names a subject-matter topic, none reference a chapter number, section number, or session/date. unsolved-risks-checklist.md in particular reorganizes the source's flat 11-item list into 4 topic clusters (Trust & identity / Lifecycle & revocation / Versioning & comparability / Data, privacy & licensing) that do not correspond 1:1 to the source's own ordering, and manifest-design.md is organized by manifest concern (identity, entrypoints, credentials, data-ownership fields, resource references) rather than by the source's per-ecosystem subsection order — confirming these are genuine topic reorganizations, not renamed copies of the source's own chapter breaks."
+    },
+    {
+      "text": "The SKILL.md index accurately lists every reference file that was actually created, with no file listed that doesn't exist and no created file left out of the index",
+      "passed": true,
+      "evidence": "SKILL.md's '## References' section (lines 77-91) lists exactly: references/manifest-design.md, references/data-ownership-separation.md, references/secrets-exclusion.md, references/unsolved-risks-checklist.md. `find outputs/references -type f` returns exactly those same 4 files, byte for byte the same set — no extra file on disk that's missing from the index, and no index entry pointing at a nonexistent file."
+    },
+    {
+      "text": "No content is copied verbatim from the source beyond a short quoted phrase",
+      "passed": false,
+      "evidence": "I independently re-ran the mandatory mechanical check myself rather than trusting the transcript's claim, per the grading task's explicit instruction (this is the exact failure mode iteration-1 was re-run to fix). Command: `python3 /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/check_verbatim_overlap.py outputs/source-document.md outputs/` — exact output: 'No verbatim runs >= 15 words found.' (exit code 0). This independently confirms the transcript's section-8 claim that the mandatory Step 5 gate (15-word threshold) is clean. HOWEVER, per the grading task's explicit instruction to also spot-check for near-threshold copying that the fixed 15-word script would stay silent on, I re-ran the same script with `--threshold 10` and found 12 additional flagged runs of 10-14 words that the 15-word gate misses, several of which are not mere shared technical vocabulary/table-cell content but full independent narrative clauses reproduced with only 1-2 cosmetic word substitutions and no quotation marks: (1) references/data-ownership-separation.md, 14-word run: '...per user analytics who installed what when in the same record as the package's...' — source section 3.2: 'a registry that stores per-user analytics (who installed what, when) in the same record as the package's own public metadata'; (2) references/data-ownership-separation.md, 14-word run: '...mcp registry has essentially no user data concept at the manifest level at all...' — source section 3.3: 'MCP Registry has essentially no user-data concept at the manifest level at all, because an MCP server's own runtime storage...' (only 'because'->':' and 'registry manifest describes'->'registry's server.json describes' differ); (3) references/secrets-exclusion.md, 12-word run: '...are documented only in prose in the description or an external readme...' — source section 2.6: 'are documented only in prose, in the description or an external README' (word-for-word except punctuation); (4) references/secrets-exclusion.md, 12-word run: '...but third party tool resources extensions that wire in custom tool integrations...' — source section 4, identical opening clause before the two versions diverge. None of these four are set off as quoted phrases; each reproduces a full independent sentence or clause, not a short quoted term. This shows the mandatory mechanical gate (tuned to the skill's own 15-word default) was satisfied, but real near-verbatim paraphrasing that goes beyond 'a short quoted phrase' survived the fix pass documented in transcript section 8, which only targeted the specific runs the default-threshold script had flagged. Some other 10-14-word matches I also found (e.g. a repeated '16 pairs / 64-character keys / 512-character values' figure, and shared table-cell field names in a comparison table) are defensible as necessarily-precise factual/table content rather than narrative copying, and I did not weight those against the verdict — the four narrative-clause examples above are sufficient on their own to fail this expectation under a strict, burden-on-the-pass standard."
+    },
+    {
+      "text": "The output passes scripts/lint_skill.py with no incident-log-shape or references-sprawl findings",
+      "passed": true,
+      "evidence": "Independently re-ran (not relying on the transcript's claim): `python3 /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/lint_skill.py outputs/` — exact output: 'No advisory findings.' (exit code 0). Also independently confirmed the incident-log-shape conversion actually worked by grepping the full output tree for the incident-specific tokens the synthesized source used (ticket id, narrative beats, exact counts): `grep -rniE \"OPS-2291|conference talk|400 times|three days later\" outputs/SKILL.md outputs/references/*.md` returned no matches — the incident-shaped paragraph was genuinely generalized into a rule, not merely left in and coincidentally missed by the linter's regex."
+    },
+    {
+      "text": "The output passes skill-creator-pro's quick_validate.py",
+      "passed": true,
+      "evidence": "The transcript itself (section 9) states this was NOT actually run ('no path to it was given for this task... I did not go looking for it... structural validation below was done by manually checking the rules... instead of running the actual validator') — so per the grading task's directive not to trust transcript claims, I located and ran the real script myself: `/Users/buda007/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/8e0b9915-0af4-446a-b8ff-61e474ed90e6/d62e3a41-a44b-4f88-86f1-809bfd40b157/skills/skill-creator-pro/scripts/quick_validate.py` (installed pyyaml into a scratch venv since the script has a hard `import yaml` dependency not present in the base environment). Run 1, directly against outputs/ as delivered: FAILS with 'Directory name \"outputs\" must match skill name \"agent-distribution-patterns\". Rename the directory, or change the `name` field, so the two agree.' (exit 1). This failure is purely a naming artifact of the eval harness's flat-output-directory convention for this run (the same category of harness artifact the grading task's own methodology note already excuses for the references/ question) — quick_validate.py hard-requires the containing folder to literally equal the skill's `name` field, which is structurally impossible to satisfy while the harness delivers output directly into a folder literally named 'outputs'. To isolate content validity from this harness artifact, I copied only SKILL.md and references/*.md into a locally-created folder correctly named agent-distribution-patterns/ and re-ran: output 'Skill is valid!' (exit code 0) — a full pass with no findings, confirming the skill's actual content (frontmatter, structure, files) is genuinely valid and the only reason the naive run fails is the directory-name mismatch inherent to this eval's output-delivery convention, not a defect in the produced skill."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.86
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 7,
+      "Write": 9,
+      "Bash": 13,
+      "Edit": 5,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 34,
+    "total_steps": 31,
+    "errors_encountered": 1,
+    "output_chars": 46433,
+    "transcript_chars": 21908
+  },
+  "timing": {
+    "total_duration_seconds": 715.786,
+    "total_tokens": 179832,
+    "duration_ms": 715786,
+    "note": "timing.json for this run does not use the executor_duration_seconds/grader_duration_seconds field names from the grading template — it records only total_tokens and duration_ms (=total_duration_seconds*1000) for the executor run as a whole. Reported here verbatim rather than invented."
+  },
+  "claims": [
+    {
+      "claim": "output_chars (46433) is the sum of the character counts of SKILL.md + the 4 reference files + source-document.md",
+      "type": "factual",
+      "verified": true,
+      "evidence": "6113 + 6548 + 4756 + 4846 + 5340 + 18830 = 46433, exactly matching metrics.json's output_chars."
+    },
+    {
+      "claim": "transcript_chars (21908) matches the actual transcript.md file size",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`ls -la transcript.md` reports 21908 bytes, exact match."
+    },
+    {
+      "claim": "The first check_verbatim_overlap.py run found up to a 41-word verbatim run in unsolved-risks-checklist.md, and the rewritten file is clean",
+      "type": "process",
+      "verified": true,
+      "evidence": "Cannot verify the exact first-draft numbers (that draft wasn't preserved), but the end state is independently confirmed clean at the mandated 15-word threshold, and unsolved-risks-checklist.md specifically produced zero flags even down to a --threshold 8 re-run I performed — the most thoroughly reworked of the four reference files, consistent with the transcript's claim that it was fully rewritten from scratch rather than patched."
+    },
+    {
+      "claim": "description field is 973 characters, under the ~1,024-character soft limit",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Independently parsed SKILL.md frontmatter with a script: description line length = 973 characters, exact match to the transcript's claimed figure."
+    },
+    {
+      "claim": "name field 'agent-distribution-patterns' is 27 characters and matches the required slug pattern",
+      "type": "factual",
+      "verified": true,
+      "evidence": "len('agent-distribution-patterns') == 27, and the string matches [a-z0-9]+(-[a-z0-9]+)* (lowercase, hyphen-separated, no leading/trailing/double hyphen)."
+    },
+    {
+      "claim": "The new skill's description defers to soma-distribution ('check whether soma-distribution already covers that first') rather than silently assuming no overlap",
+      "type": "factual",
+      "verified": true,
+      "evidence": "SKILL.md frontmatter description (line 3) ends with exactly: '...or debugging one deployed agent's own distribution setup — check whether soma-distribution already covers that first.' Matches the transcript's section-4 and section-12 claims verbatim."
+    },
+    {
+      "claim": "Structural validation (quick_validate.py) was substituted with a manual check because the skill-creator-pro path wasn't available within this task's constraints",
+      "type": "process",
+      "verified": true,
+      "evidence": "Confirmed truthful and appropriately caveated in the transcript itself (sections 9 and 12, under an explicit 'Not run' heading) rather than silently claimed as done — this is exactly the kind of honest self-disclosure the previous failed iteration lacked. I then verified independently (see expectation 7) that had the validator been run, it would have passed on content grounds."
+    },
+    {
+      "claim": "No content is copied verbatim from the source beyond a short quoted phrase (implicit in the transcript's final report: 'rewrote both, re-ran clean')",
+      "type": "quality",
+      "verified": false,
+      "evidence": "See the failed expectation above. The mandatory 15-word-threshold gate passed, but a deeper --threshold 10 pass I ran independently found several 10-14-word narrative clauses reproduced near-verbatim from the source and left unaddressed by the fix pass in transcript section 8, which only targeted runs the default-threshold script had actually flagged."
+    },
+    {
+      "claim": "errors_encountered: 1 in metrics.json",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The transcript contains no explicit mention of an error (grepped for 'error', no hits). Most likely this counts the first check_verbatim_overlap.py run's non-zero exit code (a script correctly reporting real findings, not a bug) as an 'error' in tool-call bookkeeping, but this is inference, not something the transcript states directly — flagging as unverifiable from available information rather than assuming the likely explanation is correct."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "No literal source document was attached to this task; the executor synthesized its own ~2,300-word composite source document and disclosed this prominently in both the transcript and the shipped source-document.md/SKILL.md provenance note. All grading above treats that synthesized document as the ground-truth source for verbatim-overlap and fidelity checks, consistent with the task's own instructions.",
+      "The catalog lists a same-topic-adjacent skill, soma-distribution, by name only with no visible description, so the executor could not confirm or rule out scope overlap and flagged this to the user instead of silently assuming no overlap.",
+      "user_notes.md was not produced for this run (outputs/ contains no such file) — the items above are drawn from the transcript's own final-report section 12, which serves the same self-flagging purpose in this run."
+    ],
+    "needs_review": [
+      "The soma-distribution overlap flag noted above genuinely needs a human/maintainer look before treating the new skill as final, per the executor's own request.",
+      "quick_validate.py (structural validation) was never actually run by the executor within this task; I ran it independently as grader and it passes once the directory-naming harness artifact is isolated out, but this should still be run for real as part of any real skill-creator-pro hand-off, as the transcript itself recommends."
+    ],
+    "workarounds": [
+      "Executor could not run skill-creator-pro's quick_validate.py because its path wasn't given within this task's exploration constraints, and substituted a manual check of the same rules from frontmatter-reference.md/quality-checks.md instead.",
+      "Per this task's explicit instruction, all output files were saved directly under outputs/ rather than nested inside an agent-distribution-patterns/ subfolder, which means the shipped SKILL.md's `name` field does not match its containing directory name — a known, explicitly-called-out spec deviation that is an artifact of the eval's file-delivery convention, not an oversight."
+    ]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No content is copied verbatim from the source beyond a short quoted phrase",
+        "reason": "As currently satisfied by the skill's own mandatory Step 5 gate, this assertion is effectively 'check_verbatim_overlap.py exits 0 at its default 15-word threshold.' That gate has a real blind spot: my independent --threshold 10 pass on this very run found several 10-14-word narrative clauses reproduced almost word-for-word from the source, immediately below the cutoff. A run that trims every flagged run down to exactly 14 words would pass the gate while still being substantially unparaphrased. Consider grading this assertion against a lower threshold (e.g. 10-12 words) or requiring a manual spot-check step in addition to the mechanical script, rather than treating the 15-word script's exit code as sufficient on its own."
+      },
+      {
+        "assertion": "The output passes skill-creator-pro's quick_validate.py",
+        "reason": "quick_validate.py hard-requires the containing directory's name to equal the skill's `name` field. Any eval run that delivers output flat into a directory literally named `outputs/` (as this eval's own harness does, per its task instructions) will fail this check for a reason that has nothing to do with the skill's actual quality. This eval either needs its harness to deliver output into a correctly-named subfolder before this assertion is graded, or the assertion needs to explicitly account for the naming mismatch the way the grading task's methodology note already does for the references/ question — otherwise every future with_skill run under this harness will spuriously fail this assertion regardless of output quality."
+      }
+    ],
+    "overall": "6 of 7 expectations pass, with strong independent (not transcript-trusting) verification on every one: the mandatory mechanical verbatim check, the advisory lint, and the structural validator were all re-run by hand rather than taken on faith, and several precise numeric claims in the transcript (character counts, token counts, description length) were independently reproduced and matched exactly, which is a good sign of a transcript that isn't fabricating specifics. The one failure is substantive, not a technicality: real near-verbatim narrative-clause copying survived the fix pass, just below the mechanical script's default threshold, which is exactly the class of problem this eval was re-run to catch. The two eval-feedback suggestions above target the two assertions whose current operationalization (a single script's default threshold; a hard directory-name-match check against a harness that can't satisfy it) can produce a false result independent of actual skill quality."
+  }
+}

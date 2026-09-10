@@ -1,0 +1,91 @@
+{
+  "expectations": [
+    {
+      "text": "No new skill folder is created for this request",
+      "passed": true,
+      "evidence": "outputs/ directory contains only metrics.json and recommendation.md (verified via `ls -la` on outputs_dir) — no new skill directory or SKILL.md was created anywhere. Transcript Step 5/6 states explicitly: 'No new skill folder was created. No change to soma-agent-debugger was proposed, since the request maps onto an existing mode with no residual gap.'"
+    },
+    {
+      "text": "The response explicitly names the overlapping existing skill (soma-agent-debugger)",
+      "passed": true,
+      "evidence": "recommendation.md names it repeatedly, e.g. '# No new skill created — use `soma-agent-debugger`' (line 1) and '> **soma-agent-debugger** — \"Specialized skill for debugging, fixing, and deploying production AgentStack agents...\"' (lines 14-16). Transcript's final response to the user also names it: 'already covered by the existing `soma-agent-debugger` skill, specifically its **Investigate (root cause)** mode.'"
+    },
+    {
+      "text": "The response does not assume the only valid extension is a references/ patch — it accounts for the matched skill's own shape (operational/mode-based, not knowledge-base) before proposing how to extend it",
+      "passed": true,
+      "evidence": "recommendation.md has a dedicated section '## Shape check before deciding how to fold in' (lines 31-45): 'skill-distiller's fold-in rule warns against defaulting to \"extend the match == add a `references/` file\" — that pattern only fits a knowledge-base-shaped skill. soma-agent-debugger's own description shows it is **not** that shape: it's an operational/procedural skill organized around four fixed modes... For a skill like this, extension — if warranted — means adding a new mode or section to its `SKILL.md` body, not dropping a reference file into it.' It then correctly concludes no extension is warranted at all since the request is fully covered by the existing Investigate mode, rather than mechanically patching references/ regardless of fit."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 5,
+      "Write": 3,
+      "Bash": 3,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 11,
+    "total_steps": 6,
+    "errors_encountered": 0,
+    "output_chars": 3386,
+    "transcript_chars": 6572
+  },
+  "timing": {
+    "total_tokens": 111196,
+    "duration_ms": 115745,
+    "total_duration_seconds": 115.745
+  },
+  "claims": [
+    {
+      "claim": "soma-agent-debugger is a 4-mode operational skill: Investigate (root cause), Plan Fix, Build Validator, Verify Deploy",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches the skill description supplied verbatim in eval_metadata.json's prompt field: 'Specialized skill for debugging, fixing, and deploying production AgentStack agents. 4 modes: Investigate (root cause), Plan Fix, Build Validator, Verify Deploy.'"
+    },
+    {
+      "claim": "The executor read /Users/buda007/moji_skillovi/standalone/skill-distiller/SKILL.md and its fold-in check (Step 2) instructs exactly the behavior demonstrated (don't default to a references/ patch; consider adding a mode to an operational skill's own SKILL.md, or telling the user it's already covered)",
+      "type": "process",
+      "verified": true,
+      "evidence": "Read the actual file at that path. Step 2 of its Workflow section reads almost verbatim to what the transcript paraphrases: 'If a match is found, don't create a duplicate — but \"extend the match\" isn't always a `references/` patch: for a knowledge-base-shaped skill it usually is, but for an operational/procedural skill (e.g. one built around fixed modes or a fixed pipeline) the right move may be adding a new mode/section to its `SKILL.md` body instead, or simply telling the user the existing skill already covers this and no new work is needed.' This confirms the reasoning in recommendation.md traces to genuine skill instructions rather than being fabricated."
+    },
+    {
+      "claim": "The executor read the three reference files (distillation-algorithm.md, frontmatter-reference.md, quality-checks.md) before writing anything",
+      "type": "process",
+      "verified": true,
+      "evidence": "All three files exist at /Users/buda007/moji_skillovi/standalone/skill-distiller/references/ (confirmed via directory listing), consistent with the transcript's Step 2 description. Their actual necessity/relevance to a no-new-skill outcome is low, but their existence corroborates the transcript's account rather than contradicting it."
+    },
+    {
+      "claim": "The output file sizes reported in metrics.json (output_chars: 3386, transcript_chars: 6572) are accurate",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`wc -c` on recommendation.md returned 3386 bytes and on transcript.md returned 6572 bytes, exactly matching metrics.json."
+    },
+    {
+      "claim": "This is a direct, near-total overlap rather than an adjacent or partial one",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The request ('debug AgentStack agents when their flow isn't working correctly') maps essentially one-to-one onto the existing skill's stated first mode ('Investigate (root cause)') and target system ('AgentStack agents'). No element of the request falls outside the existing skill's four stated modes, so treating this as full overlap rather than partial is justified."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No new skill folder is created for this request",
+        "reason": "This assertion alone is weakly discriminating — a run that crashed, timed out, or simply did nothing would also satisfy it trivially. It only becomes meaningful in combination with the other two assertions, which do check substantive content. Consider adding an assertion that a deliverable (e.g. recommendation.md or equivalent) was actually produced with the fold-in decision, so a null/failed run can't pass by omission."
+      }
+    ],
+    "overall": "The three assertions together form a solid, discriminating set: they require the executor to (1) actually refrain from creating a duplicate, (2) name the specific overlapping skill rather than gesturing vaguely at 'an existing skill', and (3) demonstrate real shape-aware reasoning rather than mechanically defaulting to a references/ patch — which is the crux failure mode this eval is designed to catch. The third assertion in particular is hard to satisfy by coincidence. Cross-checking the executor's reasoning against the actual skill-distiller/SKILL.md source confirmed the output's reasoning is grounded in genuine skill instructions, not fabricated post-hoc justification."
+  }
+}

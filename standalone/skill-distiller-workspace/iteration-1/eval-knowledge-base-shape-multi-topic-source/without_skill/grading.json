@@ -1,0 +1,121 @@
+{
+  "expectations": [
+    {
+      "text": "The output chooses the knowledge-base shape (SKILL.md plus multiple reference files under references/), not a single-file shape",
+      "passed": true,
+      "evidence": "outputs/ contains SKILL.md plus outputs/references/ with 4 files: manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, unsolved-risks-checklist.md. Transcript Step 3 explicitly documents this as a deliberate decision ('Decision: use the standard Agent Skill progressive-disclosure structure — a single SKILL.md as the entry point ... plus one reference file per distinct topic under references/'), rejecting the single-file alternative."
+    },
+    {
+      "text": "The SKILL.md body stays within roughly 500 lines / 5000 tokens despite the source being much larger — this is the sharpest with-skill/without-skill differentiator in this eval, since a capable model asked to 'make a skill from this' may split into multiple files on its own, but is much less likely to independently apply a strict body budget discipline without explicit instruction",
+      "passed": true,
+      "evidence": "Measured directly: outputs/SKILL.md is 96 lines total (92 lines / 764 words in the body alone, excluding the 4-line frontmatter block), 884 words, 6146 characters (~1537 tokens at a 4-chars/token estimate). This is well within both the 500-line and 5000-token budget."
+    },
+    {
+      "text": "Reference files are organized by topic, not by chapter number or session",
+      "passed": true,
+      "evidence": "Files are named manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, unsolved-risks-checklist.md — each named after a cross-cutting topic. Transcript Step 3 states this explicitly was chosen over an ecosystem- or session-based split: 'Named reference files after the topic, not the ecosystem, since the skill is organized around the four cross-cutting concerns.'"
+    },
+    {
+      "text": "The SKILL.md index accurately lists every reference file that was actually created, with no file listed that doesn't exist and no created file left out of the index",
+      "passed": true,
+      "evidence": "Cross-checked via grep: SKILL.md references exactly 4 files (references/manifest-design.md, references/data-ownership-separation.md, references/secrets-exclusion.md, references/unsolved-risks-checklist.md), and `ls outputs/references/` shows exactly those same 4 files, no more, no less. 1:1 match with no orphaned links and no undocumented files."
+    },
+    {
+      "text": "No content is copied verbatim from the source beyond a short quoted phrase",
+      "passed": false,
+      "evidence": "Cannot be verified. Per the transcript (Step 2), the executor synthesized its own 'source document' and wrote it only to its own scratchpad ('not part of the deliverable'); that file was never saved into outputs_dir or any other location accessible to the grader (confirmed: outputs/ contains only SKILL.md, references/*.md, and metrics.json — no source-document.md). With no source text available to diff against, verbatim-copying cannot be checked either way. Per grading criteria, an expectation that cannot be verified from available information fails — burden of proof is on the expectation."
+    },
+    {
+      "text": "The output passes scripts/lint_skill.py with no incident-log-shape or references-sprawl findings",
+      "passed": false,
+      "evidence": "No evidence this was ever run. The transcript contains no mention of 'lint' anywhere, and metrics.json's tool_calls show only Bash: 10 with no indication of a lint script invocation. The transcript explicitly states 'I did not invoke skill-creator-pro or any other skill-authoring skill' for this without_skill condition, consistent with no validation script being run at all."
+    },
+    {
+      "text": "The output passes skill-creator-pro's quick_validate.py",
+      "passed": false,
+      "evidence": "No evidence this was ever run. The transcript contains no mention of 'validate' or 'quick_validate' anywhere. As with the lint_skill.py expectation, the transcript explicitly confirms no skill-authoring skill or its scripts were invoked in this baseline run."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 3,
+    "total": 7,
+    "pass_rate": 0.5714
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 0,
+      "Bash": 10,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 10,
+    "total_steps": 10,
+    "errors_encountered": 0,
+    "output_chars": 26734,
+    "transcript_chars": 9429
+  },
+  "timing": {
+    "executor_duration_seconds": 332.493,
+    "total_duration_seconds": 332.493,
+    "total_tokens": 120070,
+    "note": "timing.json contains only a single total duration for this run; no separate grader_duration_seconds was available at grading time."
+  },
+  "claims": [
+    {
+      "claim": "The SKILL.md's reference-file pointers exactly match the files actually created in references/, with no orphaned links or untracked extra files.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "grep of `references/*.md` mentions in SKILL.md returned exactly 4 unique paths, identical to the 4 files listed by `ls outputs/references/`."
+    },
+    {
+      "claim": "The executor did not invoke skill-creator-pro or any other skill-authoring skill for this run.",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript states this directly ('this run represents the without_skill condition...I did not invoke skill-creator-pro or any other skill-authoring skill'), and metrics.json's tool_calls show only Bash (10), consistent with no skill invocation."
+    },
+    {
+      "claim": "metrics.json's output_chars (26734) and transcript_chars (9429) counts are accurate.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`wc -c` on SKILL.md plus all 4 reference files sums to exactly 26734 bytes; transcript.md is exactly 9429 bytes on disk."
+    },
+    {
+      "claim": "SKILL.md was kept to roughly 900 words.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "`wc -w` on SKILL.md returns 884 words total (including frontmatter)."
+    },
+    {
+      "claim": "Reference files preserve concrete, ecosystem-specific detail (field names, concrete leak examples) rather than reducing them to vague general advice.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Files contain specific artifacts throughout, e.g. hermes.manifest.json's `capabilities`/`signature`/`permissions.prompt` fields, crew.yaml's `backstory` field as a leak vector, and the AssistantHub `os.environ` export-bug example — consistent with the claim that detail was preserved rather than generalized away."
+    },
+    {
+      "claim": "No fifth 'ecosystems overview' reference file was created; that framing was kept inline in SKILL.md instead.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Only 4 files exist under references/, and SKILL.md itself contains the five-ecosystem comparison table and the 'four questions' framing directly in its body."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No content is copied verbatim from the source beyond a short quoted phrase",
+        "reason": "This assertion is structurally unverifiable in the without_skill condition as currently run: the task tells the executor to synthesize its own 'source document' (since none was attached), and that synthesized source is written only to the executor's private scratchpad, never saved into outputs_dir or anywhere else the grader can reach. Without the source text, verbatim-overlap can never be checked either way — it will fail every run of this eval for lack of evidence, regardless of actual output quality. Consider requiring the harness to persist the synthesized source (e.g. to outputs/source-document.md or a fixed sibling location) so this assertion has something to compare against."
+      },
+      {
+        "reason": "Both scripts/lint_skill.py and quick_validate.py expectations depend on tooling that is only available inside the skill-creator-pro skill, which this without_skill condition is explicitly instructed not to invoke. As written, these two expectations are guaranteed to fail on every without_skill run for a reason that has nothing to do with output quality (shape, budget, organization, fidelity all passed here). If the intent is to demonstrate that the baseline skips validation entirely, that's a valid and even useful differentiator to capture — but it's worth confirming the with_skill condition actually exercises both scripts, and considering whether these two belong in a separate 'validation' checklist that is scored/reported distinctly from the four structural/content expectations, so a reader doesn't read '3 of 7 failed' as a content-quality problem when it's actually a tooling-availability artifact of the condition."
+      }
+    ],
+    "overall": "The four structural/content expectations (shape, budget, topic organization, index accuracy) are all genuinely discriminating and all passed with strong, specific evidence — this looks like a solid without_skill run on those dimensions. The remaining three failures are not quality problems with the output; they reflect two evaluability gaps in the eval itself: (1) the verbatim-copying check has no ground truth to check against in this condition, and (2) the two validator-script checks are inherently unreachable without invoking the very skill this condition is designed to withhold. Recommend either fixing the harness to persist the synthesized source, or reclassifying/separating the two script-based expectations so their expected failure in without_skill doesn't read as a comparable content defect."
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "expectations": [
+    {
+      "text": "The produced skill content contains zero ticket, PR, or issue number references",
+      "passed": false,
+      "evidence": "outputs/cache-invalidation-ordering/SKILL.md, 'Case reference' section (lines 117-127), contains all six reference tokens verbatim: '#4821' (line 121), 'PR #5012' (line 122), 'issue 6034' (line 123), 'PR#7001' and '#7002' (line 124), and '#7003' (line 126). Confirmed by direct grep of the file: `grep -noE '#[0-9]{3,6}|PR ?#[0-9]{3,6}|[Ii]ssue #?[0-9]{3,6}' SKILL.md` returned exactly these six matches, all inside the closing footnote. checklist.md is clean (zero matches). This directly contradicts the expectation of zero references anywhere in the produced skill; the transcript's own description ('a short case reference footnote citing the six tickets/PRs as provenance') confirms this was a deliberate choice, not an oversight, but the expectation allows no exception for provenance footnotes."
+    },
+    {
+      "text": "The core rule (invalidate cache before writing to shared state, not after) is present and stated as a general rule, not tied to a specific incident narrative",
+      "passed": true,
+      "evidence": "SKILL.md 'The rule' section (lines 8-19) states it generically and prominently: 'When a code path both writes shared state and invalidates a cache entry for that state, invalidate the cache first, then write the state — never the reverse. Write-then-invalidate leaves a window where a concurrent reader can repopulate the cache with data older than the write...' No entity names, ticket numbers, or company-specific detail appear in this section or in the following 'Why the order matters' / 'This is necessary, not sufficient' sections — the rule and its mechanism are phrased entirely in general cache-aside terms."
+    },
+    {
+      "text": "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+      "passed": false,
+      "evidence": "No evidence scripts/lint_skill.py was ever invoked in this run. `grep -rn \"lint_skill\"` over the entire without_skill/ directory (transcript.md, outputs/, metrics.json) returns zero hits, and `find` for a file named lint_skill.py anywhere under the skill-distiller-workspace tree also returns nothing — the script isn't even present to run. This is an expected/known limitation of the baseline (no-skill) condition: no skill was loaded, so none of its bundled scripts (including any lint tooling) were available to invoke, not a quality problem with the produced SKILL.md/checklist.md content itself. Failing for lack of evidence per the grading standard (cannot verify from available information)."
+    },
+    {
+      "text": "If the raw transcript content were bundled unmodified instead of being distilled, scripts/lint_skill.py would report an incident-log-shape finding on it — confirming the check has real detection power, not just a clean pass by default",
+      "passed": false,
+      "evidence": "Same root cause as the prior expectation: scripts/lint_skill.py was never run against raw-transcript.md (or anything else) in this session — no mention in the transcript, no output artifact recording a lint result, and the script itself is not present anywhere in this workspace to have been run. Failing for lack of evidence; this is an expected limitation of the without_skill baseline condition (the skill and its tooling were never loaded), not a defect in the produced content."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 3,
+    "total": 4,
+    "pass_rate": 0.25
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 0,
+      "Bash": 6,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 6,
+    "total_steps": 7,
+    "errors_encountered": 0,
+    "output_chars": 9087,
+    "transcript_chars": 5891
+  },
+  "timing": {
+    "total_duration_seconds": 247.323,
+    "total_tokens": 110942
+  },
+  "claims": [
+    {
+      "claim": "metrics.json's output_chars (9087) equals the combined size of SKILL.md and checklist.md",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -c: SKILL.md = 6209 chars, checklist.md = 2878 chars, sum = 9087, matching metrics.json output_chars exactly."
+    },
+    {
+      "claim": "metrics.json's transcript_chars (5891) equals the size of the synthesized raw-transcript.md",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -c on outputs/raw-transcript.md returns 5891, matching metrics.json transcript_chars exactly."
+    },
+    {
+      "claim": "'the original incident's tickets kept only as a short provenance footnote' (transcript's final-response summary), implying this satisfies keeping the skill general",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The claim is descriptively accurate (the six tickets do appear only in one closing 'Case reference' footnote, not scattered through the body), but it does not establish the quality outcome the executor implies. The eval's expectation requires zero ticket/PR/issue references anywhere in the produced skill, with no carve-out for a provenance footnote — so this design choice directly causes expectation 1 to fail. The claim of adequacy is not justified against the actual bar."
+    },
+    {
+      "claim": "checklist.md was kept free of incident-specific ticket/PR/issue references",
+      "type": "factual",
+      "verified": true,
+      "evidence": "grep for ticket/PR/issue patterns on checklist.md returned zero matches; the file is entirely generic (ordering, race-window, testing, blast-radius checklist items plus a generic concurrency-test sketch)."
+    },
+    {
+      "claim": "All 6 tool calls were Bash, 0 errors encountered",
+      "type": "process",
+      "verified": true,
+      "evidence": "metrics.json tool_calls shows Bash: 6 and all other tool types at 0, errors_encountered: 0, consistent with the transcript's step-by-step account of using Bash heredocs for every file write."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The core rule ... is present and stated as a general rule, not tied to a specific incident narrative",
+        "reason": "This assertion is nearly guaranteed to pass regardless of skill quality — any reasonable distillation attempt will restate the given rule in some general form, since the rule itself was handed to the model in the prompt. It doesn't discriminate between a well-distilled skill and one that also leaks incident narrative elsewhere (as happened here). Consider either merging it with a narrative-freeness check or dropping it in favor of a stronger assertion (see next suggestion)."
+      },
+      {
+        "reason": "The eval's own expected_output text says the distilled skill should have 'no ticket numbers, PR references, or incident-specific narrative' but none of the four expectations actually checks for narrative content independent of the six literal reference tokens. SKILL.md's 'Case reference' section is exactly such a narrative — it retells the specific scenario ('customers who upgraded their plan intermittently kept their old limits under traffic spikes,' 'an async entitlement job') even setting the ticket numbers aside. A hypothetical output that stripped only the '#NNNN'-style tokens but kept this narrative paragraph would still pass all four current expectations, which under-tests the stated goal. Consider adding an assertion that the skill contains no case-study/incident-narrative section at all (not just no reference numbers), e.g. flagging phrases like 'this incident', 'this pattern was distilled from', or a dedicated 'case reference'/'background' section."
+      },
+      {
+        "reason": "Expectations 3 and 4 depend on scripts/lint_skill.py, which is part of the skill's own tooling and was never available to invoke in this without_skill baseline run (no skill was loaded, and the script doesn't exist anywhere in this workspace). As written, these two expectations are structurally unverifiable — and therefore always FAIL — for any without_skill condition, which will silently drag down every baseline run's pass rate for reasons unrelated to output quality. If without_skill runs are meant to be compared against with_skill runs on the same 4-expectation rubric, consider marking lint-script-dependent expectations as N/A/skipped rather than FAIL when the tooling isn't part of the condition being graded, so aggregate comparisons aren't confounded by condition-only unavailability."
+      }
+    ],
+    "overall": "Expectation 1 (zero ticket/PR/issue references) is a strong, discriminating assertion and it correctly caught a real failure: the produced SKILL.md leaks all six reference tokens in a closing 'Case reference' footnote, despite the transcript explicitly reasoning that this was an acceptable provenance mention rather than 'leaning on the incident's specifics as the primary content.' That is exactly the failure mode this eval exists to detect, and it fired correctly. However, expectations 3 and 4 could not be evaluated at all in this baseline condition since scripts/lint_skill.py was never run and isn't present in this workspace — that's a structural limitation of grading a without_skill transcript against skill-tooling-dependent assertions, not a quality problem with the produced content. Net result: 1/4 pass, with the one clear failure (ticket leakage) being the most informative signal in this run."
+  }
+}

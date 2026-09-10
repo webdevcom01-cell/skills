@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "knowledge-base-shape-multi-topic-source",
+  "prompt": "Distill a new skill from this source document about AI agent distribution and packaging patterns across ecosystems (Hermes Agent, LangChain Hub, CrewAI, OpenAI Assistants, MCP Registry). The source covers manifest design, distributor-owned vs. user-owned data separation, secrets exclusion, and a checklist of unsolved risks \u2014 multiple distinct topics that would each lose substantial content if forced into a single file.",
+  "expected_output": "A knowledge-base-shaped skill (lean SKILL.md + multiple topic-organized reference files, not one giant file), with an accurate index, structural rules distilled rather than the source's own narrative reproduced, and no fabricated specifics beyond what the source actually states.",
+  "expectations": [
+    "The output chooses the knowledge-base shape (SKILL.md plus multiple reference files under references/), not a single-file shape",
+    "The SKILL.md body stays within roughly 500 lines / 5000 tokens despite the source being much larger \u2014 this is the sharpest with-skill/without-skill differentiator in this eval, since a capable model asked to 'make a skill from this' may split into multiple files on its own, but is much less likely to independently apply a strict body budget discipline without explicit instruction",
+    "Reference files are organized by topic, not by chapter number or session",
+    "The SKILL.md index accurately lists every reference file that was actually created, with no file listed that doesn't exist and no created file left out of the index",
+    "No content is copied verbatim from the source beyond a short quoted phrase",
+    "The output passes scripts/lint_skill.py with no incident-log-shape or references-sprawl findings",
+    "The output passes skill-creator-pro's quick_validate.py"
+  ]
+}

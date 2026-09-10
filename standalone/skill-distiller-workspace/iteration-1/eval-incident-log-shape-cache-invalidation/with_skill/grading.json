@@ -1,0 +1,110 @@
+{
+  "expectations": [
+    {
+      "text": "The produced skill content contains zero ticket, PR, or issue number references",
+      "passed": true,
+      "evidence": "Independently grepped outputs/cache-invalidation-ordering/SKILL.md with the same pattern class the linter uses (`#[0-9]{3,5}`, `PR ?#[0-9]{3,5}`, `issue [0-9]{3,5}`, bare `#[0-9]`) — zero matches (grep exit code 1). Read the full SKILL.md body and frontmatter directly: no #4821, PR #5012, issue 6034, PR#7001, #7002, or #7003, and no other numeric ticket-style reference anywhere in the file."
+    },
+    {
+      "text": "The core rule (invalidate cache before writing to shared state, not after) is present and stated as a general rule, not tied to a specific incident narrative",
+      "passed": true,
+      "evidence": "SKILL.md '## The rule' section states: 'When a code path writes to shared state that is also served through a cache, invalidate the cache entry before performing the write — not after.' Followed by a general causal explanation (unbounded out-of-band invalidation latency, readers repopulating cache with soon-to-be-stale values) and a general 3-step fix. No incident-specific details (seat counts, org names, bulk-invite flow, engineer names Dana/Ilya) appear anywhere — confirmed by grep, zero matches for 'dana|ilya|reyes|novak'."
+    },
+    {
+      "text": "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+      "passed": true,
+      "evidence": "Independently re-ran `python3 scripts/lint_skill.py outputs/cache-invalidation-ordering` from /Users/buda007/moji_skillovi/standalone/skill-distiller (the real script, not trusting the transcript's claim) and got the exact output 'No advisory findings.' — matching the transcript's claim."
+    },
+    {
+      "text": "If the raw transcript content were bundled unmodified instead of being distilled, scripts/lint_skill.py would report an incident-log-shape finding on it — confirming the check has real detection power, not just a clean pass by default",
+      "passed": true,
+      "evidence": "Independently staged outputs/raw-slack-transcript.md as SKILL.md in a fresh scratch folder and ran the real lint_skill.py against it myself (not trusting the transcript's assertion). Got a genuine WARN with concrete numbers: '[WARN] incident-log-shape — SKILL.md: 21 ticket/PR/issue references, density 5.33/1000 chars (threshold: 4+ refs AND 0.5+/1000 chars)' — exactly matching what the transcript reported, confirming this is a real firing finding, not just an unverified claim."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 2,
+      "Write": 4,
+      "Bash": 13,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 19,
+    "total_steps": 12,
+    "errors_encountered": 1,
+    "output_chars": 4620,
+    "transcript_chars": 10751
+  },
+  "timing": {
+    "executor_duration_seconds": 326.651,
+    "total_duration_seconds": 326.651,
+    "total_tokens": 137620
+  },
+  "claims": [
+    {
+      "claim": "The distilled SKILL.md is 4,620 characters",
+      "type": "factual",
+      "verified": false,
+      "evidence": "wc -c on the actual file reports 4646 characters, not 4620 (off by 26). Doesn't affect any expectation (both are well under the 5,000-token soft budget) but the self-reported metric is measurably inaccurate."
+    },
+    {
+      "claim": "The raw synthesized transcript is 3,942 characters",
+      "type": "factual",
+      "verified": false,
+      "evidence": "wc -c on outputs/raw-slack-transcript.md reports 3986 characters, not 3942 (off by 44)."
+    },
+    {
+      "claim": "Distilled skill body is roughly 1,150 estimated tokens by the script's char/4 heuristic",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Reproduced lint_skill.py's own body-budget calculation (frontmatter stripped, len(body)//4): body is 3555 chars → 888 estimated tokens, not ~1,150 (a ~30% overstatement). Still well under the 5,000-token soft limit either way, so it doesn't change the lint result, but the specific figure quoted in the transcript is wrong."
+    },
+    {
+      "claim": "No ticket numbers, PR numbers, or names (Dana/Ilya) were carried into the distilled output",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Grep for the pattern class and for 'dana|ilya|reyes|novak' against SKILL.md both returned zero matches."
+    },
+    {
+      "claim": "No references/ files were needed for this skill",
+      "type": "process",
+      "verified": true,
+      "evidence": "outputs/cache-invalidation-ordering/ contains only SKILL.md, no references/ subdirectory."
+    },
+    {
+      "claim": "Step 7's structural validator (quick_validate.py) failed because PyYAML isn't installed in this environment, not because of a skill defect",
+      "type": "process",
+      "verified": true,
+      "evidence": "Independently ran `python3 -c \"import yaml\"` and `python3 -B -m scripts.quick_validate <path>` from the skill-creator-pro directory — both reproduce 'ModuleNotFoundError: No module named 'yaml'' exactly as described."
+    },
+    {
+      "claim": "The synthesized raw Slack thread naturally references all six required identifiers (#4821, PR #5012, issue 6034, PR#7001, #7002, #7003), several more than once",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Read outputs/raw-slack-transcript.md directly: #4821 appears twice, PR #5012 twice, issue 6034 twice, PR#7001 three times, #7002 once, #7003 once — all six present, several repeated."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": ["No user_notes.md file found in outputs_dir — nothing to summarize from it."]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Significant run-validity concern, not covered by any assertion: the transcript's Step 2 shows the executor deliberately reading eval_metadata.json — which lists all four expectations verbatim — before doing any work, and explicitly says 'this confirmed the plan below before writing anything.' That means this run isn't a blind test of whether the skill-distiller skill alone produces expectation-satisfying output; the executor had direct sight of the grading criteria and could (consciously or not) optimize straight at them. This weakens the eval's power to attribute the clean pass to the skill's guidance versus the model simply satisfying known test criteria. Worth either removing eval_metadata.json from the executor's visible working directory during real runs, or treating any run where the executor admits to reading it as a contaminated/non-blind sample."
+      },
+      {
+        "reason": "The eval prompt says 'Distill a skill from this source: a raw Slack thread transcript...' but no such transcript exists as an input fixture in the eval directory — the executor had to invent it (outputs/raw-slack-transcript.md) before distilling it. That means the same model authors both the material to be distilled and its distillation, and controls how cleanly the raw material converges on the target rule and how many/which incident-style references it contains. A fixed, pre-authored synthetic transcript fixture (checked into the eval directory) would make the eval a more faithful, reproducible test of distillation skill specifically, decoupled from the model's separate skill at inventing plausible incident narratives."
+      }
+    ],
+    "overall": "All four expectations pass with strong, independently-reproduced evidence (re-ran lint_skill.py myself rather than trusting the transcript). The assertions themselves are reasonably discriminating — they require an actual clean distillation and an actual firing lint result with real numbers, not just filename/existence checks. The main weakness isn't the assertions but the run setup: the executor saw the eval's own expectations file mid-task (a blind-test validity issue) and had to self-author the raw source material it was graded on distilling (reducing how cleanly this isolates distillation skill from narrative-authoring skill). Both are flagged above as suggestions rather than assertion failures, since the produced output genuinely and substantively satisfies what was asked."
+  }
+}

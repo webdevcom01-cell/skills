@@ -1,0 +1,9 @@
+{
+  "tool_calls": {"Read": 0, "Write": 0, "Bash": 6, "Edit": 0, "Glob": 0, "Grep": 0},
+  "total_tool_calls": 6,
+  "total_steps": 7,
+  "files_created": ["raw-transcript.md", "cache-invalidation-ordering/SKILL.md", "cache-invalidation-ordering/checklist.md", "metrics.json", "transcript.md"],
+  "errors_encountered": 0,
+  "output_chars": 9087,
+  "transcript_chars": 5891
+}

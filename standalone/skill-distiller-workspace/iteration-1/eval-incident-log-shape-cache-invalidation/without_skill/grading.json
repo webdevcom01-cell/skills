@@ -1,0 +1,100 @@
+{
+  "expectations": [
+    {
+      "text": "The produced skill content contains zero ticket, PR, or issue number references",
+      "passed": true,
+      "evidence": "Grepped the produced skill package directly (not trusting the transcript's summary claim) with patterns for '#NNN+', 'PR ?#?NNN+', 'issue ?#?NNN+', and any bare 4-digit number across SKILL.md, references/race-timeline.md, and examples/invalidate-before-write.ts — zero matches in all three files. Specifically checked the 'Provenance' section of SKILL.md ('Distilled from a synthesized incident thread (../raw-incident-slack-thread.md in this output set)...'), which the transcript calls a 'one-line provenance pointer' — it references the source file by filename only and contains no #4821/PR #5012/issue 6034/PR#7001/#7002/#7003 style reference. The raw incident thread (raw-incident-slack-thread.md, a sibling input artifact, not part of the produced skill package) does contain all six required ticket references, confirming the distillation actually stripped them rather than never having them."
+    },
+    {
+      "text": "The core rule (invalidate cache before writing to shared state, not after) is present and stated as a general rule, not tied to a specific incident narrative",
+      "passed": true,
+      "evidence": "SKILL.md '## The rule' section states it generically: 'When a write updates shared state that's also cached (cache-aside / read-through pattern), invalidate the cache key before the write transaction, in addition to any invalidation you already do after commit. Never rely on a single post-write invalidation alone.' No names, dates, org, or ticket references attached. 'When this applies' / 'When it doesn't' sections generalize the rule beyond the illustrative entitlements scenario (explicitly listing feature flags, session scopes, pricing, config tables), and a code-review checklist and regression-test shape are written in domain-neutral terms."
+    },
+    {
+      "text": "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+      "passed": false,
+      "evidence": "No evidence the script was ever run. The transcript's own 'Tool usage summary' states Bash was used only for 'directory checks, mkdir -p, and wc -c / find for character counts and file listing' and explicitly says 'no destructive or exploratory commands beyond that.' A grep for 'lint' anywhere in transcript.md returns zero matches. scripts/lint_skill.py does not exist anywhere inside this eval's own directory tree (checked iteration-1/eval-incident-log-shape-cache-invalidation/ and moji_skillovi/standalone/skill-distiller-workspace/ recursively) — the only copies found on disk live in an unrelated sibling project (moji_skillovi/standalone/skill-distiller/scripts/lint_skill.py) that this without_skill baseline run had no reason to know about or invoke, since no skill was loaded in this condition. With no invocation and no script available in-scope, this expectation cannot be verified from the available information and fails per the grading criteria."
+    },
+    {
+      "text": "If the raw transcript content were bundled unmodified instead of being distilled, scripts/lint_skill.py would report an incident-log-shape finding on it — confirming the check has real detection power, not just a clean pass by default",
+      "passed": false,
+      "evidence": "Same root cause as the prior expectation: this is a counterfactual check ('if the raw transcript were bundled instead') that requires actually running scripts/lint_skill.py against raw-incident-slack-thread.md and observing a finding. Nothing in the transcript or outputs shows this comparison was performed — no lint script was run at all in this baseline condition (see previous expectation's evidence). Fails for lack of evidence."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 6,
+      "Bash": 4,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 10,
+    "total_steps": 10,
+    "errors_encountered": 0,
+    "output_chars": 17588,
+    "transcript_chars": 6992
+  },
+  "timing": {
+    "executor_duration_seconds": 277.878,
+    "total_duration_seconds": 277.878,
+    "note": "timing.json for this run only records a single duration_ms/total_duration_seconds (277.878s) and total_tokens (116881) for the without_skill executor; it has no separate executor_duration_seconds/grader_duration_seconds split, so executor_duration_seconds is copied from the run's own total_duration_seconds rather than inferred."
+  },
+  "claims": [
+    {
+      "claim": "No ticket numbers, org names, or people from the incident were carried into the operative SKILL.md guidance itself",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Confirmed by direct grep of the produced skill package (see expectation 1 evidence) — zero ticket/PR/issue patterns in SKILL.md, references/race-timeline.md, or examples/invalidate-before-write.ts."
+    },
+    {
+      "claim": "The raw Slack thread contains all six required references: #4821, PR #5012, issue 6034, PR#7001, #7002, #7003",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Read raw-incident-slack-thread.md directly — all six identifiers appear verbatim in the dialogue (e.g. 'Paged for #4821', 'issue 6034', 'PR #5012', 'Opening PR#7001', 'Filing #7002', 'And #7003')."
+    },
+    {
+      "claim": "Character counts reported in metrics.json (output_chars: 17588, transcript_chars: 6992, and the per-file breakdown: raw transcript 5395, SKILL.md 5157, race-timeline.md 4439, invalidate-before-write.ts 2597)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Ran wc -c on each file independently: raw-incident-slack-thread.md=5395, SKILL.md=5157, race-timeline.md=4439, invalidate-before-write.ts=2597 (sum=17588, matches output_chars exactly), transcript.md=6992 (matches transcript_chars exactly)."
+    },
+    {
+      "claim": "No Read, Edit, Glob, or Grep calls were needed — this was a pure synthesis-and-write task",
+      "type": "process",
+      "verified": true,
+      "evidence": "metrics.json tool_calls shows Read:0, Edit:0, Glob:0, Grep:0, with Write:6 and Bash:4 summing to total_tool_calls:10, consistent with total_steps:10 and the transcript's step-by-step account."
+    },
+    {
+      "claim": "The regression test shape in SKILL.md and the .ts example would fail reliably against the buggy ordering and pass against the fixed ordering",
+      "type": "quality",
+      "verified": false,
+      "evidence": "This is asserted in prose ('Reverting the fix ... should make this test fail reliably') but the test was never actually executed against either upgradePlanBuggy or upgradePlanFixed in this run — no test runner was invoked (Bash calls were limited to mkdir/wc/find). The claim is plausible from reading the code but is unverified, not confirmed."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Running scripts/lint_skill.py on the produced output reports no incident-log-shape finding",
+        "reason": "This assertion (and the paired counterfactual one) is structurally unsatisfiable in the without_skill condition as currently scoped: scripts/lint_skill.py is not present anywhere under this eval's own directory tree, and nothing in the eval prompt tells a model running without the skill that such a script exists or should be run. A baseline run has no path to discovering or invoking it, so grading it as FAIL isn't really measuring 'the baseline produced a bad incident-log shape' — it's measuring 'the baseline wasn't told about a script it had no way to know about.' If the intent is to compare skill vs. no-skill using the same objective lint check, either (a) make the script discoverable/runnable independent of the skill (e.g. document its path in the eval prompt or metadata for both conditions), or (b) treat these two assertions as with_skill-only checks and use content-based assertions (like expectation 1) for the without_skill condition."
+      },
+      {
+        "assertion": "The core rule ... is present and stated as a general rule, not tied to a specific incident narrative",
+        "reason": "This assertion only checks the rule statement's own wording, not the surrounding illustrative material. The example file (examples/invalidate-before-write.ts) reuses domain-specific naming straight from the synthesized incident — EntitlementsRepo, upgradePlanBuggy/upgradePlanFixed, orgId, Plan{tier, seatLimit} — rather than a fully domain-neutral example (e.g. a generic Resource/writeResource). That's a defensible judgment call (the executor's transcript explicitly flags it as intentional, to keep the example 'concrete and checkable'), and it doesn't reintroduce any ticket numbers or narrative specifics, but it's a softer form of incident-shape leakage that no current assertion would catch if it went further (e.g. if the example had kept 'billing webhook' or 'EU traffic spike' framing). Consider adding an assertion that checks illustrative code/examples use generic naming, not just that the prose rule statement is general."
+      }
+    ],
+    "overall": "2 of 4 expectations pass on genuine evidence (clean ticket/PR/issue stripping, verified by direct grep rather than trusting the transcript's claim; and a properly generalized rule statement). The other 2 fail purely for lack of evidence — scripts/lint_skill.py was never run and isn't even reachable from this eval's directory tree in the without_skill condition, so those two assertions couldn't have passed regardless of output quality. That's a gap in the eval design more than a finding about this run's output quality, and is worth fixing before using pass/fail counts on this eval to compare skill vs. no-skill conditions."
+  }
+}

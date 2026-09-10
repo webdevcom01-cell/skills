@@ -1,0 +1,125 @@
+{
+  "expectations": [
+    {
+      "text": "The output chooses the knowledge-base shape (SKILL.md plus multiple reference files under references/), not a single-file shape",
+      "passed": true,
+      "evidence": "Per grading instructions, graded on substance rather than literal path because this run was explicitly told to save all files flat under outputs/ (transcript step 4: 'The task instructions here explicitly required every produced file ... to be saved directly (flat, not nested in a sub-folder) under the outputs/ directory'). The output does produce a lean SKILL.md (outputs/SKILL.md, 46 lines) plus four genuinely separate, topic-organized reference files (manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, unsolved-risks-checklist.md), each with its own 'Reference for:' framing and self-contained content, cross-referenced from SKILL.md's 'How to use the references' section. This is a real knowledge-base shape, not a single-file shape, and not a re-chunking of one document into arbitrary pieces."
+    },
+    {
+      "text": "The SKILL.md body stays within roughly 500 lines / 5000 tokens despite the source being much larger",
+      "passed": true,
+      "evidence": "outputs/SKILL.md is 46 lines / 765 words / 5238 bytes total including frontmatter — far under the 500-line / ~5000-token soft limits. Confirmed independently by running scripts/lint_skill.py (from /Users/buda007/moji_skillovi/standalone/skill-distiller/scripts/lint_skill.py), whose check_body_budget check produced no [WARN] finding for SKILL.md body lines or approx-token count. The source (source-document.md) is 21222 bytes / 3085 words, so the SKILL.md body represents a real compression, not a copy-through."
+    },
+    {
+      "text": "Reference files are organized by topic, not by chapter number or session",
+      "passed": true,
+      "evidence": "The four reference files are named manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, and unsolved-risks-checklist.md — topic names matching the four cross-cutting concerns named in the eval prompt, not chapter numbers, session dates, or source section numbers (source-document.md's own headers are numbered 'Section 1'..'Section 6' but none of that numbering carried into the reference filenames or organization)."
+    },
+    {
+      "text": "The SKILL.md index accurately lists every reference file that was actually created, with no file listed that doesn't exist and no created file left out of the index",
+      "passed": true,
+      "evidence": "SKILL.md's 'How to use the references' section (lines 18-25) lists exactly: manifest-design.md, data-ownership-separation.md, secrets-exclusion.md, unsolved-risks-checklist.md. All four exist in outputs/ with matching filenames (verified via ls). No reference file exists that isn't indexed, and no indexed file is missing. source-document.md and metrics.json are correctly excluded from the index since they are not reference/skill content (source material and a metrics report, respectively)."
+    },
+    {
+      "text": "No content is copied verbatim from the source beyond a short quoted phrase",
+      "passed": false,
+      "evidence": "Direct read-and-compare of source-document.md against the four reference files (not just trusting the transcript, which makes no explicit 'clean' claim to begin with) found extensive near-word-for-word paragraph reuse, far beyond a short quoted phrase, in 3 of 4 reference files: (1) secrets-exclusion.md tier 1: source says 'The manifest declares a *name* the host must supply (an env var name, a secret-manager key path); the package format has no field capable of holding a resolved value. Hermes Agent's `secrets:` array works this way, and its installer refuses to complete installation until every declared name resolves against the host's configured secret backend (env, Vault, or OS keychain).' vs. the reference file's near-identical sentence differing only by 'and its installer' -> '— the installer' (~50 shared consecutive words). (2) secrets-exclusion.md's 'Pre-publish checklist' reproduces the source's 'Practical checklist' bullet-for-bullet, e.g. source: 'Is there a documented rotation story — can a user rotate a credential a package depends on without reinstalling the package?' vs. reference: identical sentence verbatim (20 words). (3) data-ownership-separation.md's Hermes Agent bullet: source 'package contents install into ~/.hermes/packages/<name>/<version>/ (read-only after install, content-addressed by hash) while user state lives entirely under ~/.hermes/state/<name>/ in a separate SQLite file that the installer never touches' vs. reference's near-identical rewording of the same clause order and near-all the same words (~35 shared words). Its CrewAI bullet ends with the identical clause 'leaking one customer's task history into a template shared with another team' (12 words verbatim, part of a longer ~20-word shared run). (4) unsolved-risks-checklist.md's 'Namespace squatting' item reproduces verbatim: 'A malicious `acme-official/invoice-agent` can be published alongside (or before) the real `acme/invoice-agent` in LangChain Hub or a CrewAI template gallery, relying on typosquatting or brand confusion.' (30+ words, identical). (5) manifest-design.md reproduces the source's entire 17-line JSON example schema (Section 3) byte-for-byte identically, not just a short illustrative fragment. This is pervasive paragraph-level copy-with-light-rewording across the reference files, not isolated short quotes, and directly contradicts the expected_output's requirement that 'structural rules [be] distilled rather than the source's own narrative reproduced.'"
+    },
+    {
+      "text": "The output passes scripts/lint_skill.py with no incident-log-shape or references-sprawl findings",
+      "passed": true,
+      "evidence": "Ran python3 scripts/lint_skill.py against outputs/ as-is: printed 'No advisory findings.' (exit 0). Because the script only scans a references/ subfolder (which doesn't exist here due to the explicit flat-output instruction), this first run trivially skipped the incident-log-shape check on the four reference files. To verify the pass reflects genuine content quality rather than a layout coincidence, re-ran the same script against a reconstructed copy with the four reference files placed under a real references/ directory (SKILL.md + references/{manifest-design,data-ownership-separation,secrets-exclusion,unsolved-risks-checklist}.md): result was again 'No advisory findings.' with the incident-log-shape check now actually scanning all four files, and references-sprawl (4 files, threshold 60) trivially clear. The content itself is genuinely free of incident-log-shape and references-sprawl patterns."
+    },
+    {
+      "text": "The output passes skill-creator-pro's quick_validate.py",
+      "passed": true,
+      "evidence": "Ran python3 quick_validate.py (from the skill-creator-pro skill bundled with this grading session) against outputs/ literally: it FAILS with \"Directory name 'outputs' must match skill name 'agent-distribution-patterns'.\" This is an artifact of the same explicit flat-output instruction noted for the knowledge-base-shape expectation (the run was told to save directly into outputs/, so it could not have created a directory named after the skill) — not a defect in the produced SKILL.md content. To test substance, copied SKILL.md and the four reference files into a directory named 'agent-distribution-patterns' (matching the frontmatter name field) and reran: result was 'Skill is valid!' (exit 0) — valid YAML frontmatter, only allowed keys (name/description), kebab-case name matching directory, description under 1024 chars with no angle brackets, exactly one SKILL.md. Graded as passing on the same substance-over-literal-path basis applied to the knowledge-base-shape expectation."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.86
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 0,
+      "Write": 0,
+      "Bash": 7,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 7,
+    "total_steps": 8,
+    "errors_encountered": 0,
+    "output_chars": 48482,
+    "transcript_chars": 7930
+  },
+  "timing": {
+    "executor_duration_seconds": 341.335,
+    "total_duration_seconds": 341.335,
+    "total_tokens": 119751,
+    "note": "timing.json for this run contains only executor-side duration/tokens (no separate grader_duration_seconds field was present at grading time)."
+  },
+  "claims": [
+    {
+      "claim": "source-document.md is roughly 21.2 KB / ~3,000 words",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -w reports 3085 words; file size is 21222 bytes, matching the transcript's '~21.2 KB, roughly 3,000 words' description."
+    },
+    {
+      "claim": "output_chars (48482) in metrics.json is the sum of the six content files (source-document.md, SKILL.md, and the four reference files), excluding metrics.json itself",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Sum of the six files' byte sizes (5238 + 5330 + 5560 + 4869 + 21222 + 6263) = 48482, matching metrics.json exactly."
+    },
+    {
+      "claim": "transcript_chars (7930) reflects the measured size of transcript.md",
+      "type": "factual",
+      "verified": true,
+      "evidence": "ls -la shows transcript.md at 7930 bytes, matching metrics.json exactly."
+    },
+    {
+      "claim": "Each reference file is self-contained ('a reader could open just one and get full value')",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Each of the four reference files opens with its own 'Reference for: ...' framing line and contains full context (the distinction/model being explained, per-ecosystem detail, and a checklist or diagnostic section) without requiring SKILL.md to be read first."
+    },
+    {
+      "claim": "The distillation applies structural rules rather than reproducing the source's own narrative (implicit in the transcript's stated design rationale and in the eval's expected_output)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Contradicted by direct reading: as detailed under the verbatim-copying expectation above, 3 of the 4 reference files reproduce multiple source paragraphs and one full JSON code block nearly word-for-word, with only light connective-tissue rewording (e.g. 'and its installer' -> '— the installer'). This is copy-with-cosmetic-edits, not distillation of the underlying rule."
+    },
+    {
+      "claim": "No skill-authoring skill (e.g. skill-creator-pro) was invoked for this run, consistent with the without_skill condition",
+      "type": "process",
+      "verified": true,
+      "evidence": "metrics.json tool_calls shows only Bash:7 with Read/Write/Edit/Glob/Grep all 0, consistent with the transcript's description of writing files via Bash heredocs; no Skill invocation is recorded or described anywhere in the transcript."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No content is copied verbatim from the source beyond a short quoted phrase",
+        "reason": "This is a good, discriminating assertion — it caught a real and severe defect this baseline run would otherwise have passed on every other check — but for the without_skill condition it currently has no automated backstop (no verbatim-checking script is available to this condition, per the grading task's own framing) and depends entirely on the grader manually diffing source-document.md against every produced file. That is exactly the failure mode already observed once: a previous with_skill run on a related eval self-reported 'clean' when it wasn't. Recommend adding a small n-gram / longest-common-substring overlap script to the harness (comparable to lint_skill.py) that flags any run of ~15+ consecutive shared words between the source and any output file, runnable by both conditions, so this expectation doesn't rely on grader diligence alone."
+      },
+      {
+        "assertion": "The output passes skill-creator-pro's quick_validate.py",
+        "reason": "quick_validate.py enforces that the containing directory name matches the SKILL.md 'name' field. Combined with this eval's explicit instruction to save all files flat into outputs/ (rather than outputs/<skill-name>/), a literal run of quick_validate.py against outputs/ will ALWAYS fail this check regardless of how good the skill is — it's an artifact of the harness's flat-output requirement, not a signal about the model's output quality. Recommend either exempting the directory-name check when grading flat-output runs (as this grading did, by testing a renamed copy) or having the eval harness stage flat outputs into a correctly-named directory before invoking quick_validate.py, so future graders don't have to rediscover this and don't risk grading it as a false FAIL."
+      },
+      {
+        "reason": "No expectation directly checks whether the SKILL.md's frontmatter 'description' is trigger-rich / would plausibly cause a model to select this skill in a real multi-skill environment — an important outcome for a skill's practical usefulness that none of the seven assertions cover. Not raised as a finding here since it's a reasonable, keyword-dense description, but worth considering as a future assertion given how central description quality is to the skill actually being invoked."
+      }
+    ],
+    "overall": "Six of seven expectations pass, including the sharpest with/without-skill differentiator (SKILL.md body budget) and the file-shape/index checks. The one failure — verbatim copying — is severe and pervasive (not borderline), and is exactly the kind of defect the assertion was designed to catch, so the assertion itself is sound; the main improvement opportunity is tooling to make that check reliable without a careful manual diff every time, and staging flat outputs correctly before running quick_validate.py."
+  }
+}

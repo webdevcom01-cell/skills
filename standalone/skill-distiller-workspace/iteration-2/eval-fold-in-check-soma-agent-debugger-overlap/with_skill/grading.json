@@ -1,0 +1,96 @@
+{
+  "expectations": [
+    {
+      "text": "No new skill folder is created for this request",
+      "passed": true,
+      "evidence": "outputs_dir contains only metrics.json and recommendation.md. A recursive listing of the whole eval directory (iteration-2/eval-fold-in-check-soma-agent-debugger-overlap/with_skill/**) shows no new skill directory, no SKILL.md, and no bundled files were created anywhere. transcript.md Step 9 / 'Fold-in check — outcome' states explicitly: 'Action taken: no new skill folder created. A written recommendation was produced instead.'"
+    },
+    {
+      "text": "The response explicitly names the overlapping existing skill (soma-agent-debugger)",
+      "passed": true,
+      "evidence": "outputs/recommendation.md names 'soma-agent-debugger' six times, including a direct quote of its catalog description in the 'Fold-in check performed' section, and the transcript's 'Final response given to the user' section states: 'is already covered by the existing soma-agent-debugger skill's \"Investigate (root cause)\" mode.'"
+    },
+    {
+      "text": "The response does not assume the only valid extension is a references/ patch — it accounts for the matched skill's own shape (operational/mode-based, not knowledge-base) before proposing how to extend it",
+      "passed": true,
+      "evidence": "recommendation.md has a dedicated section 'Why this isn't a `references/` patch': 'that's the right move for a knowledge-base-shaped skill, but for an operational/procedural skill built around fixed modes ... the right move is either adding a new mode/section to its own SKILL.md, or, if the existing modes already cover the need, simply telling the user no new work is needed.' This mirrors and correctly applies the branch documented in the real skill-distiller SKILL.md Step 2 (verified by reading /Users/buda007/moji_skillovi/standalone/skill-distiller/SKILL.md lines 29-47), which explicitly distinguishes knowledge-base-shaped skills (references/ patch) from operational/procedural skills built around fixed modes (SKILL.md mode/section addition, or 'no new work needed')."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 3,
+      "Write": 3,
+      "Bash": 4,
+      "Edit": 0,
+      "Glob": 0,
+      "Grep": 0
+    },
+    "total_tool_calls": 10,
+    "total_steps": 10,
+    "errors_encountered": 0,
+    "output_chars": 3950,
+    "transcript_chars": 7266,
+    "files_created": ["recommendation.md", "transcript.md", "metrics.json"]
+  },
+  "timing": {
+    "executor_duration_seconds": 178.913,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 178.913,
+    "note": "with_skill/timing.json only records a single total_duration_seconds (178.913) plus total_tokens (116482) and duration_ms (178913); it does not break out executor vs. grader time separately, and no grader-side duration was tracked for this run."
+  },
+  "claims": [
+    {
+      "claim": "skill-distiller's SKILL.md contains a Step 2 titled 'Check for fold-in before creating anything new' that instructs checking the available-skills catalog first, and that for an operational/procedural skill built around fixed modes the right extension is a mode/section addition (or telling the user it's already covered) rather than a references/ patch",
+      "type": "process",
+      "verified": true,
+      "evidence": "Confirmed by directly reading /Users/buda007/moji_skillovi/standalone/skill-distiller/SKILL.md lines 29-47, which matches the transcript's description almost verbatim."
+    },
+    {
+      "claim": "references/distillation-algorithm.md Step 1 ('Fold-in check, before any new file exists') restates the check and frames it as keeping the reference directory organized by topic instead of degrading into a session log",
+      "type": "process",
+      "verified": true,
+      "evidence": "Confirmed by reading /Users/buda007/moji_skillovi/standalone/skill-distiller/references/distillation-algorithm.md lines 27-35, which contains this content near-verbatim."
+    },
+    {
+      "claim": "references/quality-checks.md has a 'Worth distilling' section saying a skill should not restate what's already reliably available elsewhere in context, and a 'Description quality' section confirming description-level matching is the intended overlap-detection mechanism",
+      "type": "process",
+      "verified": true,
+      "evidence": "grep confirms both section headers exist in /Users/buda007/moji_skillovi/standalone/skill-distiller/references/quality-checks.md ('## Worth distilling' at line 59 with the 'already reliably available' phrase at line 70, and '## Description quality (the actual triggering mechanism)' at line 141)."
+    },
+    {
+      "claim": "soma-agent-debugger's scope is a strict superset of the requested capability (debug AgentStack agents when their flow isn't working)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The given catalog description of soma-agent-debugger ('debugging, fixing, and deploying production AgentStack agents... Investigate (root cause), Plan Fix, Build Validator, Verify Deploy') textually covers root-cause diagnosis of a broken AgentStack flow via its Investigate mode, plus three additional capabilities not requested. The superset claim is well supported by the description given in eval_metadata.json's prompt."
+    },
+    {
+      "claim": "This task's instructions explicitly directed treating the given one-line description as ground truth and not going looking for the real soma-agent-debugger skill files on this machine",
+      "type": "process",
+      "verified": false,
+      "evidence": "Unverifiable from the inputs available to the grader: eval_metadata.json's 'prompt' field contains only the user-facing task description and does not itself state this constraint, and the full system/harness instructions given to the executor are not included in transcript_path or outputs_dir. The transcript asserts this constraint existed and behaves consistently with it (no soma-agent-debugger files were read), but the constraint's source cannot be independently confirmed from what was provided to the grader. This does not affect any expectation's verdict."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The response explicitly names the overlapping existing skill (soma-agent-debugger)",
+        "reason": "In isolation this assertion is weak — a response that named soma-agent-debugger while giving a wrong or fabricated justification for the overlap would still satisfy it. It only becomes discriminating in this eval because expectation 3 forces genuine reasoning about the match; if expectation 3 were ever dropped, expectation 2 alone would not catch a superficial 'I see a skill with a similar name so I won't build one' response."
+      },
+      {
+        "reason": "No assertion checks that the executor was transparent about the limits of its own check — recommendation.md explicitly flags that it compared only against the catalog description, not the real soma-agent-debugger SKILL.md body, and states what would change the recommendation if that turns out to be inaccurate. This is a real quality signal (honesty about verification depth) that the current expectations don't reward or require, so a future run that fabricated having 'confirmed' the real skill's modes would pass all three current expectations just as easily as this honest one did."
+      }
+    ],
+    "overall": "The three expectations are solid as a set, with expectation 3 doing the real discriminating work: it specifically forces the model to recognize soma-agent-debugger as operational/mode-based rather than defaulting to the more common knowledge-base references/ patch, and the output clearly earns that pass with a dedicated section reasoning through the distinction correctly against the real skill-distiller SKILL.md text. Expectation 2 is comparatively weak on its own but is adequately backstopped by expectation 3. Consider adding an assertion around honesty/calibration (the model should flag, not fabricate, when it can't verify the matched skill's actual internal structure) since that behavior was present here but isn't currently required."
+  }
+}
