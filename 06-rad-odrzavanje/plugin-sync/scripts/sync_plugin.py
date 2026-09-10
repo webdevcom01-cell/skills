@@ -34,6 +34,47 @@ EXCLUDE_DIRS = {"__pycache__", "node_modules", ".git"}
 EXCLUDE_FILES = {".DS_Store"}
 EXCLUDE_SUFFIXES = {".pyc"}
 
+# plugin/skills/ is NOT "every skill in 01-08/" — commit bed2281 deliberately
+# split this repo's skills into plugin/ ("soma-skills", general-purpose, no
+# Agent Studio/SOMA dependency) and plugin-soma-ops/ ("soma-ops-skills",
+# everything that needs that infrastructure). This is the exact list from
+# that split (verified against commit 161fb0e, the last commit before this
+# list existed as an allowlist: 21 skills, unchanged since).
+#
+# This used to be a blacklist (a small EXCLUDE set on top of "mirror all of
+# 01-08"), which is backwards: it silently re-admits every new skill by
+# default. That caused two real regressions on this exact repo —
+# market-research-navigator/system-teardown (license-restricted, manually
+# excluded in 3a031f7) came back via a later --apply (f5889a8), and ~30
+# Agent-Studio/SOMA-specific skills that bed2281 had deliberately moved OUT
+# also came back the same way, silently merging plugin-soma-ops/'s scope
+# back into the general-purpose package. An allowlist can't have that
+# failure mode: a new skill in 01-08/ simply doesn't appear in plugin/skills/
+# until someone deliberately adds its name below.
+GENERAL_PLUGIN_SKILLS = {
+    "algorithmic-art",
+    "brainstorming-buddy",
+    "brand-guidelines",
+    "canvas-design",
+    "deep-research",
+    "doc-coauthoring",
+    "geo-prompt-library",
+    "internal-comms",
+    "mcp-builder",
+    "morning",
+    "obsidian-knowledge-logger",
+    "prompt-engineer-pro",
+    "roast",
+    "session-start-hook",
+    "skill-creator-pro",
+    "skill-lint",
+    "skill-research",
+    "skill-security-review",
+    "slack-gif-creator",
+    "theme-factory",
+    "web-artifacts-builder",
+}
+
 # Phase folders are discovered, not hardcoded, so a renamed or added phase
 # doesn't silently fall outside the sync — matches the naming convention
 # already in use (two digits, a hyphen, then the phase slug).
@@ -70,6 +111,8 @@ def discover_source_skills(repo_root: Path) -> dict[str, Path]:
     for phase_dir in sorted(p for p in repo_root.iterdir() if p.is_dir() and PHASE_DIR_RE.match(p.name)):
         for skill_dir in sorted(p for p in phase_dir.iterdir() if p.is_dir() and not p.name.startswith(".")):
             name = skill_dir.name
+            if name not in GENERAL_PLUGIN_SKILLS:
+                continue
             if name in skills:
                 dupes.setdefault(name, [skills[name]]).append(skill_dir)
             else:
