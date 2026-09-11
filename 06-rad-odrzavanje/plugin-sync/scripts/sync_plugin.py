@@ -52,6 +52,7 @@ EXCLUDE_SUFFIXES = {".pyc"}
 # failure mode: a new skill in 01-08/ simply doesn't appear in plugin/skills/
 # until someone deliberately adds its name below.
 GENERAL_PLUGIN_SKILLS = {
+    "adversarial-verify",
     "algorithmic-art",
     "brainstorming-buddy",
     "brand-guidelines",
@@ -59,12 +60,14 @@ GENERAL_PLUGIN_SKILLS = {
     "deep-research",
     "doc-coauthoring",
     "geo-prompt-library",
+    "idea-to-project",
     "internal-comms",
     "mcp-builder",
     "morning",
     "obsidian-knowledge-logger",
     "prompt-engineer-pro",
     "roast",
+    "sdd-workflow",
     "session-start-hook",
     "skill-creator-pro",
     "skill-lint",

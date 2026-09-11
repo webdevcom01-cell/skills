@@ -1,6 +1,6 @@
 # soma-skills
 
-Opšti toolkit iz repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) — 21 Claude Skill koji **ne zavise** od Agent Studio / AgentStack / SOMA content pipeline / ličnog Obsidian vault-a, organizovanih kroz 8-fazni razvojni pipeline (ideja → projekat → rešenje). Koristan bilo kom Claude Code/Cowork korisniku.
+Opšti toolkit iz repozitorijuma [`webdevcom01-cell/skills`](https://github.com/webdevcom01-cell/skills) — 24 Claude Skill koji **ne zavise** od Agent Studio / AgentStack / SOMA content pipeline / ličnog Obsidian vault-a, organizovanih kroz 8-fazni razvojni pipeline (ideja → projekat → rešenje). Koristan bilo kom Claude Code/Cowork korisniku.
 
 Sestrinski paket **[`plugin-soma-ops/`](../plugin-soma-ops/README.md)** sadrži 28 skillova specifičnih za Agent Studio/AgentStack/SOMA pipeline i konsalting rad — instaliraj ga posebno ako ti treba ta funkcionalnost. Podela je urađena 22.08.2026 (vidi §12/§13 u internom D1 izveštaju) da bi ovaj paket ostao instalabilan i koristan i van tvoje sopstvene Agent Studio infrastrukture.
 
@@ -25,7 +25,10 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
 `prompt-engineer-pro`
 
 ### 03 — Izrada
-`mcp-builder`, `session-start-hook`, `skill-creator-pro`
+`mcp-builder`, `sdd-workflow`, `session-start-hook`, `skill-creator-pro`
+
+### 04 — Testiranje / QA
+`adversarial-verify`
 
 ### 06 — Rad / održavanje
 `obsidian-knowledge-logger`, `skill-lint`, `skill-security-review`
@@ -34,9 +37,9 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
 `algorithmic-art`, `brand-guidelines`, `canvas-design`, `doc-coauthoring`, `internal-comms`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`
 
 ### 08 — Drugi projekti
-`geo-prompt-library`, `morning`
+`geo-prompt-library`, `idea-to-project`, `morning`
 
-**Ukupno: 21 skillova.**
+**Ukupno: 24 skillova.**
 
 ### Šta nije u ovom paketu i zašto
 
