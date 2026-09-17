@@ -134,6 +134,16 @@ exactly the kind of thing that should shape the plan (e.g. "commit the schema ch
 actual migration is a manual step, flagged as a risk") rather than surface for the first time
 mid-Implement, when changing course costs more.
 
+**When Plan picks a specific CLI tool/ORM/build tool** (not just "a package registry" in the
+abstract) — especially one known to fetch additional binaries/artifacts outside the standard
+package registry (e.g. Prisma, Playwright, native build tools) — the capability check must
+actually **run** that tool (e.g. `npx <tool> --version` or an equivalent minimal command), not
+just confirm that package metadata is fetchable. "The registry returns a version" does not prove
+"the tool can actually run" — this is a real, live-confirmed gap (Prisma's CLI fails on every
+invocation, including `-v`, because it fetches a native binary from a separate host than the npm
+registry, and that host can be blocked by network policy while the registry itself is reachable),
+not a theoretical concern — confirmed via a real pilot run that hit exactly this gap.
+
 **If rigor is Regulated and the repo has no test framework at all** (no runner installed, no
 `test` script), name this explicitly as a risk in `plan.md`'s Risks section, not just in the
 capability-check sentence — real business logic (a calculation, a status/gating rule) shipping
