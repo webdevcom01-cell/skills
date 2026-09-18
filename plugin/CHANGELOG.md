@@ -58,3 +58,18 @@ plugin's commit history from before that date.**
   reflect the narrower scope.
 - `catalog_sync_check.py` generalized to accept `--package-dir`, so the same script checks either
   package's README catalog against its own `skills/` mirror.
+
+## 2026-09-18
+
+### Changed
+- `idea-to-project` (T-52): added a STEP 5 (DEPLOY) row and Constraints Rule #7 for real
+  infrastructure deployment (a hosting platform, e.g. Railway) — found missing during the first
+  live DEPLOY-phase run for a code project ("Polovni brodovi" pilot); the skill previously had no
+  route to real hosting at all, so it was done entirely ad-hoc. Applied identically to the source
+  copy (`08-drugi-projekti/idea-to-project/`) and the `plugin/skills/` mirror.
+- `idea-to-project` (second pass, same day): added Constraints Rule #8, formalizing the public
+  `/health`-style-route requirement that was applied ad hoc exactly once during the first full
+  idea-to-project→sdd-workflow→agentic-loop-engineer chain run on a real deployed product (QR Kod
+  Menadžer) — see `claude/OCENA-sistema-posle-runde-10-11-i-preporuka.md` recommendation #2.
+  Applied identically to both copies, same as above.
+- `plugin.json` version bumped to `0.3.1`.

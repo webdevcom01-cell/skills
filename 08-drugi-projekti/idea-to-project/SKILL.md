@@ -4,7 +4,15 @@ description: "Use when someone has a raw idea and wants a real deliverable built
 ---
 
 # Skill: idea-to-project
-*Version: 1.2 — generated 2026-08-21, first run: SOMA Vitals dashboard (Agent Studio health check). Updated 2026-09-03 (T-35): added a BUILD-step handoff to react-design:director for React/Next/Vite UI work — see Constraints and Rules #6 and the STEP 3 table. Updated 2026-09-09 (two edit passes, same day): pass 1 added a BUILD-table route from repo-scoped code/feature/module deliverables to `sdd-workflow` (STEP 3 table) and, in this skill's STEP 4 (TEST), an independent-verification requirement modeled on sdd-workflow's CONVERGE step (its Step 7); pass 2 tied the boundary between that row and the plain Write/Edit row to sdd-workflow's own "Trivial" rigor bar (1–2 files, no new dependency, no new user-visible behavior), after adversarial-verify found pass 1's row wording ambiguous for a small in-repo edit.*
+*Version: 1.2 — generated 2026-08-21, first run: SOMA Vitals dashboard (Agent Studio health check). Updated 2026-09-03 (T-35): added a BUILD-step handoff to react-design:director for React/Next/Vite UI work — see Constraints and Rules #6 and the STEP 3 table. Updated 2026-09-09 (two edit passes, same day): pass 1 added a BUILD-table route from repo-scoped code/feature/module deliverables to `sdd-workflow` (STEP 3 table) and, in this skill's STEP 4 (TEST), an independent-verification requirement modeled on sdd-workflow's CONVERGE step (its Step 7); pass 2 tied the boundary between that row and the plain Write/Edit row to sdd-workflow's own "Trivial" rigor bar (1–2 files, no new dependency, no new user-visible behavior), after adversarial-verify found pass 1's row wording ambiguous for a small in-repo edit. Updated 2026-09-18 (T-52): added a STEP 5 (DEPLOY) row and Constraints Rule #7 for real
+infrastructure deployment (a hosting platform, e.g. Railway) — found missing during the first
+live DEPLOY-phase run for a code project ("Polovni brodovi" pilot), where a real deploy had no
+route in the table at all and had to be done ad-hoc; see `claude/PILOT-runda8-DEPLOY-live-railway.md`.
+Updated 2026-09-18 (second pass, same day): added Constraints Rule #8, formalizing the public
+`/health`-style-route requirement that was applied ad hoc exactly once during the first full
+idea-to-project→sdd-workflow→agentic-loop-engineer chain run on a real deployed product (QR Kod
+Menadžer, `claude/PILOT-runda11-health-ruta-nezavisan-converge.md`) — see
+`claude/OCENA-sistema-posle-runde-10-11-i-preporuka.md` recommendation #2.*
 
 ---
 
@@ -173,6 +181,11 @@ Don't default to "paste it in chat." Decide from the spec's audience/distributio
 - Something that needs to stay current on a schedule → set up a scheduled task
   (`create_trigger`/the scheduled-task tools) — never an in-process cron, it won't survive.
 - A one-off / "just to see" → `SendUserFile` alone; don't clutter a gallery with a throwaway.
+- A real running app/service that needs to actually be live on the internet (not previewed,
+  not a one-time file) → this needs real infrastructure (a hosting platform, e.g. Railway), not
+  any of the rows above. Push the repo to a real git host first (GitHub), then deploy from
+  there. See Constraints Rule #7 for what this actually takes — it is its own small project,
+  not a one-line step. Once it's live, Constraints Rule #8 applies before calling DEPLOY done.
 
 ## STEP 6 — CLOSE THE LOOP
 
@@ -206,6 +219,35 @@ Don't default to "paste it in chat." Decide from the spec's audience/distributio
    React/Next/Vite is the signal to reach for `react-design:director` before any screen gets
    written — same reasoning as rule 4: a build that "looks right" and one where the library/
    theme/token order was actually followed are not the same thing.
+7. **Real infrastructure deployment (Section 6 says "needs to actually be live") is its own
+   small project, not a DEPLOY one-liner.** (T-52, 2026-09-18) Found on the first live DEPLOY
+   run for a code deliverable ("Polovni brodovi" pilot, `claude/PILOT-runda8-DEPLOY-live-railway.md`):
+   this skill had no route to real hosting at all, so it was done entirely ad-hoc and took most
+   of a session. Concretely, expect and budget for: (a) the repo must reach a real git host
+   (GitHub) before a platform like Railway can deploy from it — if the repo currently lives in
+   a worktree or a sandbox-only checkout, use `agentic-loop-engineer`'s
+   `scripts/portable-repo-transfer.sh` (git bundle) to move it, never a plain `tar`/`cp` of a
+   worktree directory, which is not a portable git repo; (b) `git push` needs the user's real
+   credentials (keychain/SSH) — run it in the user's own terminal, never a device-bridge shell,
+   which is a separate, credential-less environment even when it looks like "the user's
+   machine"; (c) treat every platform-specific assumption (volume limits, build-time vs.
+   runtime file serving, env var wiring) as unverified until checked live — a plausible-sounding
+   platform behavior that turns out wrong is a normal outcome here, not a surprise, and costs
+   real time when discovered late instead of checked early.
+8. **A live-deployed service (Rule #7) needs at least one genuinely public, unauthenticated
+   route before DEPLOY counts as done** — e.g. `/health` returning a bare status/count, nothing
+   sensitive. (2026-09-18, formalized from `OCENA-sistema-posle-runde-10-11-i-preporuka.md`
+   recommendation #2, after it was applied ad hoc exactly once — QR Kod Menadžer's `/health`,
+   `claude/PILOT-runda11-health-ruta-nezavisan-converge.md`.) Found necessary because every
+   route that requires auth needs a human in the loop for live verification — someone has to
+   supply real admin credentials — every single time, which doesn't scale past the first
+   deploy. Concretely: if the spec doesn't already name such a route, add it as a small spec
+   amendment (a REQ/AC pair) before or right after first deploy, through `sdd-workflow`'s own
+   amendment pattern (see the "Trivial bar" reasoning under Rule/rigor scaling), with its own
+   independent Converge pass — not self-verified, same rule as Step 4 above. Then verify it live
+   with a real HTTP call (WebFetch or a browser) against the real production URL, not just
+   against a local dev server, and confirm the response carries no operational data beyond the
+   bare liveness signal (no per-record values, no counts that leak more than "is it up").
 
 ---
 
