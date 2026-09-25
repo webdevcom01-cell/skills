@@ -2,7 +2,9 @@
 
 Biblioteka profesionalnih skillova organizovana po fazama razvoja: **ideja -> projekat -> gotovo resenje**. Fokus je na AI-agent/SOMA pipeline projektima (dogovoreni obim), sa jasnim handoff-om izmedju faza.
 
-> Ovo je snapshot skillova iz Claude naloga (webdevcom01@gmail.com), organizovan radi verzionisanja i pregleda. Izvor istine za AKTIVNO koriscenje ostaje Claude nalog - kad se skill izmeni tamo (npr. preko skill-creator-pro), ovaj repo treba rucno osveziti (re-export + commit) da ne zastari.
+> **Izvor istine je ovaj repo** (fazni folderi 01-08). Paketi `plugin/` (soma-skills) i `plugin-soma-ops/` (soma-ops-skills) su distribucija, generisana iz faza preko `plugin-sync`; instalacija na Claude nalog ide iz tih paketa. Skill se menja ovde, pa se paket ponovo pakuje i instalira - nikad direktno na nalogu, jer se tako nalog i repo razilaze (uzrok duplikata ociscenih 2026-09-25).
+>
+> Pojedinacni upload na nalog samo za skill koji namerno nije ni u jednom paketu (npr. `plugin-sync`, `tender-projekat`, `market-research-navigator`, `system-teardown`) - i tada je i dalje ovde izvor istine.
 
 ## Mapa pipeline-a
 
