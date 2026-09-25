@@ -75,8 +75,11 @@ the first step.
 
 Run from the repo root:
 ```
-python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py .
+python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py . --package all
 ```
+The repo ships two packages: `plugin/` (soma-skills) and `plugin-soma-ops/` (soma-ops-skills),
+each with its own allowlist in `sync_plugin.py`. `--package all` checks both; `--package plugin`
+(the default when the flag is omitted) or `--package plugin-soma-ops` checks one.
 Exit 0 with "potpuno usklađen" means nothing else to do — say so plainly and stop, don't
 manufacture busywork. Exit 1 lists NEW / UPDATED / ORPHANED skills by name; exit 2 means two
 phase folders have a skill with the same name — that's a naming conflict for a human to resolve,
@@ -85,7 +88,7 @@ not something to auto-fix by picking one arbitrarily.
 ## STEP 2 — Apply (only if Step 1 found drift and the user wants it fixed)
 
 ```
-python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py . --apply
+python3 06-rad-odrzavanje/plugin-sync/scripts/sync_plugin.py . --package all --apply
 ```
 Add `--prune-orphans` only when the user has confirmed an orphaned skill should actually be
 deleted from `plugin/skills/` — don't default to pruning. An orphan usually means a skill was
@@ -102,7 +105,9 @@ clean.
 
 ```
 python3 06-rad-odrzavanje/plugin-sync/scripts/package_plugin.py plugin dist
+python3 06-rad-odrzavanje/plugin-sync/scripts/package_plugin.py plugin-soma-ops dist
 ```
+Each call checks sync for the package it is building (`--package <folder name>`).
 This refuses to run if Step 1 would report drift — run Step 1/2 first rather than reaching for
 `--skip-sync-check` as a shortcut. The `.plugin` file lands in `dist/`; hand it back to the user
 the way any other deliverable in this session would be delivered (send it, and if a connected
