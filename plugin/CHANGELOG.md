@@ -6,6 +6,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 YYYY-MM-DD. **This file starts tracking from 2026-08-22 forward — it does not backfill the
 plugin's commit history from before that date.**
 
+## 2026-09-25 — v0.4.1
+
+### Added
+- `skill-lint` / `lint_metadata.py`: hard check on frontmatter field lengths (`description`
+  ≤ 1024, `compatibility` ≤ 500). claude.ai rejects a plugin upload that exceeds them; this is
+  how soma-ops-skills v0.2.1 failed to install (see that package's CHANGELOG).
+
 ## 2026-09-25 — v0.4.0
 
 ### Removed

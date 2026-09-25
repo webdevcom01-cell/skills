@@ -14,6 +14,11 @@ Three independent checks, run over every skill folder under the phase folders (0
 2. Version vs CHANGELOG: when a skill has both a `version:` frontmatter field and a
    CHANGELOG.md, the changelog's topmost version heading must match the frontmatter value.
 
+4. Frontmatter field lengths: `description` at most 1024 characters, `compatibility` at most
+   500. Both are hard limits enforced when a plugin is installed on claude.ai — on 2026-09-25
+   soma-ops-skills v0.2.1 was rejected at upload with "field 'compatibility' in SKILL.md must be
+   at most 500 characters" for two skills, which nothing in this repo had caught.
+
 3. Pip deps vs requirements.txt: every third-party import (AST-parsed, not text search) in a
    skill's bundled .py files must be covered by a requirements.txt somewhere under that skill's
    folder. Stdlib modules are excluded via sys.stdlib_module_names (no hardcoded list — always
@@ -35,6 +40,7 @@ PHASE_RE = re.compile(r"^\d\d-")
 LINE_LIMIT = 500
 TOKEN_LIMIT = 5000
 SOFT_ZONE_START = 300
+FIELD_LIMITS = {"description": 1024, "compatibility": 500}
 
 STDLIB = set(getattr(sys, "stdlib_module_names", ()))
 # A handful of extra names that are effectively stdlib-adjacent / always available and would
@@ -68,6 +74,20 @@ def discover_skill_dirs(root: Path):
             if child.is_dir() and (child / "SKILL.md").is_file():
                 skills.append(child)
     return skills
+
+
+def check_field_lengths(skill_dir: Path, fm_text: str, findings: list):
+    try:
+        fm = yaml.safe_load(fm_text) or {}
+    except yaml.YAMLError:
+        return  # malformed frontmatter is reported elsewhere, not a length issue
+    for field, limit in FIELD_LIMITS.items():
+        value = fm.get(field)
+        if isinstance(value, str) and len(value) > limit:
+            findings.append(
+                f"[FIELD] {skill_dir.name}: '{field}' ima {len(value)} znakova (limit {limit}) "
+                f"— instalacija plugina na claude.ai ga odbija"
+            )
 
 
 def split_frontmatter(text: str):
@@ -224,6 +244,7 @@ def main():
         check_size(skill_dir, body, findings, warnings)
         check_version_changelog(skill_dir, fm_text, findings, info)
         check_pip_deps(skill_dir, findings, parse_warnings)
+        check_field_lengths(skill_dir, fm_text, findings)
 
     print(f"skill-lint / lint_metadata.py — {len(skill_dirs)} skillova provereno\n")
 

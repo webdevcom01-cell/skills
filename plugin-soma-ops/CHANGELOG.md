@@ -5,6 +5,14 @@ All notable changes to the `soma-ops-skills` plugin package are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), dates in
 YYYY-MM-DD.
 
+## 2026-09-25 — v0.2.2
+
+### Fixed
+- v0.2.1 was rejected at upload on claude.ai: "field 'compatibility' in SKILL.md must be at most
+  500 characters" for `agent-delivery-pack` (518) and `enterprise-agent-readiness` (550).
+  Both shortened (now 422 and 447) with the same tool lists kept; only explanatory wording
+  trimmed. `skill-lint` now checks this limit.
+
 ## 2026-09-25 — v0.2.1
 
 ### Fixed
