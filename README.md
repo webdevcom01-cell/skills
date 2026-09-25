@@ -17,7 +17,7 @@ Pre nego sto se posveti vreme i novac gradnji - istrazi, izbusi i validiraj idej
 | [`brainstorming-buddy`](01-ideja-validacija/brainstorming-buddy/SKILL.md) | Interactive brainstorming companion for exploring ideas, projects, and solutions |
 | [`roast`](01-ideja-validacija/roast/SKILL.md) | Adversarial "council of personas" that stress-tests an idea, plan, business concept, strategy, or technical/architecture proposal to find... |
 | [`market-research-navigator`](01-ideja-validacija/market-research-navigator/SKILL.md) | Guided market research assistant that provides structure, frameworks, and helps find data for any business research |
-| [`deep-research`](01-ideja-validacija/deep-research/SKILL.md) | Conducts systematic, multi-step web research on a target topic, filters for high-quality primary and authoritative secondary sources, syn... |
+| [`deep-research-sop`](01-ideja-validacija/deep-research-sop/SKILL.md) | Conducts systematic, multi-step web research on a target topic, filters for high-quality primary and authoritative secondary sources, syn... |
 | [`skill-research`](01-ideja-validacija/skill-research/SKILL.md) | Research or verify anything about the real world — from a quick "is this true?" check to a full sourced report |
 
 ### 02-dizajn/ -- Dizajn / arhitektura

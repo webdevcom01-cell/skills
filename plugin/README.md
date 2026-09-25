@@ -19,13 +19,13 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
 ## Skillovi po fazama
 
 ### 01 — Ideja / validacija
-`brainstorming-buddy`, `deep-research`, `roast`, `skill-research`
+`brainstorming-buddy`, `deep-research-sop`, `roast`, `skill-research`
 
 ### 02 — Dizajn
 `prompt-engineer-pro`
 
 ### 03 — Izrada
-`mcp-builder`, `sdd-workflow`, `session-start-hook`, `skill-creator-pro`
+`sdd-workflow`, `session-start-hook`, `skill-creator-pro`
 
 ### 04 — Testiranje / QA
 `adversarial-verify`
@@ -34,12 +34,12 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
 `obsidian-knowledge-logger`, `skill-lint`, `skill-security-review`
 
 ### 07 — Izlazni formati
-`algorithmic-art`, `brand-guidelines`, `canvas-design`, `doc-coauthoring`, `internal-comms`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`
+`algorithmic-art`, `doc-coauthoring`, `theme-factory`
 
 ### 08 — Drugi projekti
-`geo-prompt-library`, `idea-to-project`, `morning`
+`geo-prompt-library`, `idea-to-project`
 
-**Ukupno: 24 skillova.**
+**Ukupno: 17 skillova.**
 
 ### Šta nije u ovom paketu i zašto
 
@@ -53,6 +53,10 @@ Samo `obsidian-knowledge-logger` u ovom paketu koristi MCP alate — vezan je za
   hardkodovan je na jedan konkretan klijentski projekat, beskoristan van te upotrebe.
 - `plugin-sync` (faza 06) postoji u faznom folderu ali je namerno izostavljen iz oba paketa —
   meta-alat koji sinhronizuje ovaj repo sam sa sobom, nema smisla u distributable paketu.
+- `brand-guidelines`, `canvas-design`, `internal-comms`, `mcp-builder`, `slack-gif-creator`,
+  `web-artifacts-builder` (faza 07/03) i `morning` (faza 08) postoje u faznim folderima ali su od
+  2026-09-25 izostavljeni iz paketa — njihov `SKILL.md` je identičan kopiji koju Anthropic već
+  isporučuje na Claude nalogu, pa bi paket samo duplirao isti skill pod istim imenom.
 
 ### Skillovi koji se ne pozivaju sami
 

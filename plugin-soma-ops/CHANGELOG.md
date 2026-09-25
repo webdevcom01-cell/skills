@@ -5,6 +5,13 @@ All notable changes to the `soma-ops-skills` plugin package are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), dates in
 YYYY-MM-DD.
 
+## 2026-09-25 — v0.2.1
+
+### Fixed
+- `soma-agent-debugger` was missing `_legacy-reference/` (added to the phase folder in c0ce4e7,
+  never mirrored here). This package now has a drift check: `sync_plugin.py --package
+  plugin-soma-ops` (and `--package all` in the pre-commit hook).
+
 ## 2026-08-22 (later same day) — vault-schema-reference added
 
 ### Added

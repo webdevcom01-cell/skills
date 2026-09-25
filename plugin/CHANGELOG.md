@@ -6,6 +6,24 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 YYYY-MM-DD. **This file starts tracking from 2026-08-22 forward — it does not backfill the
 plugin's commit history from before that date.**
 
+## 2026-09-25 — v0.4.0
+
+### Removed
+- `brand-guidelines`, `canvas-design`, `internal-comms`, `mcp-builder`, `morning`,
+  `slack-gif-creator`, `web-artifacts-builder` — their `SKILL.md` is identical to the copy
+  Anthropic already ships on the Claude account, so installing this package put two skills with
+  the same name and content side by side. They remain in their phase folders.
+
+### Changed
+- `deep-research` renamed `deep-research-sop` (folder, `name:`, eval `skill_name`). Anthropic
+  ships a different skill named `deep-research` (a subagent coordinator); this one is the
+  single-agent SOP with Tier 1/Tier 2 sources. Invoke it as `/deep-research-sop`.
+- `plugin.json` description count corrected (it said 21 while the package held 24; now 17).
+
+### Note
+- The installed v0.3.1 predated commit 53251f4 (which added idea-to-project Rule #8) despite
+  carrying the same version number. From here on: bump the version whenever content changes.
+
 ## 2026-08-22
 
 ### Added

@@ -39,7 +39,12 @@ EXCLUDE_SUFFIXES = {".pyc"}
 # Agent Studio/SOMA dependency) and plugin-soma-ops/ ("soma-ops-skills",
 # everything that needs that infrastructure). This is the exact list from
 # that split (verified against commit 161fb0e, the last commit before this
-# list existed as an allowlist: 21 skills, unchanged since).
+# list existed as an allowlist: 21 skills). 2026-09-25: 7 Anthropic example
+# skills whose SKILL.md is identical to the copy Anthropic already ships
+# (brand-guidelines, canvas-design, internal-comms, mcp-builder, morning,
+# slack-gif-creator, web-artifacts-builder) removed — they stay in their
+# phase folders; deep-research renamed deep-research-sop (Anthropic ships a
+# different skill under the old name).
 #
 # This used to be a blacklist (a small EXCLUDE set on top of "mirror all of
 # 01-08"), which is backwards: it silently re-admits every new skill by
@@ -55,15 +60,10 @@ GENERAL_PLUGIN_SKILLS = {
     "adversarial-verify",
     "algorithmic-art",
     "brainstorming-buddy",
-    "brand-guidelines",
-    "canvas-design",
-    "deep-research",
+    "deep-research-sop",
     "doc-coauthoring",
     "geo-prompt-library",
     "idea-to-project",
-    "internal-comms",
-    "mcp-builder",
-    "morning",
     "obsidian-knowledge-logger",
     "prompt-engineer-pro",
     "roast",
@@ -73,9 +73,7 @@ GENERAL_PLUGIN_SKILLS = {
     "skill-lint",
     "skill-research",
     "skill-security-review",
-    "slack-gif-creator",
     "theme-factory",
-    "web-artifacts-builder",
 }
 
 # plugin-soma-ops/skills/ ("soma-ops-skills") — same allowlist discipline as
