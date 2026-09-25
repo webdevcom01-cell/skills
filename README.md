@@ -43,6 +43,7 @@ Skafolduju i grade novi agent, skill, MCP server ili menjaju bezbednosni sloj ba
 | [`rls-rollout`](03-izrada/rls-rollout/SKILL.md) | Audits, plans, and orchestrates a phased Postgres Row-Level Security (RLS) rollout for the agent-studio multi-tenant database (61 Prisma ... |
 | [`session-start-hook`](03-izrada/session-start-hook/SKILL.md) | Creating and developing startup hooks for Claude Code on the web |
 | [`sdd-workflow`](03-izrada/sdd-workflow/SKILL.md) | Spec-Driven Development workflow for code changes — Constitution, Specify, Clarify, Plan, Tasks, Implement, independent Converge/Verify, with rigor scaled to change size |
+| [`agentic-loop-engineer`](03-izrada/agentic-loop-engineer/SKILL.md) | Dizajn, izvršavanje i upravljanje self-prompting autonomnim agent petljama — worktree izolacija, maker-checker verifikacija, circuit breaker, human-in-the-loop ograde (skripte uključene) |
 
 ### 04-test-qa/ -- Testiranje / QA
 
@@ -116,6 +117,8 @@ Nisu deo AI-agent pipeline-a - samostalni proizvodi izgradjeni istom disciplinom
 | [`geo-prompt-library`](08-drugi-projekti/geo-prompt-library/SKILL.md) | Generiše kvota-validiranu biblioteku kupčevih upita (30–50 intenata, SR+EN par) iz URL-a firme, vertikale i lokalea — verzionisan JSON ka... |
 | [`morning`](08-drugi-projekti/morning/SKILL.md) | Render the user's morning brief as a styled HTML artifact, or set it up as a recurring weekday task |
 | [`idea-to-project`](08-drugi-projekti/idea-to-project/SKILL.md) | General-purpose Idea→Spec→Build→Test→Deploy pipeline for turning a raw idea into a real deliverable; not SOMA/Agent Studio specific, hands off React/Next/Vite UI decisions and repo-scoped code changes to other skills |
+| [`full-agentic-loop`](08-drugi-projekti/full-agentic-loop/SKILL.md) | Runs the complete idea-to-live-deploy pipeline for a code project by chaining idea-to-project → sdd-workflow → agentic-loop-engineer, including the manual bridge between them |
+| [`kling-video-tiktok-poster`](08-drugi-projekti/kling-video-tiktok-poster/SKILL.md) | Generiše kratak vertikalni video Kling modelom (preko Higgsfield-a) iz teksta, traži odobrenje korisnika, pa ga objavljuje na povezani TikTok nalog |
 
 ## tools/
 

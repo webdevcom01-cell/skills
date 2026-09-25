@@ -1,0 +1,207 @@
+# guardrails.yaml (v2 - posle audita)
+#
+# PROMENA POSLE AUDITA: v1 ovog fajla je bio SAMO regex lista bez ijedne
+# skripte koja ga stvarno primenjuje - "orkestrator proverava" je bila
+# tvrdnja u SKILL.md bez koda iza nje. Sada ga primenjuje
+# scripts/guardrail_check.py, ožičen kao pravi Claude Code PreToolUse hook
+# (vidi hooks/settings.snippet.json), zvanična shema potvrđena na
+# https://code.claude.com/docs/en/hooks (fetch-ovano tokom audita).
+#
+# scope:
+#   bash       - pattern se primenjuje na tool_input.command, SAMO kad je tool_name == "Bash"
+#   tool_name  - pattern se primenjuje direktno na tool_name (hvata MCP alate, npr. mcp__Gmail__send_message)
+#   any        - pattern se primenjuje na "tool_name + JSON(tool_input)" spojeno - hvata slučajeve
+#                gde rizik zavisi od argumenta, ne od imena alata (npr. Railway poziv sa "production" u argumentima)
+#
+# action:
+#   block          - hook UVEK vrati "deny", i NIKAD se ne nudi one-time-approval resume put.
+#                    Za akcije čiji je blast radius toliko visok (nepovratan gubitak podataka,
+#                    novac, kredencijali) da čovek treba SAM da ih izvrši van agentske petlje,
+#                    ne da "odobri agentu da izvrši tačno ovu komandu".
+#   require_human  - hook vrati "deny" i upiše pending-approval zapis u
+#                    <cwd>/.agent/pending_human_approval/<token>.json. Čovek pregleda i,
+#                    ako odobrava, pokreće `scripts/approve.sh <token>` - to kreira
+#                    JEDNOKRATNI approval fajl koji dozvoljava TAČNO tu istu komandu
+#                    sledeći put kad je agent pokuša (ne blanket dozvolu za tip komande).
+#
+# NAPOMENA (disclosure, ne propust): regex/pattern provera na tekstu komande je
+# NUŽNA ali NE DOVOLJNA odbrana - može se zaobići (alias, env var indirection,
+# base64/eval obfuskacija, itd). Ovo je prvi sloj odbrane. Drugi slojevi koji
+# MORAJU postojati nezavisno od ovog fajla:
+#   - Git branch protection na remote-u (GitHub/GitLab) za main/production grane,
+#     tako da čak i ako hook promakne force-push, remote ga odbija.
+#   - Least-privilege API ključevi/scope-ovani tokeni za MCP konektore (Railway,
+#     Gmail, itd) - agent ne bi trebalo da uopšte POSEDUJE kredencijal koji može
+#     da diraJe produkciju, bez obzira na hook.
+# Ne tretiraj ovaj fajl kao jedinu odbranu.
+
+version: 2
+
+rules:
+  # --- Baza podataka ---
+  - id: db-drop-truncate
+    scope: bash
+    pattern: '(?i)\b(DROP\s+(TABLE|DATABASE|SCHEMA)|TRUNCATE)\b'
+    action: block
+    reason: "Nepovratno brisanje strukture/podataka baze - čovek izvršava sam ako je zaista potrebno, ne kroz agent-resume"
+
+  - id: db-delete-no-where
+    scope: bash
+    pattern: '(?i)DELETE\s+FROM\s+\w+\s*(;|$)'
+    action: block
+    reason: "DELETE bez WHERE klauzule — briše celu tabelu"
+
+  - id: db-migration-prod
+    scope: bash
+    pattern: '(?i)(migrate|prisma\s+migrate\s+deploy).*(prod|production)'
+    action: require_human
+    reason: "Migracija šeme na produkcionoj bazi"
+
+  # --- Git / kod ---
+  - id: git-force-push
+    scope: bash
+    pattern: '(?i)git\s+push\s+.*--force'
+    action: require_human
+    reason: "Prepisuje remote istoriju, može obrisati tuđe commit-e"
+
+  - id: git-hard-reset
+    scope: bash
+    pattern: '(?i)git\s+reset\s+--hard'
+    action: require_human
+    reason: "Nepovratno gubi lokalne izmene"
+
+  - id: git-merge-protected-branch
+    scope: bash
+    pattern: '(?i)git\s+(merge|rebase).*\b(main|master|production|prod)\b'
+    action: require_human
+    reason: "Merge/rebase direktno na zaštićenu granu"
+
+  - id: git-clean-force
+    scope: bash
+    pattern: '(?i)git\s+clean\s+.*-f'
+    action: require_human
+    reason: "Trajno briše untracked fajlove"
+
+  # --- Deploy / infrastruktura (bash CLI put) ---
+  - id: deploy-production-cli
+    scope: bash
+    pattern: '(?i)(railway\s+(up|redeploy)|deploy).*(prod|production)'
+    action: require_human
+    reason: "Deploy na produkcioni environment preko CLI-ja"
+
+  # --- Deploy / infrastruktura (MCP alat put - ovo je fali u v1!) ---
+  # v1 je pokrivao samo bash string-ove; MCP tool poziv (npr. Railway MCP
+  # `redeploy`/`accept-deploy`/`set-variables`) NIJE bash komanda, nema
+  # "command" string za regex - mora se hvatati po tool_name/argumentima.
+  - id: mcp-railway-deploy-actions
+    scope: tool_name
+    pattern: '^mcp__railway__(redeploy|accept-deploy|create-deployment|restart-service|delete-service)$'
+    action: require_human
+    reason: "Railway MCP akcija koja menja stanje živog servisa"
+
+  - id: mcp-railway-prod-vars
+    scope: any
+    pattern: '(?i)mcp__railway__set-variables.*"(environment|env)"\s*:\s*"(prod|production)"'
+    action: require_human
+    reason: "Menja environment varijable na produkciji preko Railway MCP-a"
+
+  # --- Fajl sistem ---
+  - id: rm-rf-outside-worktree
+    scope: bash
+    pattern: '(?i)rm\s+-rf\s+'
+    action: require_human
+    reason: "Rekurzivno brisanje — dozvoljeno SAMO unutar sopstvenog worktree/scratch prostora; van njega uvek zahteva potvrdu"
+
+  # --- Komunikacija (bash put, npr. sendmail/curl ka webhook-u) ---
+  - id: external-message-send-bash
+    scope: bash
+    pattern: '(?i)(smtp|sendmail|curl.*hooks\.slack\.com)'
+    action: require_human
+    reason: "Slanje eksterne poruke preko shell-a se ne može povući"
+
+  # --- Komunikacija (MCP alat put - Gmail/Slack konektori) ---
+  - id: mcp-gmail-send
+    scope: tool_name
+    pattern: '^mcp__Gmail__(send_message|reply|forward)$'
+    action: require_human
+    reason: "Slanje email-a se ne može povući"
+
+  - id: mcp-slack-send
+    scope: tool_name
+    pattern: '^mcp__slack.*__(slack-messaging|send.*|post.*)$'
+    action: require_human
+    reason: "Slanje Slack poruke se ne može tiho povući nakon što je pročitana"
+
+  # --- Novac ---
+  - id: payment-billing-api
+    scope: any
+    pattern: '(?i)(charge|refund|payment|billing|invoice).*(create|delete|update)'
+    action: block
+    reason: "Finansijska transakcija - čovek izvršava sam, ne kroz agent-resume"
+
+  # --- Indirekcija / obfuskacija (stavka #2 ojacavanja, 16-17. sept 2026) ---
+  # Regex na sirovom tekstu komande ne moze da "vidi kroz" sadrzaj koji se
+  # gradi/dekodira u hodu (base64, eval, alias, promenljiva podeljena preko
+  # vise Bash poziva). Umesto da pokusamo da DEKODIRAMO sadrzaj (opste
+  # nemoguce protiv proizvoljnog kodiranja - pogresan cilj), hvatamo SAM
+  # MEHANIZAM indirekcije kao sumnjiv - legitiman agent koji radi na
+  # definisanom zadatku po pravilu nema potrebu da dinamicki dekodira ili
+  # evaluira proizvoljan tekst kao komandu. (Promenljiva/alias-split preko
+  # dva poziva se hvata odvojeno, u guardrail_check.py, supstitucijom PRE
+  # ovih pravila - vidi napomenu na vrhu te skripte.)
+  - id: indirect-eval
+    scope: bash
+    pattern: '(?i)\beval\s'
+    action: require_human
+    reason: "eval izvrsava tekst konstruisan u hodu - stvaran sadrzaj se ne vidi u komandi koju guardrail proverava"
+
+  - id: indirect-command-substitution-as-command
+    scope: bash
+    pattern: '(^|[;&|\n])\s*(\$\(|`|<\()'
+    action: require_human
+    reason: "Komanda pocinje command/process substitution-om ($(...), obrnutim navodnicima ili <(...)) - stvaran sadrzaj se gradi u hodu, nije citljiv u tekstu"
+
+  - id: indirect-alias-define
+    scope: bash
+    pattern: '(?i)\balias\s+\S+\s*='
+    action: require_human
+    reason: "Definisanje shell alias-a - klasicna tehnika da se komanda sakrije od tekstualne provere; agent ne treba da pravi alias-e za rad na zadatku"
+
+  - id: indirect-decode-pipe
+    scope: bash
+    pattern: '(?i)\b(base64\s+(-d|--decode)|xxd\s+-r|openssl\s+enc\s+.*-d\b|uudecode)\b'
+    action: require_human
+    reason: "Dekodiranje obfuskovanog sadrzaja - stvarna komanda nije citljiva u tekstu koji guardrail vidi"
+
+  - id: indirect-ansi-c-quote
+    scope: bash
+    pattern: "\\$'"
+    action: require_human
+    reason: "ANSI-C quoting ($'...') dozvoljava hex/oktalni escape koji zaobilazi tekstualnu regex proveru (npr. $'\\x67\\x69\\x74' = 'git')"
+
+  - id: indirect-pipe-to-shell
+    scope: bash
+    pattern: '\|\s*(sudo\s+)?\b(sh|bash|zsh|dash)\b'
+    action: require_human
+    reason: "Cev u shell interpreter (npr. curl|bash, wget|sh) - sadrzaj koji se izvrsava dolazi spolja/dinamicki, nije citljiv u tekstu komande"
+
+  - id: indirect-process-substitution
+    scope: bash
+    pattern: '<\('
+    action: require_human
+    reason: "Process substitution (<(...)) kao argument - cesto koriscen za fetch-and-run (npr. bash <(curl ...)), sadrzaj se gradi u hodu"
+
+  # --- Bezbednost ---
+  - id: credential-rotation
+    scope: any
+    pattern: '(?i)(rotate|revoke|delete).*(api[_-]?key|secret|credential|token)'
+    action: block
+    reason: "Može zaključati pristup sistemu ili otvoriti bezbednosnu rupu - čovek izvršava sam"
+
+# Fail-safe default: ako nijedno pravilo ne matchuje ALI je akcija van scope-a
+# definisanog u task specifikaciji (npr. dotiče fajl van worktree-a),
+# orkestrator/agent i dalje MORA tražiti potvrdu. Ovo NIJE nešto što
+# guardrail_check.py može automatski detektovati (ne zna task scope) -
+# ovo ostaje odgovornost Checker koraka (Domen 2), upisano ovde radi
+# potpunosti dokumenta.
+default_on_unclassified_out_of_scope_action: require_human

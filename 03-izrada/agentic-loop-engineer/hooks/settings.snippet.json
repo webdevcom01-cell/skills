@@ -1,0 +1,17 @@
+{
+  "_napomena": "Ubaci ovaj 'hooks' blok u .claude/settings.json (ili settings.local.json) u worktree-u/repo-u gde agent radi. Šema potvrđena na https://code.claude.com/docs/en/hooks tokom audita - proveri ponovo pri sledećem ažuriranju Claude Code-a, hook API se menja između verzija.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PROJECT_DIR}/agentic-loop-engineer/scripts/guardrail_check.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
