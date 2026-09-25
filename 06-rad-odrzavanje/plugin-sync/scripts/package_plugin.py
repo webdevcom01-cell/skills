@@ -85,8 +85,11 @@ def check_sync(plugin_dir: Path) -> bool:
     if not sync_script.exists():
         print("ℹ️  sync_plugin.py nije nađen — preskačem proveru usklađenosti.")
         return True
+    # Check the package actually being packaged, not always plugin/ — before
+    # 2026-09-25 this ran the default (plugin/ only), so packaging
+    # plugin-soma-ops/ passed a sync check that never looked at it.
     result = subprocess.run(
-        [sys.executable, str(sync_script), str(plugin_dir.parent)],
+        [sys.executable, str(sync_script), str(plugin_dir.parent), "--package", plugin_dir.name],
         capture_output=True, text=True,
     )
     print(result.stdout)

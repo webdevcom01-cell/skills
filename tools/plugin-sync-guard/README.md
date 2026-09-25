@@ -1,6 +1,7 @@
 # plugin-sync-guard
 
-Git pre-commit hook that blocks a commit if `plugin/skills/` has drifted from
+Git pre-commit hook that blocks a commit if `plugin/skills/` or
+`plugin-soma-ops/skills/` (since 2026-09-25, `--package all`) has drifted from
 the 01-08 phase folders — the exact failure mode that let 28+ skills (and,
 separately, 2 more later) go unsynced for weeks until a manual audit caught it.
 

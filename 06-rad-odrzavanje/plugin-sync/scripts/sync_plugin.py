@@ -78,6 +78,50 @@ GENERAL_PLUGIN_SKILLS = {
     "web-artifacts-builder",
 }
 
+# plugin-soma-ops/skills/ ("soma-ops-skills") — same allowlist discipline as
+# GENERAL_PLUGIN_SKILLS, for the second package bed2281 split out. Until
+# 2026-09-25 nothing checked this package at all: sync_plugin.py and the
+# plugin-sync-guard pre-commit hook only ever looked at plugin/, and it had
+# already drifted once (c0ce4e7 added _legacy-reference/ to both
+# agent-architect and soma-agent-debugger; only agent-architect's copy
+# reached plugin-soma-ops/, by hand in b5bbf7a).
+SOMA_OPS_PLUGIN_SKILLS = {
+    "agent-architect",
+    "agent-delivery-pack",
+    "agent-dependency-mapper",
+    "agent-health-check",
+    "agent-scaffolder",
+    "automation-triage",
+    "enterprise-agent-readiness",
+    "evo-log-writer",
+    "instincts-updater",
+    "kb-sync",
+    "memory-integrity-gate",
+    "pipeline-debug",
+    "pipeline-input-validator",
+    "prospect-discovery",
+    "rls-rollout",
+    "safe-agent-builder",
+    "soma-agent-cleanup",
+    "soma-agent-debugger",
+    "soma-distribution",
+    "soma-eval-harness",
+    "soma-memory-fix",
+    "soma-model-preflight",
+    "soma-performance-review",
+    "soma-run",
+    "soma-score-analyzer",
+    "team-enablement-program",
+    "vault-schema-reference",
+    "winners-log-logger",
+}
+
+# package folder -> the allowlist of skills that belong in its skills/ mirror.
+PACKAGES = {
+    "plugin": GENERAL_PLUGIN_SKILLS,
+    "plugin-soma-ops": SOMA_OPS_PLUGIN_SKILLS,
+}
+
 # Phase folders are discovered, not hardcoded, so a renamed or added phase
 # doesn't silently fall outside the sync — matches the naming convention
 # already in use (two digits, a hyphen, then the phase slug).
@@ -102,7 +146,7 @@ def _included_files(root: Path) -> dict[str, str]:
     return out
 
 
-def discover_source_skills(repo_root: Path) -> dict[str, Path]:
+def discover_source_skills(repo_root: Path, allowlist: set[str] = GENERAL_PLUGIN_SKILLS) -> dict[str, Path]:
     """Map skill name -> its source directory across every phase folder.
 
     Raises ValueError if the same skill name appears under two different
@@ -114,7 +158,7 @@ def discover_source_skills(repo_root: Path) -> dict[str, Path]:
     for phase_dir in sorted(p for p in repo_root.iterdir() if p.is_dir() and PHASE_DIR_RE.match(p.name)):
         for skill_dir in sorted(p for p in phase_dir.iterdir() if p.is_dir() and not p.name.startswith(".")):
             name = skill_dir.name
-            if name not in GENERAL_PLUGIN_SKILLS:
+            if name not in allowlist:
                 continue
             if name in skills:
                 dupes.setdefault(name, [skills[name]]).append(skill_dir)
@@ -139,12 +183,12 @@ def diff_skill(source_dir: Path, plugin_dir: Path) -> dict:
     return {"added": added, "removed": removed, "changed": changed}
 
 
-def sync(repo_root: Path, apply: bool, prune_orphans: bool) -> int:
+def sync(repo_root: Path, apply: bool, prune_orphans: bool, package: str = "plugin") -> int:
     repo_root = repo_root.resolve()
-    plugin_skills_dir = repo_root / "plugin" / "skills"
+    plugin_skills_dir = repo_root / package / "skills"
 
     try:
-        source_skills = discover_source_skills(repo_root)
+        source_skills = discover_source_skills(repo_root, PACKAGES[package])
     except ValueError as e:
         print(f"❌ {e}")
         return 2
@@ -170,7 +214,7 @@ def sync(repo_root: Path, apply: bool, prune_orphans: bool) -> int:
 
     drift = bool(new_skills or orphaned_skills or updated_skills)
 
-    print(f"Izvor: {len(source_skills)} skillova u fazama, plugin/skills/: {len(plugin_skill_names)} skillova\n")
+    print(f"[{package}] Izvor: {len(source_skills)} skillova u fazama, {package}/skills/: {len(plugin_skill_names)} skillova\n")
 
     if new_skills:
         print(f"🆕 NOVO ({len(new_skills)}) — postoji u izvoru, nedostaje u pluginu:")
@@ -201,7 +245,7 @@ def sync(repo_root: Path, apply: bool, prune_orphans: bool) -> int:
     print(f"✅ Usklađeno: {len(in_sync_skills)} / {len(shared_skills)} deljenih skillova")
 
     if not drift:
-        print("\n✅ plugin/skills/ je potpuno usklađen sa izvorom. Ništa za sinhronizaciju.")
+        print(f"\n✅ {package}/skills/ je potpuno usklađen sa izvorom. Ništa za sinhronizaciju.")
         return 0
 
     if not apply:
@@ -241,7 +285,7 @@ def sync(repo_root: Path, apply: bool, prune_orphans: bool) -> int:
         print("\n❌ Sinhronizacija primenjena, ali razlika i dalje postoji — proveri ručno.")
         return 1
 
-    print("\n✅ Sinhronizovano. plugin/skills/ sada odgovara izvoru"
+    print(f"\n✅ Sinhronizovano. {package}/skills/ sada odgovara izvoru"
           + (" (napušteni skillovi nisu uklonjeni — koristi --prune-orphans)." if orphaned_skills and not prune_orphans else "."))
     return 0
 
@@ -255,9 +299,19 @@ def main():
                          help="Primeni sinhronizaciju (kopira NOVO/IZMENJENO iz izvora u plugin/skills/)")
     parser.add_argument("--prune-orphans", action="store_true",
                          help="Uz --apply, ukloni i skillove iz plugin/skills/ koji više ne postoje ni u jednoj fazi")
+    parser.add_argument("--package", choices=sorted(PACKAGES) + ["all"], default="plugin",
+                         help="Koji paket proveriti: plugin (podrazumevano, kao ranije), "
+                              "plugin-soma-ops, ili all (oba — koristi pre-commit hook)")
     args = parser.parse_args()
 
-    sys.exit(sync(Path(args.repo_root), apply=args.apply, prune_orphans=args.prune_orphans))
+    packages = sorted(PACKAGES) if args.package == "all" else [args.package]
+    worst = 0
+    for i, package in enumerate(packages):
+        if i:
+            print("\n" + "-" * 60 + "\n")
+        worst = max(worst, sync(Path(args.repo_root), apply=args.apply,
+                                prune_orphans=args.prune_orphans, package=package))
+    sys.exit(worst)
 
 
 if __name__ == "__main__":
