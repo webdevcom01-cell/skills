@@ -6,6 +6,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 YYYY-MM-DD. **This file starts tracking from 2026-08-22 forward — it does not backfill the
 plugin's commit history from before that date.**
 
+## 2026-09-25 — v0.4.2
+
+### Fixed
+- `sdd-workflow` 1.6.1: Step 5 (Tasks) now requires approval of `tasks.md` before Step 6
+  (Implement). Rule 2 already demanded approval at every phase; Step 5 did not say so. The
+  overview said "Six phases" while the skill lists seven; corrected.
+
 ## 2026-09-25 — v0.4.1
 
 ### Added

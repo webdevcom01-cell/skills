@@ -1,23 +1,18 @@
 ---
 name: soma-run
-version: 1.3.1
+version: 1.3.2
 description: >-
-  End-to-end SOMA pipeline runner: validates input, runs Trend Intelligence, captures the output,
-  writes evo-logs to Obsidian, and logs winners. One skill call replaces manual as_chat_with_agent +
-  evo-log-writer + winners-log-logger. Default scope is TI only, because TI calls Hook Writer and Hook
-  Writer calls Content Repurposer server-side — the full chain runs from one call. Running the
-  external TI → HW → CR relay on top of that would execute HW twice and CR three times, so that scope
-  is gated behind explicit confirmation until the call_agent nodes are removed (decision of
-  2026-06-19). Triggers: "soma run", "pokreni pipeline", "run pipeline", "pokreni SOMA", "run SOMA",
-  "run TI", "pokreni TI", "full pipeline run", "end-to-end run", "soma-run", "run the pipeline",
-  "pusti kroz pipeline", "pusti trend kroz pipeline".
-compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_get_agent, as_get_recent_executions, as_list_agent_calls, as_list_agents) and Obsidian MCP (obsidian_create_note, obsidian_read_note, obsidian_update_note) -- runs Trend Intelligence end-to-end and writes evo-logs and winners directly, replacing separate as_chat_with_agent, evo-log-writer and winners-log-logger calls.
-do_not_use_when:
-  - "User wants to validate input only (use pipeline-input-validator)"
-  - "User wants to log an existing run (use evo-log-writer)"
-  - "User wants to sync KB content (use kb-sync)"
-  - "User wants a health check (use agent-health-check)"
-  - "User wants to fix kb_search wiring (use soma-memory-fix)"
+  End-to-end SOMA pipeline runner: validates input, runs Trend Intelligence (which calls Hook
+  Writer, which calls Content Repurposer, server-side), confirms the fetched source, and writes the
+  TI evo-log to Obsidian. HW/CR evo-logs and winners-log are written only in the gated external-relay
+  scope. Default scope is TI only: running the external TI → HW → CR relay on top of the server-side
+  chain would execute HW twice and CR three times, so that scope needs explicit confirmation until
+  the call_agent nodes are removed (decision of 2026-06-19). Triggers: "soma run", "pokreni
+  pipeline", "run pipeline", "pokreni SOMA", "run SOMA", "run TI", "pokreni TI", "full pipeline
+  run", "end-to-end run", "run the pipeline", "pusti trend kroz pipeline". Input check only goes to
+  pipeline-input-validator; logging an existing run to evo-log-writer; KB sync to kb-sync; health
+  check to agent-health-check; kb_search wiring to soma-memory-fix.
+compatibility: Requires Agent Studio MCP (as_chat_with_agent, as_get_agent, as_get_recent_executions, as_list_agent_calls, as_list_agents) and Obsidian MCP (obsidian_create_note, obsidian_read_note, obsidian_update_note) -- runs Trend Intelligence end-to-end and writes the TI evo-log (HW/CR evo-logs and winners-log only in the gated relay scope).
 allowed-tools:
   - TodoWrite
   - mcp__agent-studio__as_chat_with_agent
@@ -37,7 +32,7 @@ allowed-tools:
 
 # Skill: soma-run
 
-*Version: 1.3.1*
+*Version: 1.3.2* — 2026-09-25: description now states what default scope actually writes (TI evo-log only); `do_not_use_when` boundaries moved into description (Claude Code ignores that field); TI timeout unified to 300; report no longer shows server-side HW/CR as SKIPPED.
 *Grounded in: live MCP audit 2026-05-16 — all tool schemas, evo-log formats, Obsidian*
 *paths, and timeout values confirmed from live data. Zero values from memory.*
 *Revised 2026-07-29: added the auto-chain conflict section and the scope gate below,*

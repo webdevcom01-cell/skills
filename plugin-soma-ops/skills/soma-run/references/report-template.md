@@ -4,7 +4,9 @@
 
 ## STEP 9 — REPORT: Final Summary
 
-After all steps complete, output the final report:
+After all steps complete, output the final report. With `pipeline_scope == "TI"` (the default),
+HW and CR still execute server-side inside TI — report them as `↪️ RAN SERVER-SIDE`, never as
+`SKIPPED`, and their evo-logs as `not written (scope=TI)`:
 
 ```
 🚀 SOMA RUN — COMPLETE
@@ -17,8 +19,8 @@ Input    : {trend_input (first 80 chars)}
 STEP RESULTS:
   TI         → {✅ COMPLETED | ⛔ FAILED | ⏭️ SKIPPED}
   TI Quality → {PASS | WARN: [missing elements] | ABORT | N/A (scope=TI)}
-  HW         → {✅ COMPLETED | ⛔ FAILED | ⏭️ SKIPPED}
-  CR         → {✅ COMPLETED | ⛔ FAILED | ⏭️ SKIPPED}
+  HW         → {✅ COMPLETED | ⛔ FAILED | ↪️ RAN SERVER-SIDE (inside TI, output not captured) | ⏭️ SKIPPED}
+  CR         → {✅ COMPLETED | ⛔ FAILED | ↪️ RAN SERVER-SIDE (inside HW, output not captured) | ⏭️ SKIPPED}
 
 ══════════════════════════════════════════
 TI OUTPUT SUMMARY:
@@ -40,9 +42,9 @@ CR OUTPUT SUMMARY:
 ══════════════════════════════════════════
 LOGGING:
   TI evo-log  → {✅ written | ⛔ failed}
-  HW evo-log  → {✅ written | ⛔ failed | ⏭️ skipped}
-  CR evo-log  → {✅ written | ⛔ failed | ⏭️ skipped}
-  Winners-log → {✅ N entries written | ⏭️ no hooks ≥17 | ⏭️ skipped}
+  HW evo-log  → {✅ written | ⛔ failed | ⏭️ not written (scope=TI) | ⏭️ skipped}
+  CR evo-log  → {✅ written | ⛔ failed | ⏭️ not written (scope=TI) | ⏭️ skipped}
+  Winners-log → {✅ N entries written | ⏭️ no hooks ≥17 | ⏭️ not written (no HW scores: SA not in chain) | ⏭️ skipped}
 ══════════════════════════════════════════
 ```
 

@@ -41,7 +41,7 @@ Include this only in the report if a FAILED step occurred:
 | Abort on sentinel | Check every agent output before passing downstream |
 | Log only real data | Never write fabricated scores, trends, or hook text to evo-log |
 | Read before write | Always `obsidian_read_note` before `obsidian_update_note` |
-| Timeouts | TI: 180s | HW: 120s | CR: 120s — never use defaults |
+| Timeouts | TI: 300 s (schema; the MCP client aborts at 60 s anyway — fire-and-poll, never resend) · HW: 120 s · CR: 120 s — never use defaults |
 | Winners threshold | Score ≥ 17/20 per platform — not just the overall winner |
 
 ---

@@ -1,6 +1,6 @@
 {
   "name": "soma-skills",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "17 Claude Skills — opšti toolkit (bez Agent Studio/SOMA zavisnosti). Sestrinski paket: soma-ops-skills.",
   "author": {
     "name": "buky"

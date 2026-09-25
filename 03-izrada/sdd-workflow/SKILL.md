@@ -4,7 +4,7 @@ description: "Implements a complete Spec-Driven Development (SDD) workflow for c
 ---
 
 # Skill: sdd-workflow
-*Version: 1.6 — updated 2026-09-07 (Converge worktree-isolation guidance, Plan-phase
+*Version: 1.6.1 — 2026-09-25: Step 5 now requires approval before Implement (Rule 2 already demanded it); "Six phases" corrected to seven. Version 1.6 — updated 2026-09-07 (Converge worktree-isolation guidance, Plan-phase
 environment-capability check with explicit missing-test-infrastructure flagging for Regulated
 rigor, a proposed environment-NOT-YET handoff.md, a Step 0 self-check note, and an explicit
 UC-1/2/3 out-loud decision requirement, from real-repo validation on `zalihe-app` and
@@ -31,7 +31,7 @@ Do NOT use this skill for:
 
 ## What This Skill Does
 
-Six phases, each producing a visible file or an explicit approval, so a feature can't quietly
+Seven phases, each producing a visible file or an explicit approval, so a feature can't quietly
 slide from "sounds good" straight into unreviewed code:
 
 ```
@@ -162,7 +162,7 @@ Get approval before Step 5.
 Read `references/tasks.md`. Write `specs/<feature-slug>/tasks.md`: an ordered, atomic checklist
 where each task traces back to a specific requirement or acceptance criterion from `spec.md`.
 A task that can't name which requirement it satisfies is probably scope creep — flag it rather
-than quietly including it.
+than quietly including it. Get approval on `tasks.md` before Step 6.
 
 ## STEP 6 — IMPLEMENT
 

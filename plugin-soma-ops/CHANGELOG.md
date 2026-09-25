@@ -5,6 +5,20 @@ All notable changes to the `soma-ops-skills` plugin package are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), dates in
 YYYY-MM-DD.
 
+## 2026-09-25 — v0.2.3
+
+### Fixed
+- `soma-run` 1.3.2:
+  - Report template: with the default scope (TI only), HW and CR run server-side inside the
+    TI chain; the report now says `RAN SERVER-SIDE (output not captured)` instead of implying
+    they were skipped, and marks HW/CR evo-logs and winners-log as not written with the reason.
+  - Reference table: TI timeout documented as 300 s in the schema, with the note that the MCP
+    client aborts at 60 s anyway (fire-and-poll, never resend).
+  - Description and compatibility no longer claim HW/CR evo-logs and winners-log are always
+    written; they are written only in the gated external-relay scope.
+  - Removed the `do_not_use_when` frontmatter field (not a supported field, silently ignored);
+    its routing hints are now in the description.
+
 ## 2026-09-25 — v0.2.2
 
 ### Fixed
