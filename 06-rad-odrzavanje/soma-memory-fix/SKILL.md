@@ -1,6 +1,6 @@
 ---
 name: soma-memory-fix
-version: 1.1.1
+version: 1.1.2
 description: >-
   Audits AgentStack agents for unwired kb_search nodes (missing knowledgeBaseId), proposes a fix plan,
   and — after confirmation — patches each node using only live MCP data. Zero hallucination tolerance:
@@ -8,12 +8,8 @@ description: >-
   fix", "fix kb wiring", "soma memory fix", "kb_search not wired", "knowledgeBaseId missing", "agents
   not using KB", "popravni memory", "popravi kb_search", "wiring fix", "fix agent memory", "agent nema
   memory", "popravni wiring".
+  Do NOT use to create a new KB (agent-scaffolder), sync KB content from Obsidian (kb-sync), run an agent (as_chat_with_agent), or for a full system health check (agent-health-check).
 compatibility: Requires Agent Studio MCP (as_inspect_flow, as_list_knowledge_bases, as_get_recent_executions, as_patch_node_field). Patches unwired kb_search nodes using only live MCP data -- zero hallucination tolerance on the knowledgeBaseId it writes.
-do_not_use_when:
-  - "User wants to CREATE a new KB (use agent-scaffolder)"
-  - "User wants to SYNC KB content from Obsidian (use kb-sync)"
-  - "User wants to RUN an agent (use as_chat_with_agent)"
-  - "User wants a full system health check (use agent-health-check)"
 allowed-tools:
   - Read
   - Glob
@@ -34,6 +30,7 @@ allowed-tools:
 *Version: 1.1.0 | Research grounded in: Anthropic Agent SDK (May 2026), Google ADK
 patterns, industry auto-remediation standards.*
 *1.1.0 (2026-08-22): Tool Reference and Examples moved to references/tool-reference-and-examples.md — file was approaching the repo's size limit. No behavior change.*
+*1.1.2 (2026-09-26): removed the unsupported `do_not_use_when` frontmatter field (Claude Code ignores it); its routing boundaries moved into the description, where the model actually sees them. Skill steps unchanged.*
 *1.1.1 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio MCP dependency. No behavior change.*
 
 ---

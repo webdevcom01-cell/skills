@@ -5,6 +5,18 @@ All notable changes to the `soma-ops-skills` plugin package are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), dates in
 YYYY-MM-DD.
 
+## 2026-09-26 — v0.2.4
+
+### Fixed
+- Removed the unsupported `do_not_use_when` frontmatter field from the last 7 skills that had it:
+  `pipeline-debug` 1.2.2, `soma-eval-harness` 1.3.2, `soma-memory-fix` 1.1.2,
+  `soma-model-preflight` 0.1.2, `soma-distribution` 0.1.2, `soma-agent-cleanup` 0.1.2,
+  `soma-score-analyzer` 0.1.2. Claude Code ignores the field, so its boundaries never reached
+  the model. The first three had no "Do NOT use" text in the description; it is added there now.
+  The other four already carried the same boundaries in the description. Skill steps unchanged.
+- `soma-memory-fix` eval 6 checked for the removed field; it now checks the boundary stated in
+  the description.
+
 ## 2026-09-25 — v0.2.3
 
 ### Fixed

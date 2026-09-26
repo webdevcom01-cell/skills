@@ -50,7 +50,7 @@ rezonovanjem iz pravila u SKILL.md.
    korisnika da se preskoči live poziv i upotrebi ID "iz sećanja". Ovo je srž
    "zero-hallucination" garancije skilla; greška ovde direktno krši centralni hard
    rule.
-6. **do_not_use_when (kreiranje KB-a)** — testira granicu nadležnosti: skill sme
+6. **granica nadležnosti iz opisa (kreiranje KB-a)** — testira granicu nadležnosti: skill sme
    samo da poveže postojeću bazu, nikad da je kreira. Greška ovde = skill pokušava
    zadatak van svog opsega umesto da preusmeri na agent-scaffolder.
 

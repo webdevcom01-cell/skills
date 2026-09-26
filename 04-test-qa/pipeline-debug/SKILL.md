@@ -1,6 +1,6 @@
 ---
 name: pipeline-debug
-version: 1.2.1
+version: 1.2.2
 description: >-
   Reactive diagnostic skill for the SOMA pipeline (TI → HW → CR → Score Analyzer). Accepts a problem
   description, runs structured multi-dimensional checks, maps evidence to root cause via explicit
@@ -11,13 +11,8 @@ description: >-
   "prazan output", "empty output", "scores dropping", "quality dropped", "debug TI", "debug HW",
   "debug CR", "šta je pokvareno u pipeline-u", "zašto pipeline ne radi", "provjeri SOMA", "istražii
   grešku".
+  Do NOT use for a preventive pre-run check (agent-health-check), fixing KB wiring across all agents (soma-memory-fix), vault-to-KB sync (kb-sync), running the pipeline (soma-run), or AI Nekretnine CG agents (out of scope).
 compatibility: Requires Agent Studio MCP (as_health_check, as_get_recent_executions, as_list_agent_calls, as_get_agent_call_log, as_find_broken_flows, as_inspect_flow, as_list_knowledge_bases, as_patch_node_field) and Obsidian MCP (obsidian_read_note) to map evidence to root cause through the IF-THEN rules in references/. Without live execution data the diagnosis stays hypothetical.
-do_not_use_when:
-  - "User wants a preventive system-wide check before running (use agent-health-check)"
-  - "User wants to fix KB wiring across all agents (use soma-memory-fix)"
-  - "User wants to sync Obsidian vault to KB (use kb-sync)"
-  - "User wants to run the pipeline (use soma-run)"
-  - "User asks about AI Nekretnine CG agents (different architecture — not in scope)"
 allowed-tools:
   - Read
   - Glob
@@ -44,7 +39,8 @@ allowed-tools:
 
 # Skill: pipeline-debug
 
-*Version: 1.2.1*
+*Version: 1.2.2*
+*1.2.2 (2026-09-26): removed the unsupported `do_not_use_when` frontmatter field (Claude Code ignores it); its routing boundaries moved into the description, where the model actually sees them. Skill steps unchanged.*
 *1.2.1 (2026-08-22): Added `compatibility:` frontmatter field describing Agent Studio/Obsidian MCP dependency. No behavior change.*
 *Grounded in: live MCP schema audit 2026-05-17, forensic plan review, confirmed tool*
 *behaviours from agent-health-check and soma-memory-fix live sessions.*

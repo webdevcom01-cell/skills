@@ -1,6 +1,6 @@
 ---
 name: soma-score-analyzer
-version: 0.1.1
+version: 0.1.2
 description: >
   Restores the missing 4th stage of the SOMA pipeline (TI → HW → CR → Score Analyzer).
   Scores Content Repurposer output per platform on the SOMA 20-point rubric, writes the
@@ -14,10 +14,6 @@ description: >
   pipeline (use soma-run), to log an already-scored run (use evo-log-writer /
   winners-log-logger), or to review historical performance (use soma-performance-review).
 compatibility: Requires Agent Studio MCP (as_search_knowledge_base, as_chat_with_agent, as_inspect_flow, as_update_flow, as_add_kb_text) and Obsidian MCP (obsidian_read_note, obsidian_update_note, obsidian_create_note) -- scores Content Repurposer output on the SOMA 20-point rubric and writes real scores back into evo-logs.
-do_not_use_when:
-  - User wants to run the full pipeline (use soma-run)
-  - User wants to log an already-scored run (use evo-log-writer or winners-log-logger)
-  - User wants a historical performance report (use soma-performance-review)
 allowed-tools:
   - TodoWrite
   - mcp__agent-studio__as_search_knowledge_base
@@ -282,5 +278,6 @@ in from the start.
 ## Versioning
 | Version | Date | Notes |
 |---|---|---|
+| 0.1.2 | 2026-09-26 | removed the unsupported `do_not_use_when` frontmatter field (Claude Code ignores it); the description already carried the same boundaries. No behavior change. |
 | v0.2 | 2026-06-26 | Regression-check step; assemble fragmented rubric; supersede-vs-replace mechanism; firmer safe-agent-builder delegation; invocation examples |
 | v0.1 | 2026-06-26 | Initial — grounded in live audit; restores SA scoring stage |
